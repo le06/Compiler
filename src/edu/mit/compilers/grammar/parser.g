@@ -85,8 +85,8 @@ statement :  assignment SEMI!
            | TK_for^ (ID ASSIGN expr COMMA! expr) block
            | TK_while^ (expr) block
            | TK_return^ (expr)? SEMI!
-           | TK_break^ SEMI!
-           | TK_continue^ SEMI!
+           | TK_break SEMI!
+           | TK_continue SEMI!
            | block;
 
 assignment! : left:location op:assign_op right:expr 
@@ -116,14 +116,17 @@ location :  ID
  * corresponds to a unary minus, and expr_tf is the lowest
  * level rule, corresponding to all of the other possible 
  * productions of expr.                                     */
-expr : expr_l0 (or_op expr)? ;
+expr! : left:expr_l0 (op:or_op right:expr)? 
+           { #expr = #(op, left, right); } ;
 
 expr_l0! : left:expr_l1 (op:and_op right:expr_l0)?
            { #expr_l0 = #(op, left, right); } ;
 
-expr_l1 : expr_l2 (eq_op expr_l1)? ;
+expr_l1! : left:expr_l2 (op:eq_op right:expr_l1)? 
+           { #expr_l1 = #(op, left, right); } ;
 
-expr_l2 : expr_l3 (rel_op expr_l2)? ;
+expr_l2! : left:expr_l3 (op:rel_op right:expr_l2)? 
+		   { #expr_l2 = #(op, left, right); } ;
 
 expr_l3! : left:expr_l4 (op:linear_op right:expr_l3)?
            { #expr_l3 = #(op, left, right); } ;
@@ -132,15 +135,15 @@ expr_l4! : left:expr_t (op:mul_op right:expr_l4)?
            { #expr_l4 = #(op, left, right); } ;
 
 expr_t : logical_not | expr_tm;
-logical_not : NOT expr_tm;
+logical_not : NOT^ expr_tm;
 
 expr_tm : unary_minus | expr_tf; 
-unary_minus : MINUS expr_tf;
+unary_minus : MINUS^ expr_tf;
 
 expr_tf :  location
       | method_call
       | literal 
-      | NOT expr
+      | NOT^ expr
       | LPAREN! expr RPAREN!; 
 
 callout_arg: expr | STRING;

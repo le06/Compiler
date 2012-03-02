@@ -9,6 +9,7 @@ import edu.mit.compilers.grammar.*;
 import edu.mit.compilers.tools.CLI;
 import edu.mit.compilers.tools.CLI.Action;
 import edu.mit.compilers.tools.GenericTreeWalk;
+import edu.mit.compilers.tools.TreeVisualizer;
 
 class Main {
   public static void main(String[] args) {
@@ -73,9 +74,8 @@ class Main {
         
         AST tree = parser.getAST();
         //GenericTreeWalk.walk(tree, null);
-        System.out.println(((CommonAST)tree).toStringList());
-
-        //System.out.println(tree.);
+        //System.out.println(((CommonAST)tree).toStringList());
+        System.out.println(TreeVisualizer.generateDOT(tree));
       }
     } catch(Exception e) {
       // print the error:

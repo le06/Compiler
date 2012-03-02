@@ -609,7 +609,7 @@ public DecafParser(ParserSharedInputState state) {
 				{
 					AST tmp42_AST = null;
 					tmp42_AST = astFactory.create(LT(1));
-					astFactory.makeASTRoot(currentAST, tmp42_AST);
+					astFactory.addASTChild(currentAST, tmp42_AST);
 					match(TK_break);
 					match(SEMI);
 					statement_AST = (AST)currentAST.root;
@@ -619,7 +619,7 @@ public DecafParser(ParserSharedInputState state) {
 				{
 					AST tmp44_AST = null;
 					tmp44_AST = astFactory.create(LT(1));
-					astFactory.makeASTRoot(currentAST, tmp44_AST);
+					astFactory.addASTChild(currentAST, tmp44_AST);
 					match(TK_continue);
 					match(SEMI);
 					statement_AST = (AST)currentAST.root;
@@ -805,16 +805,19 @@ public DecafParser(ParserSharedInputState state) {
 			returnAST = null;
 			ASTPair currentAST = new ASTPair();
 			AST expr_AST = null;
+			AST left_AST = null;
+			AST op_AST = null;
+			AST right_AST = null;
 			
 			try {      // for error handling
 				expr_l0();
-				astFactory.addASTChild(currentAST, returnAST);
+				left_AST = (AST)returnAST;
 				{
 				if ((LA(1)==OR) && (_tokenSet_10.member(LA(2))) && (_tokenSet_11.member(LA(3)))) {
 					or_op();
-					astFactory.addASTChild(currentAST, returnAST);
+					op_AST = (AST)returnAST;
 					expr();
-					astFactory.addASTChild(currentAST, returnAST);
+					right_AST = (AST)returnAST;
 				}
 				else if ((_tokenSet_9.member(LA(1))) && (_tokenSet_12.member(LA(2))) && (_tokenSet_13.member(LA(3)))) {
 				}
@@ -824,6 +827,11 @@ public DecafParser(ParserSharedInputState state) {
 				
 				}
 				expr_AST = (AST)currentAST.root;
+				expr_AST = (AST)astFactory.make( (new ASTArray(3)).add(op_AST).add(left_AST).add(right_AST));
+				currentAST.root = expr_AST;
+				currentAST.child = expr_AST!=null &&expr_AST.getFirstChild()!=null ?
+					expr_AST.getFirstChild() : expr_AST;
+				currentAST.advanceChildToEnd();
 			}
 			catch (RecognitionException ex) {
 				reportError(ex);
@@ -1081,16 +1089,19 @@ public DecafParser(ParserSharedInputState state) {
 			returnAST = null;
 			ASTPair currentAST = new ASTPair();
 			AST expr_l1_AST = null;
+			AST left_AST = null;
+			AST op_AST = null;
+			AST right_AST = null;
 			
 			try {      // for error handling
 				expr_l2();
-				astFactory.addASTChild(currentAST, returnAST);
+				left_AST = (AST)returnAST;
 				{
 				if ((LA(1)==EQ||LA(1)==NEQ) && (_tokenSet_10.member(LA(2))) && (_tokenSet_11.member(LA(3)))) {
 					eq_op();
-					astFactory.addASTChild(currentAST, returnAST);
+					op_AST = (AST)returnAST;
 					expr_l1();
-					astFactory.addASTChild(currentAST, returnAST);
+					right_AST = (AST)returnAST;
 				}
 				else if ((_tokenSet_9.member(LA(1))) && (_tokenSet_12.member(LA(2))) && (_tokenSet_13.member(LA(3)))) {
 				}
@@ -1100,6 +1111,11 @@ public DecafParser(ParserSharedInputState state) {
 				
 				}
 				expr_l1_AST = (AST)currentAST.root;
+				expr_l1_AST = (AST)astFactory.make( (new ASTArray(3)).add(op_AST).add(left_AST).add(right_AST));
+				currentAST.root = expr_l1_AST;
+				currentAST.child = expr_l1_AST!=null &&expr_l1_AST.getFirstChild()!=null ?
+					expr_l1_AST.getFirstChild() : expr_l1_AST;
+				currentAST.advanceChildToEnd();
 			}
 			catch (RecognitionException ex) {
 				reportError(ex);
@@ -1143,16 +1159,19 @@ public DecafParser(ParserSharedInputState state) {
 			returnAST = null;
 			ASTPair currentAST = new ASTPair();
 			AST expr_l2_AST = null;
+			AST left_AST = null;
+			AST op_AST = null;
+			AST right_AST = null;
 			
 			try {      // for error handling
 				expr_l3();
-				astFactory.addASTChild(currentAST, returnAST);
+				left_AST = (AST)returnAST;
 				{
 				if (((LA(1) >= LT && LA(1) <= GEQ)) && (_tokenSet_10.member(LA(2))) && (_tokenSet_11.member(LA(3)))) {
 					rel_op();
-					astFactory.addASTChild(currentAST, returnAST);
+					op_AST = (AST)returnAST;
 					expr_l2();
-					astFactory.addASTChild(currentAST, returnAST);
+					right_AST = (AST)returnAST;
 				}
 				else if ((_tokenSet_9.member(LA(1))) && (_tokenSet_12.member(LA(2))) && (_tokenSet_13.member(LA(3)))) {
 				}
@@ -1162,6 +1181,11 @@ public DecafParser(ParserSharedInputState state) {
 				
 				}
 				expr_l2_AST = (AST)currentAST.root;
+				expr_l2_AST = (AST)astFactory.make( (new ASTArray(3)).add(op_AST).add(left_AST).add(right_AST));
+				currentAST.root = expr_l2_AST;
+				currentAST.child = expr_l2_AST!=null &&expr_l2_AST.getFirstChild()!=null ?
+					expr_l2_AST.getFirstChild() : expr_l2_AST;
+				currentAST.advanceChildToEnd();
 			}
 			catch (RecognitionException ex) {
 				reportError(ex);
@@ -1461,7 +1485,7 @@ public DecafParser(ParserSharedInputState state) {
 				{
 					AST tmp75_AST = null;
 					tmp75_AST = astFactory.create(LT(1));
-					astFactory.makeASTRoot(currentAST, tmp75_AST);
+					astFactory.addASTChild(currentAST, tmp75_AST);
 					match(MOD);
 					break;
 				}
@@ -1469,7 +1493,7 @@ public DecafParser(ParserSharedInputState state) {
 				{
 					AST tmp76_AST = null;
 					tmp76_AST = astFactory.create(LT(1));
-					astFactory.makeASTRoot(currentAST, tmp76_AST);
+					astFactory.addASTChild(currentAST, tmp76_AST);
 					match(DIV);
 					break;
 				}
@@ -1477,7 +1501,7 @@ public DecafParser(ParserSharedInputState state) {
 				{
 					AST tmp77_AST = null;
 					tmp77_AST = astFactory.create(LT(1));
-					astFactory.makeASTRoot(currentAST, tmp77_AST);
+					astFactory.addASTChild(currentAST, tmp77_AST);
 					match(MUL);
 					break;
 				}
@@ -1510,7 +1534,7 @@ public DecafParser(ParserSharedInputState state) {
 			try {      // for error handling
 				AST tmp78_AST = null;
 				tmp78_AST = astFactory.create(LT(1));
-				astFactory.addASTChild(currentAST, tmp78_AST);
+				astFactory.makeASTRoot(currentAST, tmp78_AST);
 				match(NOT);
 				expr_tm();
 				astFactory.addASTChild(currentAST, returnAST);
@@ -1583,7 +1607,7 @@ public DecafParser(ParserSharedInputState state) {
 			try {      // for error handling
 				AST tmp79_AST = null;
 				tmp79_AST = astFactory.create(LT(1));
-				astFactory.addASTChild(currentAST, tmp79_AST);
+				astFactory.makeASTRoot(currentAST, tmp79_AST);
 				match(MINUS);
 				expr_tf();
 				astFactory.addASTChild(currentAST, returnAST);
@@ -1622,7 +1646,7 @@ public DecafParser(ParserSharedInputState state) {
 				{
 					AST tmp80_AST = null;
 					tmp80_AST = astFactory.create(LT(1));
-					astFactory.addASTChild(currentAST, tmp80_AST);
+					astFactory.makeASTRoot(currentAST, tmp80_AST);
 					match(NOT);
 					expr();
 					astFactory.addASTChild(currentAST, returnAST);
