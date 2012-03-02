@@ -72,8 +72,8 @@ class Main {
         }
         
         AST tree = parser.getAST();
-        GenericTreeWalk.walk(tree, null);
-        //System.out.println(((CommonAST)tree).toStringList());
+        //GenericTreeWalk.walk(tree, null);
+        System.out.println(((CommonAST)tree).toStringList());
 
         //System.out.println(tree.);
       }
