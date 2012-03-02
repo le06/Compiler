@@ -66,40 +66,43 @@ options
   }
 }
 
-program: TK_class TK_Program LCURLY (field_dec)* (method_dec)* RCURLY ;
+program: TK_class^ TK_Program LCURLY! (field_dec)* (method_dec)* RCURLY! EOF!;
 
-field_dec : type (ID | ID LSQUARE INTLITERAL RSQUARE) 
-                          (COMMA (ID | ID LSQUARE INTLITERAL RSQUARE))* SEMI;
+field_dec : type (ID | ID LSQUARE! INTLITERAL RSQUARE!) 
+                          (COMMA! (ID | ID LSQUARE! INTLITERAL RSQUARE!))* SEMI!;
 
-method_dec : (type | TK_void) ID LPAREN ((type ID) (COMMA type ID)*)? RPAREN block;
+method_dec : (type | TK_void^) ID LPAREN! ((type ID) (COMMA! type ID)*)? RPAREN! block;
 
-block : LCURLY (var_decl)* (statement)* RCURLY;
+block : LCURLY! (var_decl)* (statement)* RCURLY!;
 
-var_decl : type ID (COMMA ID)* SEMI;
+var_decl : type ID (COMMA! ID)* SEMI!;
 
 type : TK_int | TK_boolean;
 
-statement :  location assign_op expr SEMI
-           | method_call SEMI
-           | TK_if (expr) block (TK_else block)?
-           | TK_for (ID ASSIGN expr COMMA expr) block
-           | TK_while (expr) block
-           | TK_return (expr)? SEMI
-           | TK_break SEMI
-           | TK_continue SEMI
+statement :  assignment SEMI!
+           | method_call SEMI!
+           | TK_if^ (expr) block (TK_else block)?
+           | TK_for^ (ID ASSIGN expr COMMA! expr) block
+           | TK_while^ (expr) block
+           | TK_return^ (expr)? SEMI!
+           | TK_break^ SEMI!
+           | TK_continue^ SEMI!
            | block;
+
+assignment! : left:location op:assign_op right:expr 
+			{ #assignment = #(op, left, right); } ;
 
 assign_op :  ASSIGN
            | INC_ASSIGN
            | MINUS_ASSIGN;
 
-method_call :  method_name LPAREN (expr (COMMA expr)*)? RPAREN
-             | TK_callout LPAREN STRING (COMMA callout_arg)* RPAREN;
+method_call :  method_name LPAREN! (expr (COMMA! expr)*)? RPAREN!
+             | TK_callout LPAREN! STRING (COMMA! callout_arg)* RPAREN!;
 
 method_name : ID;
 
 location :  ID
-          | ID LSQUARE expr RSQUARE;
+          | ID LSQUARE! expr RSQUARE!;
 
 
 /*
@@ -113,17 +116,20 @@ location :  ID
  * corresponds to a unary minus, and expr_tf is the lowest
  * level rule, corresponding to all of the other possible 
  * productions of expr.                                     */
-expr : expr_l0 (or_op expr_l0)* ;
+expr : expr_l0 (or_op expr)? ;
 
-expr_l0 : expr_l1 (and_op expr_l1)*;
+expr_l0! : left:expr_l1 (op:and_op right:expr_l0)?
+           { #expr_l0 = #(op, left, right); } ;
 
-expr_l1 : expr_l2 (eq_op expr_l2)* ;
+expr_l1 : expr_l2 (eq_op expr_l1)? ;
 
-expr_l2 : expr_l3 (rel_op expr_l3)* ;
+expr_l2 : expr_l3 (rel_op expr_l2)? ;
 
-expr_l3 : expr_l4 (linear_op expr_l4)*;
+expr_l3! : left:expr_l4 (op:linear_op right:expr_l3)?
+           { #expr_l3 = #(op, left, right); } ;
 
-expr_l4 : expr_t (mul_op expr_t)*;
+expr_l4! : left:expr_t (op:mul_op right:expr_l4)?
+           { #expr_l4 = #(op, left, right); } ;
 
 expr_t : logical_not | expr_tm;
 logical_not : NOT expr_tm;
@@ -135,12 +141,12 @@ expr_tf :  location
       | method_call
       | literal 
       | NOT expr
-      | LPAREN expr RPAREN; 
+      | LPAREN! expr RPAREN!; 
 
 callout_arg: expr | STRING;
 
-mul_op : MOD | DIV | MUL;
-rel_op : LT | GT | LEQ | GEQ;
+mul_op : (MOD | DIV | MUL);
+rel_op : (LT | GT | LEQ | GEQ);
 eq_op : EQ | NEQ;
 or_op : OR;
 and_op : AND;

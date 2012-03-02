@@ -110,15 +110,12 @@ public DecafParser(ParserSharedInputState state) {
 			try {      // for error handling
 				AST tmp1_AST = null;
 				tmp1_AST = astFactory.create(LT(1));
-				astFactory.addASTChild(currentAST, tmp1_AST);
+				astFactory.makeASTRoot(currentAST, tmp1_AST);
 				match(TK_class);
 				AST tmp2_AST = null;
 				tmp2_AST = astFactory.create(LT(1));
 				astFactory.addASTChild(currentAST, tmp2_AST);
 				match(TK_Program);
-				AST tmp3_AST = null;
-				tmp3_AST = astFactory.create(LT(1));
-				astFactory.addASTChild(currentAST, tmp3_AST);
 				match(LCURLY);
 				{
 				_loop3:
@@ -146,10 +143,8 @@ public DecafParser(ParserSharedInputState state) {
 					
 				} while (true);
 				}
-				AST tmp4_AST = null;
-				tmp4_AST = astFactory.create(LT(1));
-				astFactory.addASTChild(currentAST, tmp4_AST);
 				match(RCURLY);
+				match(Token.EOF_TYPE);
 				program_AST = (AST)currentAST.root;
 			}
 			catch (RecognitionException ex) {
@@ -175,27 +170,21 @@ public DecafParser(ParserSharedInputState state) {
 				astFactory.addASTChild(currentAST, returnAST);
 				{
 				if ((LA(1)==ID) && (LA(2)==COMMA||LA(2)==SEMI)) {
-					AST tmp5_AST = null;
-					tmp5_AST = astFactory.create(LT(1));
-					astFactory.addASTChild(currentAST, tmp5_AST);
-					match(ID);
-				}
-				else if ((LA(1)==ID) && (LA(2)==LSQUARE)) {
 					AST tmp6_AST = null;
 					tmp6_AST = astFactory.create(LT(1));
 					astFactory.addASTChild(currentAST, tmp6_AST);
 					match(ID);
+				}
+				else if ((LA(1)==ID) && (LA(2)==LSQUARE)) {
 					AST tmp7_AST = null;
 					tmp7_AST = astFactory.create(LT(1));
 					astFactory.addASTChild(currentAST, tmp7_AST);
+					match(ID);
 					match(LSQUARE);
-					AST tmp8_AST = null;
-					tmp8_AST = astFactory.create(LT(1));
-					astFactory.addASTChild(currentAST, tmp8_AST);
-					match(INTLITERAL);
 					AST tmp9_AST = null;
 					tmp9_AST = astFactory.create(LT(1));
 					astFactory.addASTChild(currentAST, tmp9_AST);
+					match(INTLITERAL);
 					match(RSQUARE);
 				}
 				else {
@@ -207,33 +196,24 @@ public DecafParser(ParserSharedInputState state) {
 				_loop10:
 				do {
 					if ((LA(1)==COMMA)) {
-						AST tmp10_AST = null;
-						tmp10_AST = astFactory.create(LT(1));
-						astFactory.addASTChild(currentAST, tmp10_AST);
 						match(COMMA);
 						{
 						if ((LA(1)==ID) && (LA(2)==COMMA||LA(2)==SEMI)) {
-							AST tmp11_AST = null;
-							tmp11_AST = astFactory.create(LT(1));
-							astFactory.addASTChild(currentAST, tmp11_AST);
-							match(ID);
-						}
-						else if ((LA(1)==ID) && (LA(2)==LSQUARE)) {
 							AST tmp12_AST = null;
 							tmp12_AST = astFactory.create(LT(1));
 							astFactory.addASTChild(currentAST, tmp12_AST);
 							match(ID);
+						}
+						else if ((LA(1)==ID) && (LA(2)==LSQUARE)) {
 							AST tmp13_AST = null;
 							tmp13_AST = astFactory.create(LT(1));
 							astFactory.addASTChild(currentAST, tmp13_AST);
+							match(ID);
 							match(LSQUARE);
-							AST tmp14_AST = null;
-							tmp14_AST = astFactory.create(LT(1));
-							astFactory.addASTChild(currentAST, tmp14_AST);
-							match(INTLITERAL);
 							AST tmp15_AST = null;
 							tmp15_AST = astFactory.create(LT(1));
 							astFactory.addASTChild(currentAST, tmp15_AST);
+							match(INTLITERAL);
 							match(RSQUARE);
 						}
 						else {
@@ -248,9 +228,6 @@ public DecafParser(ParserSharedInputState state) {
 					
 				} while (true);
 				}
-				AST tmp16_AST = null;
-				tmp16_AST = astFactory.create(LT(1));
-				astFactory.addASTChild(currentAST, tmp16_AST);
 				match(SEMI);
 				field_dec_AST = (AST)currentAST.root;
 			}
@@ -284,9 +261,9 @@ public DecafParser(ParserSharedInputState state) {
 				}
 				case TK_void:
 				{
-					AST tmp17_AST = null;
-					tmp17_AST = astFactory.create(LT(1));
-					astFactory.addASTChild(currentAST, tmp17_AST);
+					AST tmp18_AST = null;
+					tmp18_AST = astFactory.create(LT(1));
+					astFactory.makeASTRoot(currentAST, tmp18_AST);
 					match(TK_void);
 					break;
 				}
@@ -296,13 +273,10 @@ public DecafParser(ParserSharedInputState state) {
 				}
 				}
 				}
-				AST tmp18_AST = null;
-				tmp18_AST = astFactory.create(LT(1));
-				astFactory.addASTChild(currentAST, tmp18_AST);
-				match(ID);
 				AST tmp19_AST = null;
 				tmp19_AST = astFactory.create(LT(1));
 				astFactory.addASTChild(currentAST, tmp19_AST);
+				match(ID);
 				match(LPAREN);
 				{
 				switch ( LA(1)) {
@@ -312,24 +286,21 @@ public DecafParser(ParserSharedInputState state) {
 					{
 					type();
 					astFactory.addASTChild(currentAST, returnAST);
-					AST tmp20_AST = null;
-					tmp20_AST = astFactory.create(LT(1));
-					astFactory.addASTChild(currentAST, tmp20_AST);
+					AST tmp21_AST = null;
+					tmp21_AST = astFactory.create(LT(1));
+					astFactory.addASTChild(currentAST, tmp21_AST);
 					match(ID);
 					}
 					{
 					_loop16:
 					do {
 						if ((LA(1)==COMMA)) {
-							AST tmp21_AST = null;
-							tmp21_AST = astFactory.create(LT(1));
-							astFactory.addASTChild(currentAST, tmp21_AST);
 							match(COMMA);
 							type();
 							astFactory.addASTChild(currentAST, returnAST);
-							AST tmp22_AST = null;
-							tmp22_AST = astFactory.create(LT(1));
-							astFactory.addASTChild(currentAST, tmp22_AST);
+							AST tmp23_AST = null;
+							tmp23_AST = astFactory.create(LT(1));
+							astFactory.addASTChild(currentAST, tmp23_AST);
 							match(ID);
 						}
 						else {
@@ -350,9 +321,6 @@ public DecafParser(ParserSharedInputState state) {
 				}
 				}
 				}
-				AST tmp23_AST = null;
-				tmp23_AST = astFactory.create(LT(1));
-				astFactory.addASTChild(currentAST, tmp23_AST);
 				match(RPAREN);
 				block();
 				astFactory.addASTChild(currentAST, returnAST);
@@ -380,18 +348,18 @@ public DecafParser(ParserSharedInputState state) {
 				switch ( LA(1)) {
 				case TK_int:
 				{
-					AST tmp24_AST = null;
-					tmp24_AST = astFactory.create(LT(1));
-					astFactory.addASTChild(currentAST, tmp24_AST);
+					AST tmp25_AST = null;
+					tmp25_AST = astFactory.create(LT(1));
+					astFactory.addASTChild(currentAST, tmp25_AST);
 					match(TK_int);
 					type_AST = (AST)currentAST.root;
 					break;
 				}
 				case TK_boolean:
 				{
-					AST tmp25_AST = null;
-					tmp25_AST = astFactory.create(LT(1));
-					astFactory.addASTChild(currentAST, tmp25_AST);
+					AST tmp26_AST = null;
+					tmp26_AST = astFactory.create(LT(1));
+					astFactory.addASTChild(currentAST, tmp26_AST);
 					match(TK_boolean);
 					type_AST = (AST)currentAST.root;
 					break;
@@ -421,9 +389,6 @@ public DecafParser(ParserSharedInputState state) {
 			AST block_AST = null;
 			
 			try {      // for error handling
-				AST tmp26_AST = null;
-				tmp26_AST = astFactory.create(LT(1));
-				astFactory.addASTChild(currentAST, tmp26_AST);
 				match(LCURLY);
 				{
 				_loop19:
@@ -451,9 +416,6 @@ public DecafParser(ParserSharedInputState state) {
 					
 				} while (true);
 				}
-				AST tmp27_AST = null;
-				tmp27_AST = astFactory.create(LT(1));
-				astFactory.addASTChild(currentAST, tmp27_AST);
 				match(RCURLY);
 				block_AST = (AST)currentAST.root;
 			}
@@ -478,21 +440,18 @@ public DecafParser(ParserSharedInputState state) {
 			try {      // for error handling
 				type();
 				astFactory.addASTChild(currentAST, returnAST);
-				AST tmp28_AST = null;
-				tmp28_AST = astFactory.create(LT(1));
-				astFactory.addASTChild(currentAST, tmp28_AST);
+				AST tmp29_AST = null;
+				tmp29_AST = astFactory.create(LT(1));
+				astFactory.addASTChild(currentAST, tmp29_AST);
 				match(ID);
 				{
 				_loop24:
 				do {
 					if ((LA(1)==COMMA)) {
-						AST tmp29_AST = null;
-						tmp29_AST = astFactory.create(LT(1));
-						astFactory.addASTChild(currentAST, tmp29_AST);
 						match(COMMA);
-						AST tmp30_AST = null;
-						tmp30_AST = astFactory.create(LT(1));
-						astFactory.addASTChild(currentAST, tmp30_AST);
+						AST tmp31_AST = null;
+						tmp31_AST = astFactory.create(LT(1));
+						astFactory.addASTChild(currentAST, tmp31_AST);
 						match(ID);
 					}
 					else {
@@ -501,9 +460,6 @@ public DecafParser(ParserSharedInputState state) {
 					
 				} while (true);
 				}
-				AST tmp31_AST = null;
-				tmp31_AST = astFactory.create(LT(1));
-				astFactory.addASTChild(currentAST, tmp31_AST);
 				match(SEMI);
 				var_decl_AST = (AST)currentAST.root;
 			}
@@ -529,9 +485,9 @@ public DecafParser(ParserSharedInputState state) {
 				switch ( LA(1)) {
 				case TK_if:
 				{
-					AST tmp32_AST = null;
-					tmp32_AST = astFactory.create(LT(1));
-					astFactory.addASTChild(currentAST, tmp32_AST);
+					AST tmp33_AST = null;
+					tmp33_AST = astFactory.create(LT(1));
+					astFactory.makeASTRoot(currentAST, tmp33_AST);
 					match(TK_if);
 					{
 					expr();
@@ -543,9 +499,9 @@ public DecafParser(ParserSharedInputState state) {
 					switch ( LA(1)) {
 					case TK_else:
 					{
-						AST tmp33_AST = null;
-						tmp33_AST = astFactory.create(LT(1));
-						astFactory.addASTChild(currentAST, tmp33_AST);
+						AST tmp34_AST = null;
+						tmp34_AST = astFactory.create(LT(1));
+						astFactory.addASTChild(currentAST, tmp34_AST);
 						match(TK_else);
 						block();
 						astFactory.addASTChild(currentAST, returnAST);
@@ -575,24 +531,21 @@ public DecafParser(ParserSharedInputState state) {
 				}
 				case TK_for:
 				{
-					AST tmp34_AST = null;
-					tmp34_AST = astFactory.create(LT(1));
-					astFactory.addASTChild(currentAST, tmp34_AST);
-					match(TK_for);
-					{
 					AST tmp35_AST = null;
 					tmp35_AST = astFactory.create(LT(1));
-					astFactory.addASTChild(currentAST, tmp35_AST);
-					match(ID);
+					astFactory.makeASTRoot(currentAST, tmp35_AST);
+					match(TK_for);
+					{
 					AST tmp36_AST = null;
 					tmp36_AST = astFactory.create(LT(1));
 					astFactory.addASTChild(currentAST, tmp36_AST);
-					match(ASSIGN);
-					expr();
-					astFactory.addASTChild(currentAST, returnAST);
+					match(ID);
 					AST tmp37_AST = null;
 					tmp37_AST = astFactory.create(LT(1));
 					astFactory.addASTChild(currentAST, tmp37_AST);
+					match(ASSIGN);
+					expr();
+					astFactory.addASTChild(currentAST, returnAST);
 					match(COMMA);
 					expr();
 					astFactory.addASTChild(currentAST, returnAST);
@@ -604,9 +557,9 @@ public DecafParser(ParserSharedInputState state) {
 				}
 				case TK_while:
 				{
-					AST tmp38_AST = null;
-					tmp38_AST = astFactory.create(LT(1));
-					astFactory.addASTChild(currentAST, tmp38_AST);
+					AST tmp39_AST = null;
+					tmp39_AST = astFactory.create(LT(1));
+					astFactory.makeASTRoot(currentAST, tmp39_AST);
 					match(TK_while);
 					{
 					expr();
@@ -619,9 +572,9 @@ public DecafParser(ParserSharedInputState state) {
 				}
 				case TK_return:
 				{
-					AST tmp39_AST = null;
-					tmp39_AST = astFactory.create(LT(1));
-					astFactory.addASTChild(currentAST, tmp39_AST);
+					AST tmp40_AST = null;
+					tmp40_AST = astFactory.create(LT(1));
+					astFactory.makeASTRoot(currentAST, tmp40_AST);
 					match(TK_return);
 					{
 					switch ( LA(1)) {
@@ -648,35 +601,26 @@ public DecafParser(ParserSharedInputState state) {
 					}
 					}
 					}
-					AST tmp40_AST = null;
-					tmp40_AST = astFactory.create(LT(1));
-					astFactory.addASTChild(currentAST, tmp40_AST);
 					match(SEMI);
 					statement_AST = (AST)currentAST.root;
 					break;
 				}
 				case TK_break:
 				{
-					AST tmp41_AST = null;
-					tmp41_AST = astFactory.create(LT(1));
-					astFactory.addASTChild(currentAST, tmp41_AST);
-					match(TK_break);
 					AST tmp42_AST = null;
 					tmp42_AST = astFactory.create(LT(1));
-					astFactory.addASTChild(currentAST, tmp42_AST);
+					astFactory.makeASTRoot(currentAST, tmp42_AST);
+					match(TK_break);
 					match(SEMI);
 					statement_AST = (AST)currentAST.root;
 					break;
 				}
 				case TK_continue:
 				{
-					AST tmp43_AST = null;
-					tmp43_AST = astFactory.create(LT(1));
-					astFactory.addASTChild(currentAST, tmp43_AST);
-					match(TK_continue);
 					AST tmp44_AST = null;
 					tmp44_AST = astFactory.create(LT(1));
-					astFactory.addASTChild(currentAST, tmp44_AST);
+					astFactory.makeASTRoot(currentAST, tmp44_AST);
+					match(TK_continue);
 					match(SEMI);
 					statement_AST = (AST)currentAST.root;
 					break;
@@ -690,24 +634,14 @@ public DecafParser(ParserSharedInputState state) {
 				}
 				default:
 					if ((LA(1)==ID) && (_tokenSet_6.member(LA(2)))) {
-						location();
+						assignment();
 						astFactory.addASTChild(currentAST, returnAST);
-						assign_op();
-						astFactory.addASTChild(currentAST, returnAST);
-						expr();
-						astFactory.addASTChild(currentAST, returnAST);
-						AST tmp45_AST = null;
-						tmp45_AST = astFactory.create(LT(1));
-						astFactory.addASTChild(currentAST, tmp45_AST);
 						match(SEMI);
 						statement_AST = (AST)currentAST.root;
 					}
 					else if ((LA(1)==TK_callout||LA(1)==ID) && (LA(2)==LPAREN)) {
 						method_call();
 						astFactory.addASTChild(currentAST, returnAST);
-						AST tmp46_AST = null;
-						tmp46_AST = astFactory.create(LT(1));
-						astFactory.addASTChild(currentAST, tmp46_AST);
 						match(SEMI);
 						statement_AST = (AST)currentAST.root;
 					}
@@ -726,6 +660,181 @@ public DecafParser(ParserSharedInputState state) {
 		}
 	}
 	
+	public final void assignment() throws RecognitionException, TokenStreamException {
+		
+		traceIn("assignment");
+		try { // debugging
+			returnAST = null;
+			ASTPair currentAST = new ASTPair();
+			AST assignment_AST = null;
+			AST left_AST = null;
+			AST op_AST = null;
+			AST right_AST = null;
+			
+			try {      // for error handling
+				location();
+				left_AST = (AST)returnAST;
+				assign_op();
+				op_AST = (AST)returnAST;
+				expr();
+				right_AST = (AST)returnAST;
+				assignment_AST = (AST)currentAST.root;
+				assignment_AST = (AST)astFactory.make( (new ASTArray(3)).add(op_AST).add(left_AST).add(right_AST));
+				currentAST.root = assignment_AST;
+				currentAST.child = assignment_AST!=null &&assignment_AST.getFirstChild()!=null ?
+					assignment_AST.getFirstChild() : assignment_AST;
+				currentAST.advanceChildToEnd();
+			}
+			catch (RecognitionException ex) {
+				reportError(ex);
+				recover(ex,_tokenSet_8);
+			}
+			returnAST = assignment_AST;
+		} finally { // debugging
+			traceOut("assignment");
+		}
+	}
+	
+	public final void method_call() throws RecognitionException, TokenStreamException {
+		
+		traceIn("method_call");
+		try { // debugging
+			returnAST = null;
+			ASTPair currentAST = new ASTPair();
+			AST method_call_AST = null;
+			
+			try {      // for error handling
+				switch ( LA(1)) {
+				case ID:
+				{
+					method_name();
+					astFactory.addASTChild(currentAST, returnAST);
+					match(LPAREN);
+					{
+					switch ( LA(1)) {
+					case TK_callout:
+					case LPAREN:
+					case NOT:
+					case MINUS:
+					case ID:
+					case INTLITERAL:
+					case CHAR:
+					case BOOLEANLITERAL:
+					{
+						expr();
+						astFactory.addASTChild(currentAST, returnAST);
+						{
+						_loop37:
+						do {
+							if ((LA(1)==COMMA)) {
+								match(COMMA);
+								expr();
+								astFactory.addASTChild(currentAST, returnAST);
+							}
+							else {
+								break _loop37;
+							}
+							
+						} while (true);
+						}
+						break;
+					}
+					case RPAREN:
+					{
+						break;
+					}
+					default:
+					{
+						throw new NoViableAltException(LT(1), getFilename());
+					}
+					}
+					}
+					match(RPAREN);
+					method_call_AST = (AST)currentAST.root;
+					break;
+				}
+				case TK_callout:
+				{
+					AST tmp51_AST = null;
+					tmp51_AST = astFactory.create(LT(1));
+					astFactory.addASTChild(currentAST, tmp51_AST);
+					match(TK_callout);
+					match(LPAREN);
+					AST tmp53_AST = null;
+					tmp53_AST = astFactory.create(LT(1));
+					astFactory.addASTChild(currentAST, tmp53_AST);
+					match(STRING);
+					{
+					_loop39:
+					do {
+						if ((LA(1)==COMMA)) {
+							match(COMMA);
+							callout_arg();
+							astFactory.addASTChild(currentAST, returnAST);
+						}
+						else {
+							break _loop39;
+						}
+						
+					} while (true);
+					}
+					match(RPAREN);
+					method_call_AST = (AST)currentAST.root;
+					break;
+				}
+				default:
+				{
+					throw new NoViableAltException(LT(1), getFilename());
+				}
+				}
+			}
+			catch (RecognitionException ex) {
+				reportError(ex);
+				recover(ex,_tokenSet_9);
+			}
+			returnAST = method_call_AST;
+		} finally { // debugging
+			traceOut("method_call");
+		}
+	}
+	
+	public final void expr() throws RecognitionException, TokenStreamException {
+		
+		traceIn("expr");
+		try { // debugging
+			returnAST = null;
+			ASTPair currentAST = new ASTPair();
+			AST expr_AST = null;
+			
+			try {      // for error handling
+				expr_l0();
+				astFactory.addASTChild(currentAST, returnAST);
+				{
+				if ((LA(1)==OR) && (_tokenSet_10.member(LA(2))) && (_tokenSet_11.member(LA(3)))) {
+					or_op();
+					astFactory.addASTChild(currentAST, returnAST);
+					expr();
+					astFactory.addASTChild(currentAST, returnAST);
+				}
+				else if ((_tokenSet_9.member(LA(1))) && (_tokenSet_12.member(LA(2))) && (_tokenSet_13.member(LA(3)))) {
+				}
+				else {
+					throw new NoViableAltException(LT(1), getFilename());
+				}
+				
+				}
+				expr_AST = (AST)currentAST.root;
+			}
+			catch (RecognitionException ex) {
+				reportError(ex);
+				recover(ex,_tokenSet_9);
+			}
+			returnAST = expr_AST;
+		} finally { // debugging
+			traceOut("expr");
+		}
+	}
+	
 	public final void location() throws RecognitionException, TokenStreamException {
 		
 		traceIn("location");
@@ -735,27 +844,21 @@ public DecafParser(ParserSharedInputState state) {
 			AST location_AST = null;
 			
 			try {      // for error handling
-				if ((LA(1)==ID) && (_tokenSet_8.member(LA(2)))) {
-					AST tmp47_AST = null;
-					tmp47_AST = astFactory.create(LT(1));
-					astFactory.addASTChild(currentAST, tmp47_AST);
+				if ((LA(1)==ID) && (_tokenSet_14.member(LA(2)))) {
+					AST tmp56_AST = null;
+					tmp56_AST = astFactory.create(LT(1));
+					astFactory.addASTChild(currentAST, tmp56_AST);
 					match(ID);
 					location_AST = (AST)currentAST.root;
 				}
 				else if ((LA(1)==ID) && (LA(2)==LSQUARE)) {
-					AST tmp48_AST = null;
-					tmp48_AST = astFactory.create(LT(1));
-					astFactory.addASTChild(currentAST, tmp48_AST);
+					AST tmp57_AST = null;
+					tmp57_AST = astFactory.create(LT(1));
+					astFactory.addASTChild(currentAST, tmp57_AST);
 					match(ID);
-					AST tmp49_AST = null;
-					tmp49_AST = astFactory.create(LT(1));
-					astFactory.addASTChild(currentAST, tmp49_AST);
 					match(LSQUARE);
 					expr();
 					astFactory.addASTChild(currentAST, returnAST);
-					AST tmp50_AST = null;
-					tmp50_AST = astFactory.create(LT(1));
-					astFactory.addASTChild(currentAST, tmp50_AST);
 					match(RSQUARE);
 					location_AST = (AST)currentAST.root;
 				}
@@ -766,7 +869,7 @@ public DecafParser(ParserSharedInputState state) {
 			}
 			catch (RecognitionException ex) {
 				reportError(ex);
-				recover(ex,_tokenSet_8);
+				recover(ex,_tokenSet_14);
 			}
 			returnAST = location_AST;
 		} finally { // debugging
@@ -786,27 +889,27 @@ public DecafParser(ParserSharedInputState state) {
 				switch ( LA(1)) {
 				case ASSIGN:
 				{
-					AST tmp51_AST = null;
-					tmp51_AST = astFactory.create(LT(1));
-					astFactory.addASTChild(currentAST, tmp51_AST);
+					AST tmp60_AST = null;
+					tmp60_AST = astFactory.create(LT(1));
+					astFactory.addASTChild(currentAST, tmp60_AST);
 					match(ASSIGN);
 					assign_op_AST = (AST)currentAST.root;
 					break;
 				}
 				case INC_ASSIGN:
 				{
-					AST tmp52_AST = null;
-					tmp52_AST = astFactory.create(LT(1));
-					astFactory.addASTChild(currentAST, tmp52_AST);
+					AST tmp61_AST = null;
+					tmp61_AST = astFactory.create(LT(1));
+					astFactory.addASTChild(currentAST, tmp61_AST);
 					match(INC_ASSIGN);
 					assign_op_AST = (AST)currentAST.root;
 					break;
 				}
 				case MINUS_ASSIGN:
 				{
-					AST tmp53_AST = null;
-					tmp53_AST = astFactory.create(LT(1));
-					astFactory.addASTChild(currentAST, tmp53_AST);
+					AST tmp62_AST = null;
+					tmp62_AST = astFactory.create(LT(1));
+					astFactory.addASTChild(currentAST, tmp62_AST);
 					match(MINUS_ASSIGN);
 					assign_op_AST = (AST)currentAST.root;
 					break;
@@ -819,170 +922,11 @@ public DecafParser(ParserSharedInputState state) {
 			}
 			catch (RecognitionException ex) {
 				reportError(ex);
-				recover(ex,_tokenSet_9);
+				recover(ex,_tokenSet_10);
 			}
 			returnAST = assign_op_AST;
 		} finally { // debugging
 			traceOut("assign_op");
-		}
-	}
-	
-	public final void expr() throws RecognitionException, TokenStreamException {
-		
-		traceIn("expr");
-		try { // debugging
-			returnAST = null;
-			ASTPair currentAST = new ASTPair();
-			AST expr_AST = null;
-			
-			try {      // for error handling
-				expr_l0();
-				astFactory.addASTChild(currentAST, returnAST);
-				{
-				_loop43:
-				do {
-					if ((LA(1)==OR) && (_tokenSet_9.member(LA(2))) && (_tokenSet_10.member(LA(3)))) {
-						or_op();
-						astFactory.addASTChild(currentAST, returnAST);
-						expr_l0();
-						astFactory.addASTChild(currentAST, returnAST);
-					}
-					else {
-						break _loop43;
-					}
-					
-				} while (true);
-				}
-				expr_AST = (AST)currentAST.root;
-			}
-			catch (RecognitionException ex) {
-				reportError(ex);
-				recover(ex,_tokenSet_11);
-			}
-			returnAST = expr_AST;
-		} finally { // debugging
-			traceOut("expr");
-		}
-	}
-	
-	public final void method_call() throws RecognitionException, TokenStreamException {
-		
-		traceIn("method_call");
-		try { // debugging
-			returnAST = null;
-			ASTPair currentAST = new ASTPair();
-			AST method_call_AST = null;
-			
-			try {      // for error handling
-				switch ( LA(1)) {
-				case ID:
-				{
-					method_name();
-					astFactory.addASTChild(currentAST, returnAST);
-					AST tmp54_AST = null;
-					tmp54_AST = astFactory.create(LT(1));
-					astFactory.addASTChild(currentAST, tmp54_AST);
-					match(LPAREN);
-					{
-					switch ( LA(1)) {
-					case TK_callout:
-					case LPAREN:
-					case NOT:
-					case MINUS:
-					case ID:
-					case INTLITERAL:
-					case CHAR:
-					case BOOLEANLITERAL:
-					{
-						expr();
-						astFactory.addASTChild(currentAST, returnAST);
-						{
-						_loop36:
-						do {
-							if ((LA(1)==COMMA)) {
-								AST tmp55_AST = null;
-								tmp55_AST = astFactory.create(LT(1));
-								astFactory.addASTChild(currentAST, tmp55_AST);
-								match(COMMA);
-								expr();
-								astFactory.addASTChild(currentAST, returnAST);
-							}
-							else {
-								break _loop36;
-							}
-							
-						} while (true);
-						}
-						break;
-					}
-					case RPAREN:
-					{
-						break;
-					}
-					default:
-					{
-						throw new NoViableAltException(LT(1), getFilename());
-					}
-					}
-					}
-					AST tmp56_AST = null;
-					tmp56_AST = astFactory.create(LT(1));
-					astFactory.addASTChild(currentAST, tmp56_AST);
-					match(RPAREN);
-					method_call_AST = (AST)currentAST.root;
-					break;
-				}
-				case TK_callout:
-				{
-					AST tmp57_AST = null;
-					tmp57_AST = astFactory.create(LT(1));
-					astFactory.addASTChild(currentAST, tmp57_AST);
-					match(TK_callout);
-					AST tmp58_AST = null;
-					tmp58_AST = astFactory.create(LT(1));
-					astFactory.addASTChild(currentAST, tmp58_AST);
-					match(LPAREN);
-					AST tmp59_AST = null;
-					tmp59_AST = astFactory.create(LT(1));
-					astFactory.addASTChild(currentAST, tmp59_AST);
-					match(STRING);
-					{
-					_loop38:
-					do {
-						if ((LA(1)==COMMA)) {
-							AST tmp60_AST = null;
-							tmp60_AST = astFactory.create(LT(1));
-							astFactory.addASTChild(currentAST, tmp60_AST);
-							match(COMMA);
-							callout_arg();
-							astFactory.addASTChild(currentAST, returnAST);
-						}
-						else {
-							break _loop38;
-						}
-						
-					} while (true);
-					}
-					AST tmp61_AST = null;
-					tmp61_AST = astFactory.create(LT(1));
-					astFactory.addASTChild(currentAST, tmp61_AST);
-					match(RPAREN);
-					method_call_AST = (AST)currentAST.root;
-					break;
-				}
-				default:
-				{
-					throw new NoViableAltException(LT(1), getFilename());
-				}
-				}
-			}
-			catch (RecognitionException ex) {
-				reportError(ex);
-				recover(ex,_tokenSet_11);
-			}
-			returnAST = method_call_AST;
-		} finally { // debugging
-			traceOut("method_call");
 		}
 	}
 	
@@ -995,15 +939,15 @@ public DecafParser(ParserSharedInputState state) {
 			AST method_name_AST = null;
 			
 			try {      // for error handling
-				AST tmp62_AST = null;
-				tmp62_AST = astFactory.create(LT(1));
-				astFactory.addASTChild(currentAST, tmp62_AST);
+				AST tmp63_AST = null;
+				tmp63_AST = astFactory.create(LT(1));
+				astFactory.addASTChild(currentAST, tmp63_AST);
 				match(ID);
 				method_name_AST = (AST)currentAST.root;
 			}
 			catch (RecognitionException ex) {
 				reportError(ex);
-				recover(ex,_tokenSet_12);
+				recover(ex,_tokenSet_15);
 			}
 			returnAST = method_name_AST;
 		} finally { // debugging
@@ -1037,9 +981,9 @@ public DecafParser(ParserSharedInputState state) {
 				}
 				case STRING:
 				{
-					AST tmp63_AST = null;
-					tmp63_AST = astFactory.create(LT(1));
-					astFactory.addASTChild(currentAST, tmp63_AST);
+					AST tmp64_AST = null;
+					tmp64_AST = astFactory.create(LT(1));
+					astFactory.addASTChild(currentAST, tmp64_AST);
 					match(STRING);
 					callout_arg_AST = (AST)currentAST.root;
 					break;
@@ -1052,7 +996,7 @@ public DecafParser(ParserSharedInputState state) {
 			}
 			catch (RecognitionException ex) {
 				reportError(ex);
-				recover(ex,_tokenSet_13);
+				recover(ex,_tokenSet_16);
 			}
 			returnAST = callout_arg_AST;
 		} finally { // debugging
@@ -1067,30 +1011,37 @@ public DecafParser(ParserSharedInputState state) {
 			returnAST = null;
 			ASTPair currentAST = new ASTPair();
 			AST expr_l0_AST = null;
+			AST left_AST = null;
+			AST op_AST = null;
+			AST right_AST = null;
 			
 			try {      // for error handling
 				expr_l1();
-				astFactory.addASTChild(currentAST, returnAST);
+				left_AST = (AST)returnAST;
 				{
-				_loop46:
-				do {
-					if ((LA(1)==AND) && (_tokenSet_9.member(LA(2))) && (_tokenSet_10.member(LA(3)))) {
-						and_op();
-						astFactory.addASTChild(currentAST, returnAST);
-						expr_l1();
-						astFactory.addASTChild(currentAST, returnAST);
-					}
-					else {
-						break _loop46;
-					}
-					
-				} while (true);
+				if ((LA(1)==AND) && (_tokenSet_10.member(LA(2))) && (_tokenSet_11.member(LA(3)))) {
+					and_op();
+					op_AST = (AST)returnAST;
+					expr_l0();
+					right_AST = (AST)returnAST;
+				}
+				else if ((_tokenSet_9.member(LA(1))) && (_tokenSet_12.member(LA(2))) && (_tokenSet_13.member(LA(3)))) {
+				}
+				else {
+					throw new NoViableAltException(LT(1), getFilename());
+				}
+				
 				}
 				expr_l0_AST = (AST)currentAST.root;
+				expr_l0_AST = (AST)astFactory.make( (new ASTArray(3)).add(op_AST).add(left_AST).add(right_AST));
+				currentAST.root = expr_l0_AST;
+				currentAST.child = expr_l0_AST!=null &&expr_l0_AST.getFirstChild()!=null ?
+					expr_l0_AST.getFirstChild() : expr_l0_AST;
+				currentAST.advanceChildToEnd();
 			}
 			catch (RecognitionException ex) {
 				reportError(ex);
-				recover(ex,_tokenSet_11);
+				recover(ex,_tokenSet_9);
 			}
 			returnAST = expr_l0_AST;
 		} finally { // debugging
@@ -1107,15 +1058,15 @@ public DecafParser(ParserSharedInputState state) {
 			AST or_op_AST = null;
 			
 			try {      // for error handling
-				AST tmp64_AST = null;
-				tmp64_AST = astFactory.create(LT(1));
-				astFactory.addASTChild(currentAST, tmp64_AST);
+				AST tmp65_AST = null;
+				tmp65_AST = astFactory.create(LT(1));
+				astFactory.addASTChild(currentAST, tmp65_AST);
 				match(OR);
 				or_op_AST = (AST)currentAST.root;
 			}
 			catch (RecognitionException ex) {
 				reportError(ex);
-				recover(ex,_tokenSet_9);
+				recover(ex,_tokenSet_10);
 			}
 			returnAST = or_op_AST;
 		} finally { // debugging
@@ -1135,25 +1086,24 @@ public DecafParser(ParserSharedInputState state) {
 				expr_l2();
 				astFactory.addASTChild(currentAST, returnAST);
 				{
-				_loop49:
-				do {
-					if ((LA(1)==EQ||LA(1)==NEQ) && (_tokenSet_9.member(LA(2))) && (_tokenSet_10.member(LA(3)))) {
-						eq_op();
-						astFactory.addASTChild(currentAST, returnAST);
-						expr_l2();
-						astFactory.addASTChild(currentAST, returnAST);
-					}
-					else {
-						break _loop49;
-					}
-					
-				} while (true);
+				if ((LA(1)==EQ||LA(1)==NEQ) && (_tokenSet_10.member(LA(2))) && (_tokenSet_11.member(LA(3)))) {
+					eq_op();
+					astFactory.addASTChild(currentAST, returnAST);
+					expr_l1();
+					astFactory.addASTChild(currentAST, returnAST);
+				}
+				else if ((_tokenSet_9.member(LA(1))) && (_tokenSet_12.member(LA(2))) && (_tokenSet_13.member(LA(3)))) {
+				}
+				else {
+					throw new NoViableAltException(LT(1), getFilename());
+				}
+				
 				}
 				expr_l1_AST = (AST)currentAST.root;
 			}
 			catch (RecognitionException ex) {
 				reportError(ex);
-				recover(ex,_tokenSet_11);
+				recover(ex,_tokenSet_9);
 			}
 			returnAST = expr_l1_AST;
 		} finally { // debugging
@@ -1170,15 +1120,15 @@ public DecafParser(ParserSharedInputState state) {
 			AST and_op_AST = null;
 			
 			try {      // for error handling
-				AST tmp65_AST = null;
-				tmp65_AST = astFactory.create(LT(1));
-				astFactory.addASTChild(currentAST, tmp65_AST);
+				AST tmp66_AST = null;
+				tmp66_AST = astFactory.create(LT(1));
+				astFactory.addASTChild(currentAST, tmp66_AST);
 				match(AND);
 				and_op_AST = (AST)currentAST.root;
 			}
 			catch (RecognitionException ex) {
 				reportError(ex);
-				recover(ex,_tokenSet_9);
+				recover(ex,_tokenSet_10);
 			}
 			returnAST = and_op_AST;
 		} finally { // debugging
@@ -1198,25 +1148,24 @@ public DecafParser(ParserSharedInputState state) {
 				expr_l3();
 				astFactory.addASTChild(currentAST, returnAST);
 				{
-				_loop52:
-				do {
-					if (((LA(1) >= LT && LA(1) <= GEQ)) && (_tokenSet_9.member(LA(2))) && (_tokenSet_10.member(LA(3)))) {
-						rel_op();
-						astFactory.addASTChild(currentAST, returnAST);
-						expr_l3();
-						astFactory.addASTChild(currentAST, returnAST);
-					}
-					else {
-						break _loop52;
-					}
-					
-				} while (true);
+				if (((LA(1) >= LT && LA(1) <= GEQ)) && (_tokenSet_10.member(LA(2))) && (_tokenSet_11.member(LA(3)))) {
+					rel_op();
+					astFactory.addASTChild(currentAST, returnAST);
+					expr_l2();
+					astFactory.addASTChild(currentAST, returnAST);
+				}
+				else if ((_tokenSet_9.member(LA(1))) && (_tokenSet_12.member(LA(2))) && (_tokenSet_13.member(LA(3)))) {
+				}
+				else {
+					throw new NoViableAltException(LT(1), getFilename());
+				}
+				
 				}
 				expr_l2_AST = (AST)currentAST.root;
 			}
 			catch (RecognitionException ex) {
 				reportError(ex);
-				recover(ex,_tokenSet_11);
+				recover(ex,_tokenSet_9);
 			}
 			returnAST = expr_l2_AST;
 		} finally { // debugging
@@ -1236,18 +1185,18 @@ public DecafParser(ParserSharedInputState state) {
 				switch ( LA(1)) {
 				case EQ:
 				{
-					AST tmp66_AST = null;
-					tmp66_AST = astFactory.create(LT(1));
-					astFactory.addASTChild(currentAST, tmp66_AST);
+					AST tmp67_AST = null;
+					tmp67_AST = astFactory.create(LT(1));
+					astFactory.addASTChild(currentAST, tmp67_AST);
 					match(EQ);
 					eq_op_AST = (AST)currentAST.root;
 					break;
 				}
 				case NEQ:
 				{
-					AST tmp67_AST = null;
-					tmp67_AST = astFactory.create(LT(1));
-					astFactory.addASTChild(currentAST, tmp67_AST);
+					AST tmp68_AST = null;
+					tmp68_AST = astFactory.create(LT(1));
+					astFactory.addASTChild(currentAST, tmp68_AST);
 					match(NEQ);
 					eq_op_AST = (AST)currentAST.root;
 					break;
@@ -1260,7 +1209,7 @@ public DecafParser(ParserSharedInputState state) {
 			}
 			catch (RecognitionException ex) {
 				reportError(ex);
-				recover(ex,_tokenSet_9);
+				recover(ex,_tokenSet_10);
 			}
 			returnAST = eq_op_AST;
 		} finally { // debugging
@@ -1275,30 +1224,37 @@ public DecafParser(ParserSharedInputState state) {
 			returnAST = null;
 			ASTPair currentAST = new ASTPair();
 			AST expr_l3_AST = null;
+			AST left_AST = null;
+			AST op_AST = null;
+			AST right_AST = null;
 			
 			try {      // for error handling
 				expr_l4();
-				astFactory.addASTChild(currentAST, returnAST);
+				left_AST = (AST)returnAST;
 				{
-				_loop55:
-				do {
-					if ((LA(1)==MINUS||LA(1)==PLUS) && (_tokenSet_9.member(LA(2))) && (_tokenSet_10.member(LA(3)))) {
-						linear_op();
-						astFactory.addASTChild(currentAST, returnAST);
-						expr_l4();
-						astFactory.addASTChild(currentAST, returnAST);
-					}
-					else {
-						break _loop55;
-					}
-					
-				} while (true);
+				if ((LA(1)==MINUS||LA(1)==PLUS) && (_tokenSet_10.member(LA(2))) && (_tokenSet_11.member(LA(3)))) {
+					linear_op();
+					op_AST = (AST)returnAST;
+					expr_l3();
+					right_AST = (AST)returnAST;
+				}
+				else if ((_tokenSet_9.member(LA(1))) && (_tokenSet_12.member(LA(2))) && (_tokenSet_13.member(LA(3)))) {
+				}
+				else {
+					throw new NoViableAltException(LT(1), getFilename());
+				}
+				
 				}
 				expr_l3_AST = (AST)currentAST.root;
+				expr_l3_AST = (AST)astFactory.make( (new ASTArray(3)).add(op_AST).add(left_AST).add(right_AST));
+				currentAST.root = expr_l3_AST;
+				currentAST.child = expr_l3_AST!=null &&expr_l3_AST.getFirstChild()!=null ?
+					expr_l3_AST.getFirstChild() : expr_l3_AST;
+				currentAST.advanceChildToEnd();
 			}
 			catch (RecognitionException ex) {
 				reportError(ex);
-				recover(ex,_tokenSet_11);
+				recover(ex,_tokenSet_9);
 			}
 			returnAST = expr_l3_AST;
 		} finally { // debugging
@@ -1315,41 +1271,38 @@ public DecafParser(ParserSharedInputState state) {
 			AST rel_op_AST = null;
 			
 			try {      // for error handling
+				{
 				switch ( LA(1)) {
 				case LT:
-				{
-					AST tmp68_AST = null;
-					tmp68_AST = astFactory.create(LT(1));
-					astFactory.addASTChild(currentAST, tmp68_AST);
-					match(LT);
-					rel_op_AST = (AST)currentAST.root;
-					break;
-				}
-				case GT:
 				{
 					AST tmp69_AST = null;
 					tmp69_AST = astFactory.create(LT(1));
 					astFactory.addASTChild(currentAST, tmp69_AST);
-					match(GT);
-					rel_op_AST = (AST)currentAST.root;
+					match(LT);
 					break;
 				}
-				case LEQ:
+				case GT:
 				{
 					AST tmp70_AST = null;
 					tmp70_AST = astFactory.create(LT(1));
 					astFactory.addASTChild(currentAST, tmp70_AST);
-					match(LEQ);
-					rel_op_AST = (AST)currentAST.root;
+					match(GT);
 					break;
 				}
-				case GEQ:
+				case LEQ:
 				{
 					AST tmp71_AST = null;
 					tmp71_AST = astFactory.create(LT(1));
 					astFactory.addASTChild(currentAST, tmp71_AST);
+					match(LEQ);
+					break;
+				}
+				case GEQ:
+				{
+					AST tmp72_AST = null;
+					tmp72_AST = astFactory.create(LT(1));
+					astFactory.addASTChild(currentAST, tmp72_AST);
 					match(GEQ);
-					rel_op_AST = (AST)currentAST.root;
 					break;
 				}
 				default:
@@ -1357,10 +1310,12 @@ public DecafParser(ParserSharedInputState state) {
 					throw new NoViableAltException(LT(1), getFilename());
 				}
 				}
+				}
+				rel_op_AST = (AST)currentAST.root;
 			}
 			catch (RecognitionException ex) {
 				reportError(ex);
-				recover(ex,_tokenSet_9);
+				recover(ex,_tokenSet_10);
 			}
 			returnAST = rel_op_AST;
 		} finally { // debugging
@@ -1375,30 +1330,37 @@ public DecafParser(ParserSharedInputState state) {
 			returnAST = null;
 			ASTPair currentAST = new ASTPair();
 			AST expr_l4_AST = null;
+			AST left_AST = null;
+			AST op_AST = null;
+			AST right_AST = null;
 			
 			try {      // for error handling
 				expr_t();
-				astFactory.addASTChild(currentAST, returnAST);
+				left_AST = (AST)returnAST;
 				{
-				_loop58:
-				do {
-					if (((LA(1) >= MUL && LA(1) <= MOD)) && (_tokenSet_9.member(LA(2))) && (_tokenSet_10.member(LA(3)))) {
-						mul_op();
-						astFactory.addASTChild(currentAST, returnAST);
-						expr_t();
-						astFactory.addASTChild(currentAST, returnAST);
-					}
-					else {
-						break _loop58;
-					}
-					
-				} while (true);
+				if (((LA(1) >= MUL && LA(1) <= MOD)) && (_tokenSet_10.member(LA(2))) && (_tokenSet_11.member(LA(3)))) {
+					mul_op();
+					op_AST = (AST)returnAST;
+					expr_l4();
+					right_AST = (AST)returnAST;
+				}
+				else if ((_tokenSet_9.member(LA(1))) && (_tokenSet_12.member(LA(2))) && (_tokenSet_13.member(LA(3)))) {
+				}
+				else {
+					throw new NoViableAltException(LT(1), getFilename());
+				}
+				
 				}
 				expr_l4_AST = (AST)currentAST.root;
+				expr_l4_AST = (AST)astFactory.make( (new ASTArray(3)).add(op_AST).add(left_AST).add(right_AST));
+				currentAST.root = expr_l4_AST;
+				currentAST.child = expr_l4_AST!=null &&expr_l4_AST.getFirstChild()!=null ?
+					expr_l4_AST.getFirstChild() : expr_l4_AST;
+				currentAST.advanceChildToEnd();
 			}
 			catch (RecognitionException ex) {
 				reportError(ex);
-				recover(ex,_tokenSet_11);
+				recover(ex,_tokenSet_9);
 			}
 			returnAST = expr_l4_AST;
 		} finally { // debugging
@@ -1418,18 +1380,18 @@ public DecafParser(ParserSharedInputState state) {
 				switch ( LA(1)) {
 				case PLUS:
 				{
-					AST tmp72_AST = null;
-					tmp72_AST = astFactory.create(LT(1));
-					astFactory.addASTChild(currentAST, tmp72_AST);
+					AST tmp73_AST = null;
+					tmp73_AST = astFactory.create(LT(1));
+					astFactory.addASTChild(currentAST, tmp73_AST);
 					match(PLUS);
 					linear_op_AST = (AST)currentAST.root;
 					break;
 				}
 				case MINUS:
 				{
-					AST tmp73_AST = null;
-					tmp73_AST = astFactory.create(LT(1));
-					astFactory.addASTChild(currentAST, tmp73_AST);
+					AST tmp74_AST = null;
+					tmp74_AST = astFactory.create(LT(1));
+					astFactory.addASTChild(currentAST, tmp74_AST);
 					match(MINUS);
 					linear_op_AST = (AST)currentAST.root;
 					break;
@@ -1442,7 +1404,7 @@ public DecafParser(ParserSharedInputState state) {
 			}
 			catch (RecognitionException ex) {
 				reportError(ex);
-				recover(ex,_tokenSet_9);
+				recover(ex,_tokenSet_10);
 			}
 			returnAST = linear_op_AST;
 		} finally { // debugging
@@ -1459,12 +1421,12 @@ public DecafParser(ParserSharedInputState state) {
 			AST expr_t_AST = null;
 			
 			try {      // for error handling
-				if ((LA(1)==NOT) && (_tokenSet_9.member(LA(2))) && (_tokenSet_10.member(LA(3)))) {
+				if ((LA(1)==NOT) && (_tokenSet_10.member(LA(2))) && (_tokenSet_11.member(LA(3)))) {
 					logical_not();
 					astFactory.addASTChild(currentAST, returnAST);
 					expr_t_AST = (AST)currentAST.root;
 				}
-				else if ((_tokenSet_9.member(LA(1))) && (_tokenSet_10.member(LA(2))) && (_tokenSet_14.member(LA(3)))) {
+				else if ((_tokenSet_10.member(LA(1))) && (_tokenSet_11.member(LA(2))) && (_tokenSet_17.member(LA(3)))) {
 					expr_tm();
 					astFactory.addASTChild(currentAST, returnAST);
 					expr_t_AST = (AST)currentAST.root;
@@ -1476,7 +1438,7 @@ public DecafParser(ParserSharedInputState state) {
 			}
 			catch (RecognitionException ex) {
 				reportError(ex);
-				recover(ex,_tokenSet_11);
+				recover(ex,_tokenSet_9);
 			}
 			returnAST = expr_t_AST;
 		} finally { // debugging
@@ -1493,32 +1455,30 @@ public DecafParser(ParserSharedInputState state) {
 			AST mul_op_AST = null;
 			
 			try {      // for error handling
+				{
 				switch ( LA(1)) {
 				case MOD:
 				{
-					AST tmp74_AST = null;
-					tmp74_AST = astFactory.create(LT(1));
-					astFactory.addASTChild(currentAST, tmp74_AST);
+					AST tmp75_AST = null;
+					tmp75_AST = astFactory.create(LT(1));
+					astFactory.makeASTRoot(currentAST, tmp75_AST);
 					match(MOD);
-					mul_op_AST = (AST)currentAST.root;
 					break;
 				}
 				case DIV:
 				{
-					AST tmp75_AST = null;
-					tmp75_AST = astFactory.create(LT(1));
-					astFactory.addASTChild(currentAST, tmp75_AST);
+					AST tmp76_AST = null;
+					tmp76_AST = astFactory.create(LT(1));
+					astFactory.makeASTRoot(currentAST, tmp76_AST);
 					match(DIV);
-					mul_op_AST = (AST)currentAST.root;
 					break;
 				}
 				case MUL:
 				{
-					AST tmp76_AST = null;
-					tmp76_AST = astFactory.create(LT(1));
-					astFactory.addASTChild(currentAST, tmp76_AST);
+					AST tmp77_AST = null;
+					tmp77_AST = astFactory.create(LT(1));
+					astFactory.makeASTRoot(currentAST, tmp77_AST);
 					match(MUL);
-					mul_op_AST = (AST)currentAST.root;
 					break;
 				}
 				default:
@@ -1526,10 +1486,12 @@ public DecafParser(ParserSharedInputState state) {
 					throw new NoViableAltException(LT(1), getFilename());
 				}
 				}
+				}
+				mul_op_AST = (AST)currentAST.root;
 			}
 			catch (RecognitionException ex) {
 				reportError(ex);
-				recover(ex,_tokenSet_9);
+				recover(ex,_tokenSet_10);
 			}
 			returnAST = mul_op_AST;
 		} finally { // debugging
@@ -1546,9 +1508,9 @@ public DecafParser(ParserSharedInputState state) {
 			AST logical_not_AST = null;
 			
 			try {      // for error handling
-				AST tmp77_AST = null;
-				tmp77_AST = astFactory.create(LT(1));
-				astFactory.addASTChild(currentAST, tmp77_AST);
+				AST tmp78_AST = null;
+				tmp78_AST = astFactory.create(LT(1));
+				astFactory.addASTChild(currentAST, tmp78_AST);
 				match(NOT);
 				expr_tm();
 				astFactory.addASTChild(currentAST, returnAST);
@@ -1556,7 +1518,7 @@ public DecafParser(ParserSharedInputState state) {
 			}
 			catch (RecognitionException ex) {
 				reportError(ex);
-				recover(ex,_tokenSet_11);
+				recover(ex,_tokenSet_9);
 			}
 			returnAST = logical_not_AST;
 		} finally { // debugging
@@ -1602,7 +1564,7 @@ public DecafParser(ParserSharedInputState state) {
 			}
 			catch (RecognitionException ex) {
 				reportError(ex);
-				recover(ex,_tokenSet_11);
+				recover(ex,_tokenSet_9);
 			}
 			returnAST = expr_tm_AST;
 		} finally { // debugging
@@ -1619,9 +1581,9 @@ public DecafParser(ParserSharedInputState state) {
 			AST unary_minus_AST = null;
 			
 			try {      // for error handling
-				AST tmp78_AST = null;
-				tmp78_AST = astFactory.create(LT(1));
-				astFactory.addASTChild(currentAST, tmp78_AST);
+				AST tmp79_AST = null;
+				tmp79_AST = astFactory.create(LT(1));
+				astFactory.addASTChild(currentAST, tmp79_AST);
 				match(MINUS);
 				expr_tf();
 				astFactory.addASTChild(currentAST, returnAST);
@@ -1629,7 +1591,7 @@ public DecafParser(ParserSharedInputState state) {
 			}
 			catch (RecognitionException ex) {
 				reportError(ex);
-				recover(ex,_tokenSet_11);
+				recover(ex,_tokenSet_9);
 			}
 			returnAST = unary_minus_AST;
 		} finally { // debugging
@@ -1658,9 +1620,9 @@ public DecafParser(ParserSharedInputState state) {
 				}
 				case NOT:
 				{
-					AST tmp79_AST = null;
-					tmp79_AST = astFactory.create(LT(1));
-					astFactory.addASTChild(currentAST, tmp79_AST);
+					AST tmp80_AST = null;
+					tmp80_AST = astFactory.create(LT(1));
+					astFactory.addASTChild(currentAST, tmp80_AST);
 					match(NOT);
 					expr();
 					astFactory.addASTChild(currentAST, returnAST);
@@ -1669,21 +1631,15 @@ public DecafParser(ParserSharedInputState state) {
 				}
 				case LPAREN:
 				{
-					AST tmp80_AST = null;
-					tmp80_AST = astFactory.create(LT(1));
-					astFactory.addASTChild(currentAST, tmp80_AST);
 					match(LPAREN);
 					expr();
 					astFactory.addASTChild(currentAST, returnAST);
-					AST tmp81_AST = null;
-					tmp81_AST = astFactory.create(LT(1));
-					astFactory.addASTChild(currentAST, tmp81_AST);
 					match(RPAREN);
 					expr_tf_AST = (AST)currentAST.root;
 					break;
 				}
 				default:
-					if ((LA(1)==ID) && (_tokenSet_15.member(LA(2)))) {
+					if ((LA(1)==ID) && (_tokenSet_18.member(LA(2)))) {
 						location();
 						astFactory.addASTChild(currentAST, returnAST);
 						expr_tf_AST = (AST)currentAST.root;
@@ -1700,7 +1656,7 @@ public DecafParser(ParserSharedInputState state) {
 			}
 			catch (RecognitionException ex) {
 				reportError(ex);
-				recover(ex,_tokenSet_11);
+				recover(ex,_tokenSet_9);
 			}
 			returnAST = expr_tf_AST;
 		} finally { // debugging
@@ -1720,27 +1676,27 @@ public DecafParser(ParserSharedInputState state) {
 				switch ( LA(1)) {
 				case INTLITERAL:
 				{
-					AST tmp82_AST = null;
-					tmp82_AST = astFactory.create(LT(1));
-					astFactory.addASTChild(currentAST, tmp82_AST);
+					AST tmp83_AST = null;
+					tmp83_AST = astFactory.create(LT(1));
+					astFactory.addASTChild(currentAST, tmp83_AST);
 					match(INTLITERAL);
 					literal_AST = (AST)currentAST.root;
 					break;
 				}
 				case CHAR:
 				{
-					AST tmp83_AST = null;
-					tmp83_AST = astFactory.create(LT(1));
-					astFactory.addASTChild(currentAST, tmp83_AST);
+					AST tmp84_AST = null;
+					tmp84_AST = astFactory.create(LT(1));
+					astFactory.addASTChild(currentAST, tmp84_AST);
 					match(CHAR);
 					literal_AST = (AST)currentAST.root;
 					break;
 				}
 				case BOOLEANLITERAL:
 				{
-					AST tmp84_AST = null;
-					tmp84_AST = astFactory.create(LT(1));
-					astFactory.addASTChild(currentAST, tmp84_AST);
+					AST tmp85_AST = null;
+					tmp85_AST = astFactory.create(LT(1));
+					astFactory.addASTChild(currentAST, tmp85_AST);
 					match(BOOLEANLITERAL);
 					literal_AST = (AST)currentAST.root;
 					break;
@@ -1753,7 +1709,7 @@ public DecafParser(ParserSharedInputState state) {
 			}
 			catch (RecognitionException ex) {
 				reportError(ex);
-				recover(ex,_tokenSet_11);
+				recover(ex,_tokenSet_9);
 			}
 			returnAST = literal_AST;
 		} finally { // debugging
@@ -1873,44 +1829,59 @@ public DecafParser(ParserSharedInputState state) {
 	}
 	public static final BitSet _tokenSet_7 = new BitSet(mk_tokenSet_7());
 	private static final long[] mk_tokenSet_8() {
-		long[] data = { 2305966154000629760L, 0L};
+		long[] data = { 70368744177664L, 0L};
 		return data;
 	}
 	public static final BitSet _tokenSet_8 = new BitSet(mk_tokenSet_8());
 	private static final long[] mk_tokenSet_9() {
-		long[] data = { 4756223419782004992L, 0L};
+		long[] data = { 109950647402496L, 0L};
 		return data;
 	}
 	public static final BitSet _tokenSet_9 = new BitSet(mk_tokenSet_9());
 	private static final long[] mk_tokenSet_10() {
-		long[] data = { 4756333369894633728L, 0L};
+		long[] data = { 4756223419782004992L, 0L};
 		return data;
 	}
 	public static final BitSet _tokenSet_10 = new BitSet(mk_tokenSet_10());
 	private static final long[] mk_tokenSet_11() {
-		long[] data = { 109950647402496L, 0L};
+		long[] data = { 4756333369894633728L, 0L};
 		return data;
 	}
 	public static final BitSet _tokenSet_11 = new BitSet(mk_tokenSet_11());
 	private static final long[] mk_tokenSet_12() {
-		long[] data = { 8388608L, 0L};
+		long[] data = { 7350419949398717888L, 0L};
 		return data;
 	}
 	public static final BitSet _tokenSet_12 = new BitSet(mk_tokenSet_12());
 	private static final long[] mk_tokenSet_13() {
-		long[] data = { 35184388866048L, 0L};
+		long[] data = { 7350419949400882624L, 0L};
 		return data;
 	}
 	public static final BitSet _tokenSet_13 = new BitSet(mk_tokenSet_13());
 	private static final long[] mk_tokenSet_14() {
-		long[] data = { 7350419949400815040L, 0L};
+		long[] data = { 2305966154000629760L, 0L};
 		return data;
 	}
 	public static final BitSet _tokenSet_14 = new BitSet(mk_tokenSet_14());
 	private static final long[] mk_tokenSet_15() {
-		long[] data = { 109950649499648L, 0L};
+		long[] data = { 8388608L, 0L};
 		return data;
 	}
 	public static final BitSet _tokenSet_15 = new BitSet(mk_tokenSet_15());
+	private static final long[] mk_tokenSet_16() {
+		long[] data = { 35184388866048L, 0L};
+		return data;
+	}
+	public static final BitSet _tokenSet_16 = new BitSet(mk_tokenSet_16());
+	private static final long[] mk_tokenSet_17() {
+		long[] data = { 7350419949400815040L, 0L};
+		return data;
+	}
+	public static final BitSet _tokenSet_17 = new BitSet(mk_tokenSet_17());
+	private static final long[] mk_tokenSet_18() {
+		long[] data = { 109950649499648L, 0L};
+		return data;
+	}
+	public static final BitSet _tokenSet_18 = new BitSet(mk_tokenSet_18());
 	
 	}

@@ -1,10 +1,14 @@
 package edu.mit.compilers;
 
 import java.io.*;
+
+import antlr.CommonAST;
 import antlr.Token;
+import antlr.collections.AST;
 import edu.mit.compilers.grammar.*;
 import edu.mit.compilers.tools.CLI;
 import edu.mit.compilers.tools.CLI.Action;
+import edu.mit.compilers.tools.GenericTreeWalk;
 
 class Main {
   public static void main(String[] args) {
@@ -66,6 +70,12 @@ class Main {
         if (parser.getError()) {
           System.exit(-1);
         }
+        
+        AST tree = parser.getAST();
+        GenericTreeWalk.walk(tree, null);
+        //System.out.println(((CommonAST)tree).toStringList());
+
+        //System.out.println(tree.);
       }
     } catch(Exception e) {
       // print the error:
