@@ -934,7 +934,7 @@ public DecafParser(ParserSharedInputState state) {
 				match(ASSIGN);
 				expr();
 				astFactory.addASTChild(currentAST, returnAST);
-				match(COMMA);
+				match(SEMI);
 				expr();
 				astFactory.addASTChild(currentAST, returnAST);
 				match(RPAREN);

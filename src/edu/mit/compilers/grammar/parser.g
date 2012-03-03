@@ -117,7 +117,7 @@ assignment! : left:location op:assign_op right:expr
 if_statement! : TK_if LPAREN! cond:expr RPAREN! if_block:block (TK_else! else_block:block)? 
             { #if_statement = #(TK_if, cond, if_block, else_block); } ;
             
-for_statement : TK_for^ LPAREN! ID ASSIGN expr COMMA! expr RPAREN! block;
+for_statement : TK_for^ LPAREN! ID ASSIGN expr SEMI! expr RPAREN! block;
 
 assign_op :  ASSIGN
            | INC_ASSIGN
