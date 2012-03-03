@@ -62,6 +62,7 @@ class Main {
           }
         }
       } else if (CLI.target == Action.PARSE ||
+                 CLI.target == Action.DOT ||
                  CLI.target == Action.DEFAULT) {
         DecafScanner scanner =
             new DecafScanner(new DataInputStream(inputStream));
@@ -74,8 +75,12 @@ class Main {
         
         AST tree = parser.getAST();
         //GenericTreeWalk.walk(tree, null);
-        //System.out.println(((CommonAST)tree).toStringList());
-        System.out.println(TreeVisualizer.generateDOT(tree));
+        
+//        System.out.println(((CommonAST)tree).toStringList());
+        
+        if (CLI.target == Action.DOT) {
+            System.out.println(TreeVisualizer.generateDOT(tree));
+        }
       }
     } catch(Exception e) {
       // print the error:

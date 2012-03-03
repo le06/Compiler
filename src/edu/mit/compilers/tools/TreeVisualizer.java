@@ -11,29 +11,42 @@ public class TreeVisualizer {
         StringBuilder out = new StringBuilder();
         out.append("digraph AST {\n");
         
-        walk(ast, out, "a", (char)('a'-1));
+        walk(ast, out, "a", 'a');
         
         out.append("}");
         
         return out.toString();
     }
     
-    private static void walk(AST ast, StringBuilder out, String parent, char last) {
+    private static void walk(AST ast, StringBuilder out, String parent, char name) {
         if (ast == null) {
             return;
         }
         
-        out.append((parent + (char)(last + 1)) + " [label=\"" + ast.getText() + "\"]\n");
+        out.append((parent + name) + " [label=\"" + ast.getText() + "\"]\n");
         
-        out.append(parent + " -> " + (parent + (char)(last + 1)) // Link
+        out.append(parent + " -> " + (parent + name) // Link
                 
                 + "\n");
         
-        if (ast.getFirstChild() != null) {
-            walk(ast.getFirstChild(), out, parent + (char)(last + 1), (char)('a'-1));
-        } else {
-            walk(ast.getNextSibling(), out, parent, (char)(last+1));
+        AST child = ast.getFirstChild();
+        
+        
+        char next = 'a';
+        for (int i = 0; i < ast.getNumberOfChildren(); i++) {
+            walk(child, out, parent + name, next++);
+            child = child.getNextSibling();
         }
         
+        /*if (ast.getFirstChild() != null) {
+            walk(ast.getFirstChild(), out, parent + (char)(last + 1), (char)('a'-1));
+        }//
+        //else {
+        for (int i = 0; i < ast.getN)
+            walk(ast.getNextSibling(), out, parent, (char)(last+1));
+        //}
+*/        
     }
+    
+
 }

@@ -1,0 +1,11 @@
+class Program {
+  int a;
+  void main() {
+    if (a == !b && c == d) {
+      a = 3;
+      b = 2;
+    } else {
+      a = a + b;
+    }
+  }
+}

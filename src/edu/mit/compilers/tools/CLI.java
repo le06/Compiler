@@ -24,8 +24,9 @@ public class CLI {
    *        stop.
    * CFG: produce an image of the control flow graph
    * ASSEMBLY: produce assembly from the input.
+   * DOT: produce dotfile output
    */
-  public enum Action {DEFAULT, SCAN, PARSE, INTER, LOWIR, CFG, ASSEMBLY};
+  public enum Action {DEFAULT, SCAN, PARSE, INTER, LOWIR, CFG, ASSEMBLY, DOT};
 
   /**
    * Array indicating which optimizations should be performed.  If
@@ -156,6 +157,8 @@ public class CLI {
         } else if (argSansCase.equals("assembly") ||
                    argSansCase.equals("codegen")) {
           target = Action.ASSEMBLY;
+        } else if (argSansCase.equals("dot")) {
+          target = Action.DOT;  
         } else {
           target = Action.DEFAULT; // Anything else is just default
         }

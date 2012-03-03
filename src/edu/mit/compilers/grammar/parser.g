@@ -16,6 +16,16 @@ options
   buildAST = true;
 }
 
+tokens
+{
+  BLOCK;
+  BLOCK_LINE;
+  VAR_DECL;
+  METHOD;
+  FIELD;
+  ARRAY;
+}
+
 // Java glue code that makes error reporting easier.
 // You can insert arbitrary Java code into your parser/lexer this way.
 {
@@ -68,29 +78,46 @@ options
 
 program: TK_class^ TK_Program LCURLY! (field_dec)* (method_dec)* RCURLY! EOF!;
 
-field_dec : type (ID | ID LSQUARE! INTLITERAL RSQUARE!) 
-                          (COMMA! (ID | ID LSQUARE! INTLITERAL RSQUARE!))* SEMI!;
+field_dec : type (ID | array_dec) 
+                          (COMMA! (ID | array_dec))* SEMI!
+           {#field_dec = #([FIELD, "field"], #field_dec);};
 
-method_dec : (type | TK_void^) ID LPAREN! ((type ID) (COMMA! type ID)*)? RPAREN! block;
+array_dec : ID LSQUARE! INTLITERAL RSQUARE!
+           {#array_dec = #([ARRAY, "array"], #array_dec);};
 
-block : LCURLY! (var_decl)* (statement)* RCURLY!;
+method_dec : (type | TK_void^) ID LPAREN! ((type ID) (COMMA! type ID)*)? RPAREN! block
+           {#method_dec = #([METHOD, "method"], #method_dec); };
 
-var_decl : type ID (COMMA! ID)* SEMI!;
+
+block : LCURLY! (var_decl | statement)* RCURLY!
+         { #block = #([BLOCK, "block"], #block); };
+
+
+line : (var_decl | statement);
+
+var_decl : type ID (COMMA! ID)* SEMI!
+         {#var_decl = #([VAR_DECL, "declaration"], #var_decl);};
 
 type : TK_int | TK_boolean;
 
 statement :  assignment SEMI!
            | method_call SEMI!
-           | TK_if^ (expr) block (TK_else block)?
-           | TK_for^ (ID ASSIGN expr COMMA! expr) block
-           | TK_while^ (expr) block
+           //| TK_if^ (expr) block (TK_else block)? 
+           | if_statement
+           | for_statement
+           | TK_while^ LPAREN! expr RPAREN! block
            | TK_return^ (expr)? SEMI!
-           | TK_break SEMI!
-           | TK_continue SEMI!
+           | TK_break^ SEMI!
+           | TK_continue^ SEMI!
            | block;
 
 assignment! : left:location op:assign_op right:expr 
 			{ #assignment = #(op, left, right); } ;
+			
+if_statement! : TK_if LPAREN! cond:expr RPAREN! if_block:block (TK_else! else_block:block)? 
+            { #if_statement = #(TK_if, cond, if_block, else_block); } ;
+            
+for_statement : TK_for^ LPAREN! ID ASSIGN expr COMMA! expr RPAREN! block;
 
 assign_op :  ASSIGN
            | INC_ASSIGN

@@ -62,6 +62,12 @@ public interface DecafParserTokenTypes {
 	int STRING = 58;
 	int ESC = 59;
 	int CHARLIT = 60;
-	int MINUS_ASSIGN = 61;
-	int BOOLEANLITERAL = 62;
+	int BLOCK = 61;
+	int BLOCK_LINE = 62;
+	int VAR_DECL = 63;
+	int METHOD = 64;
+	int FIELD = 65;
+	int ARRAY = 66;
+	int MINUS_ASSIGN = 67;
+	int BOOLEANLITERAL = 68;
 }
