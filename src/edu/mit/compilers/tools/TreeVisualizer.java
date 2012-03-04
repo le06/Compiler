@@ -36,16 +36,7 @@ public class TreeVisualizer {
         for (int i = 0; i < ast.getNumberOfChildren(); i++) {
             walk(child, out, parent + name, next++);
             child = child.getNextSibling();
-        }
-        
-        /*if (ast.getFirstChild() != null) {
-            walk(ast.getFirstChild(), out, parent + (char)(last + 1), (char)('a'-1));
-        }//
-        //else {
-        for (int i = 0; i < ast.getN)
-            walk(ast.getNextSibling(), out, parent, (char)(last+1));
-        //}
-*/        
+        } 
     }
     
 

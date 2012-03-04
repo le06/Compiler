@@ -24,6 +24,8 @@ tokens
   METHOD;
   FIELD;
   ARRAY;
+  FN_CALL;
+  FOR_INIT;
 }
 
 // Java glue code that makes error reporting easier.
@@ -117,19 +119,29 @@ assignment! : left:location op:assign_op right:expr
 if_statement! : TK_if LPAREN! cond:expr RPAREN! if_block:block (TK_else! else_block:block)? 
             { #if_statement = #(TK_if, cond, if_block, else_block); } ;
             
-for_statement : TK_for^ LPAREN! ID ASSIGN expr SEMI! expr RPAREN! block;
+for_statement : TK_for^ for_init block;
+
+for_init : LPAREN! ID ASSIGN expr SEMI! expr RPAREN!
+            { #for_init = #([FOR_INIT, "init"], #for_init); };
 
 assign_op :  ASSIGN
            | INC_ASSIGN
            | MINUS_ASSIGN;
 
-method_call :  method_name LPAREN! (expr (COMMA! expr)*)? RPAREN!
-             | TK_callout LPAREN! STRING (COMMA! callout_arg)* RPAREN!;
+method_call :  fn_call | callout;
+             
+fn_call : method_name LPAREN! (expr (COMMA! expr)*)? RPAREN!
+          { #fn_call = #([FN_CALL, "function call"], #fn_call); };
+          
+callout : TK_callout^ LPAREN! STRING (COMMA! callout_arg)* RPAREN!;
 
 method_name : ID;
 
 location :  ID
-          | ID LSQUARE! expr RSQUARE!;
+          | array_access;
+          
+array_access! : left:ID LSQUARE! right:expr RSQUARE!
+              { #array_access = #([ARRAY, "array access"], left, right); };
 
 
 /*

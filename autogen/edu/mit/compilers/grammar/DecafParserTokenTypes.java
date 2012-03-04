@@ -68,6 +68,8 @@ public interface DecafParserTokenTypes {
 	int METHOD = 64;
 	int FIELD = 65;
 	int ARRAY = 66;
-	int MINUS_ASSIGN = 67;
-	int BOOLEANLITERAL = 68;
+	int FN_CALL = 67;
+	int FOR_INIT = 68;
+	int MINUS_ASSIGN = 69;
+	int BOOLEANLITERAL = 70;
 }
