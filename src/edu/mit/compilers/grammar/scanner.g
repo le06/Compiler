@@ -114,13 +114,12 @@ SEMI : ';';
 
 ID : ALPHA (ALPHA_NUM)*;
 
-INTLITERAL : (DEC_LITERAL | HEX_LITERAL | BIN_LITERAL);
- protected
- DEC_LITERAL : (DIGIT)+;
- protected
- HEX_LITERAL : "0x" (HEX_DIGIT)+;
- protected
- BIN_LITERAL : "0b" (BIN_DIGIT)+;
+
+DEC_LITERAL : (DIGIT)+;
+
+HEX_LITERAL : "0x" (HEX_DIGIT)+;
+
+BIN_LITERAL : "0b" (BIN_DIGIT)+;
 
  protected
  ALPHA_NUM : (ALPHA | DIGIT);

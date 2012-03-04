@@ -1,3 +1,5 @@
+package edu.mit.compilers.checker.Ir;
+
 import java.util.Stack;
 import java.util.HashMap;
 import java.util.ArrayList;

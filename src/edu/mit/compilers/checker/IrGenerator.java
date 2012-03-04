@@ -213,58 +213,25 @@ public class IrGenerator {
             outIr = new IrIdentifier(ast.getText());
             break;
 
-        case DecafParserTokenTypes.INTLITERAL:
-            return null;
-        
-
         case DecafParserTokenTypes.DEC_LITERAL:
-            return null;
-        
+            outIr = new IrIntLiteral(ast.getText(), IrIntLiteral.Type.DECIMAL);
+            break;
 
         case DecafParserTokenTypes.HEX_LITERAL:
-            return null;
-        
+            outIr = new IrIntLiteral(ast.getText(), IrIntLiteral.Type.HEX);
+            break;
 
         case DecafParserTokenTypes.BIN_LITERAL:
-            return null;
-        
-
-        case DecafParserTokenTypes.ALPHA_NUM:
-            return null;
-        
-
-        case DecafParserTokenTypes.ALPHA:
-            return null;
-        
-
-        case DecafParserTokenTypes.DIGIT:
-            return null;
-        
-
-        case DecafParserTokenTypes.HEX_DIGIT:
-            return null;
-        
-
-        case DecafParserTokenTypes.BIN_DIGIT:
-            return null;
-        
+            outIr = new IrIntLiteral(ast.getText(), IrIntLiteral.Type.BINARY);
+            break;
 
         case DecafParserTokenTypes.CHAR:
-            return null;
-        
+            outIr = IrCharLiteral.fromString(ast.getText());
+            break;
 
         case DecafParserTokenTypes.STRING:
-            return null;
-        
-
-        case DecafParserTokenTypes.MINUS_ASSIGN:
-            return null;
-        
-
-        case DecafParserTokenTypes.BOOLEANLITERAL:
-            return null;
-        
-
+            outIr = new IrStringLiteral(ast.getText());
+            break;
         
         default:
             return null;

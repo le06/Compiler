@@ -38,7 +38,9 @@ class Main {
                case DecafScannerTokenTypes.STRING:
                 type = " STRINGLITERAL";
                 break;
-               case DecafScannerTokenTypes.INTLITERAL:
+               case DecafScannerTokenTypes.DEC_LITERAL:
+               case DecafScannerTokenTypes.HEX_LITERAL:
+               case DecafScannerTokenTypes.BIN_LITERAL:
                 type = " INTLITERAL";
                 break; 
                case DecafScannerTokenTypes.CHAR:

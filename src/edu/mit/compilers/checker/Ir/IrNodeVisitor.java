@@ -1,3 +1,5 @@
+package edu.mit.compilers.checker.Ir;
+
 public interface IrNodeVisitor {
 	public void visit(IrClassDecl node);
 

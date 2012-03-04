@@ -185,14 +185,6 @@ tryAgain:
 					theRetToken=_returnToken;
 					break;
 				}
-				case '0':  case '1':  case '2':  case '3':
-				case '4':  case '5':  case '6':  case '7':
-				case '8':  case '9':
-				{
-					mINTLITERAL(true);
-					theRetToken=_returnToken;
-					break;
-				}
 				case '\'':
 				{
 					mCHAR(true);
@@ -238,6 +230,14 @@ tryAgain:
 						mDEC_ASSIGN(true);
 						theRetToken=_returnToken;
 					}
+					else if ((LA(1)=='0') && (LA(2)=='x')) {
+						mHEX_LITERAL(true);
+						theRetToken=_returnToken;
+					}
+					else if ((LA(1)=='0') && (LA(2)=='b')) {
+						mBIN_LITERAL(true);
+						theRetToken=_returnToken;
+					}
 					else if ((LA(1)=='!') && (true)) {
 						mNOT(true);
 						theRetToken=_returnToken;
@@ -264,6 +264,10 @@ tryAgain:
 					}
 					else if ((LA(1)=='=') && (true)) {
 						mASSIGN(true);
+						theRetToken=_returnToken;
+					}
+					else if (((LA(1) >= '0' && LA(1) <= '9')) && (true)) {
+						mDEC_LITERAL(true);
 						theRetToken=_returnToken;
 					}
 				else {
@@ -1040,39 +1044,7 @@ tryAgain:
 		}
 	}
 	
-	public final void mINTLITERAL(boolean _createToken) throws RecognitionException, CharStreamException, TokenStreamException {
-		int _ttype; Token _token=null; int _begin=text.length();
-		traceIn("mINTLITERAL");
-		_ttype = INTLITERAL;
-		int _saveIndex;
-		try { // debugging
-			
-			{
-			if ((LA(1)=='0') && (LA(2)=='x')) {
-				mHEX_LITERAL(false);
-			}
-			else if ((LA(1)=='0') && (LA(2)=='b')) {
-				mBIN_LITERAL(false);
-			}
-			else if (((LA(1) >= '0' && LA(1) <= '9')) && (true)) {
-				mDEC_LITERAL(false);
-			}
-			else {
-				throw new NoViableAltForCharException((char)LA(1), getFilename(), getLine(), getColumn());
-			}
-			
-			}
-			if ( _createToken && _token==null && _ttype!=Token.SKIP ) {
-				_token = makeToken(_ttype);
-				_token.setText(new String(text.getBuffer(), _begin, text.length()-_begin));
-			}
-			_returnToken = _token;
-		} finally { // debugging
-			traceOut("mINTLITERAL");
-		}
-	}
-	
-	protected final void mDEC_LITERAL(boolean _createToken) throws RecognitionException, CharStreamException, TokenStreamException {
+	public final void mDEC_LITERAL(boolean _createToken) throws RecognitionException, CharStreamException, TokenStreamException {
 		int _ttype; Token _token=null; int _begin=text.length();
 		traceIn("mDEC_LITERAL");
 		_ttype = DEC_LITERAL;
@@ -1080,17 +1052,17 @@ tryAgain:
 		try { // debugging
 			
 			{
-			int _cnt42=0;
-			_loop42:
+			int _cnt40=0;
+			_loop40:
 			do {
 				if (((LA(1) >= '0' && LA(1) <= '9'))) {
 					mDIGIT(false);
 				}
 				else {
-					if ( _cnt42>=1 ) { break _loop42; } else {throw new NoViableAltForCharException((char)LA(1), getFilename(), getLine(), getColumn());}
+					if ( _cnt40>=1 ) { break _loop40; } else {throw new NoViableAltForCharException((char)LA(1), getFilename(), getLine(), getColumn());}
 				}
 				
-				_cnt42++;
+				_cnt40++;
 			} while (true);
 			}
 			if ( _createToken && _token==null && _ttype!=Token.SKIP ) {
@@ -1100,70 +1072,6 @@ tryAgain:
 			_returnToken = _token;
 		} finally { // debugging
 			traceOut("mDEC_LITERAL");
-		}
-	}
-	
-	protected final void mHEX_LITERAL(boolean _createToken) throws RecognitionException, CharStreamException, TokenStreamException {
-		int _ttype; Token _token=null; int _begin=text.length();
-		traceIn("mHEX_LITERAL");
-		_ttype = HEX_LITERAL;
-		int _saveIndex;
-		try { // debugging
-			
-			match("0x");
-			{
-			int _cnt45=0;
-			_loop45:
-			do {
-				if ((_tokenSet_3.member(LA(1)))) {
-					mHEX_DIGIT(false);
-				}
-				else {
-					if ( _cnt45>=1 ) { break _loop45; } else {throw new NoViableAltForCharException((char)LA(1), getFilename(), getLine(), getColumn());}
-				}
-				
-				_cnt45++;
-			} while (true);
-			}
-			if ( _createToken && _token==null && _ttype!=Token.SKIP ) {
-				_token = makeToken(_ttype);
-				_token.setText(new String(text.getBuffer(), _begin, text.length()-_begin));
-			}
-			_returnToken = _token;
-		} finally { // debugging
-			traceOut("mHEX_LITERAL");
-		}
-	}
-	
-	protected final void mBIN_LITERAL(boolean _createToken) throws RecognitionException, CharStreamException, TokenStreamException {
-		int _ttype; Token _token=null; int _begin=text.length();
-		traceIn("mBIN_LITERAL");
-		_ttype = BIN_LITERAL;
-		int _saveIndex;
-		try { // debugging
-			
-			match("0b");
-			{
-			int _cnt48=0;
-			_loop48:
-			do {
-				if ((LA(1)=='0'||LA(1)=='1')) {
-					mBIN_DIGIT(false);
-				}
-				else {
-					if ( _cnt48>=1 ) { break _loop48; } else {throw new NoViableAltForCharException((char)LA(1), getFilename(), getLine(), getColumn());}
-				}
-				
-				_cnt48++;
-			} while (true);
-			}
-			if ( _createToken && _token==null && _ttype!=Token.SKIP ) {
-				_token = makeToken(_ttype);
-				_token.setText(new String(text.getBuffer(), _begin, text.length()-_begin));
-			}
-			_returnToken = _token;
-		} finally { // debugging
-			traceOut("mBIN_LITERAL");
 		}
 	}
 	
@@ -1182,6 +1090,38 @@ tryAgain:
 			_returnToken = _token;
 		} finally { // debugging
 			traceOut("mDIGIT");
+		}
+	}
+	
+	public final void mHEX_LITERAL(boolean _createToken) throws RecognitionException, CharStreamException, TokenStreamException {
+		int _ttype; Token _token=null; int _begin=text.length();
+		traceIn("mHEX_LITERAL");
+		_ttype = HEX_LITERAL;
+		int _saveIndex;
+		try { // debugging
+			
+			match("0x");
+			{
+			int _cnt43=0;
+			_loop43:
+			do {
+				if ((_tokenSet_3.member(LA(1)))) {
+					mHEX_DIGIT(false);
+				}
+				else {
+					if ( _cnt43>=1 ) { break _loop43; } else {throw new NoViableAltForCharException((char)LA(1), getFilename(), getLine(), getColumn());}
+				}
+				
+				_cnt43++;
+			} while (true);
+			}
+			if ( _createToken && _token==null && _ttype!=Token.SKIP ) {
+				_token = makeToken(_ttype);
+				_token.setText(new String(text.getBuffer(), _begin, text.length()-_begin));
+			}
+			_returnToken = _token;
+		} finally { // debugging
+			traceOut("mHEX_LITERAL");
 		}
 	}
 	
@@ -1226,6 +1166,38 @@ tryAgain:
 			_returnToken = _token;
 		} finally { // debugging
 			traceOut("mHEX_DIGIT");
+		}
+	}
+	
+	public final void mBIN_LITERAL(boolean _createToken) throws RecognitionException, CharStreamException, TokenStreamException {
+		int _ttype; Token _token=null; int _begin=text.length();
+		traceIn("mBIN_LITERAL");
+		_ttype = BIN_LITERAL;
+		int _saveIndex;
+		try { // debugging
+			
+			match("0b");
+			{
+			int _cnt46=0;
+			_loop46:
+			do {
+				if ((LA(1)=='0'||LA(1)=='1')) {
+					mBIN_DIGIT(false);
+				}
+				else {
+					if ( _cnt46>=1 ) { break _loop46; } else {throw new NoViableAltForCharException((char)LA(1), getFilename(), getLine(), getColumn());}
+				}
+				
+				_cnt46++;
+			} while (true);
+			}
+			if ( _createToken && _token==null && _ttype!=Token.SKIP ) {
+				_token = makeToken(_ttype);
+				_token.setText(new String(text.getBuffer(), _begin, text.length()-_begin));
+			}
+			_returnToken = _token;
+		} finally { // debugging
+			traceOut("mBIN_LITERAL");
 		}
 	}
 	
@@ -1338,13 +1310,13 @@ tryAgain:
 			
 			match('"');
 			{
-			_loop60:
+			_loop58:
 			do {
 				if ((_tokenSet_6.member(LA(1)))) {
 					mCHARLIT(false);
 				}
 				else {
-					break _loop60;
+					break _loop58;
 				}
 				
 			} while (true);
