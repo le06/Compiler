@@ -123,12 +123,14 @@ assignment! : left:location op:assign_op right:expr
 if_statement! : TK_if LPAREN! cond:expr RPAREN! if_block:block (TK_else! else_block:block)? 
             { #if_statement = #(TK_if, cond, if_block, else_block); } ;
             
-for_statement : TK_for^ for_init block;
+/*for_statement : TK_for^ for_init block;
 
 for_init : LPAREN! for_assign SEMI! expr RPAREN!
             { #for_init = #([FOR_INIT, "init"], #for_init); };
             
-for_assign : ID ASSIGN^ expr;
+for_assign : ID ASSIGN^ expr;*/
+
+for_statement : TK_for^ LPAREN! ID ASSIGN! expr SEMI! expr RPAREN! block;
 
 assign_op :  ASSIGN
            | INC_ASSIGN

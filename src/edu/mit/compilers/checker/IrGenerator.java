@@ -24,6 +24,7 @@ public class IrGenerator {
          * associated Ir object.
          */
         Ir outIr; // The returned variable
+        AST next; // Helper variable for traversing children
         
         switch (ast.getType()) {
         
@@ -48,22 +49,51 @@ public class IrGenerator {
             return null;
             
         case DecafParserTokenTypes.TK_class:
+            IrClassDecl cdecl = new IrClassDecl();
             
-            // outIr = new IrClassDecl TODO
-            return null;
+            next = ast.getFirstChild();
+            for (int i = 0; i < ast.getNumberOfChildren(); i++) {
+                cdecl.addMember((IrMemberDecl)fromAST(next));
+                next = next.getNextSibling();
+            }
+            
+             outIr = (Ir)cdecl;
+            break;
         
         case DecafParserTokenTypes.TK_continue:
             outIr = new IrContinueStmt();
             break;
             
         case DecafParserTokenTypes.TK_for:
+            next = ast.getFirstChild();
             
-            // outIr = new IrForStmt TODO
-            return null;
+            IrIdentifier counter = (IrIdentifier)fromAST(next);
+            next = next.getNextSibling();
+            
+            IrExpression start_value = (IrExpression)fromAST(next);
+            next = next.getNextSibling();
+            
+            IrExpression stop_value = (IrExpression)fromAST(next);
+            next = next.getNextSibling();
+            
+            IrBlock block = (IrBlock)fromAST(next);
+            
+            outIr = new IrForStmt(counter, start_value, stop_value, block);
+            break;
             
         case DecafParserTokenTypes.TK_if:
-            // TODO
-            return null;
+            next = ast.getFirstChild();
+            
+            IrExpression test = (IrExpression)fromAST(next);
+            
+            next = next.getNextSibling();
+            IrBlock if_block = (IrBlock)fromAST(next);
+            
+            next = next.getNextSibling();
+            IrBlock else_block = (IrBlock)fromAST(next);
+            
+            outIr = new IrIfStmt(test, if_block, else_block);
+            break;
             
         case DecafParserTokenTypes.TK_int:
             outIr = new IrType(IrType.Type.INT);
@@ -78,8 +108,15 @@ public class IrGenerator {
             break;
 
         case DecafParserTokenTypes.TK_while:
-            // IrWhileStmt TODO
-            return null;
+            next = ast.getFirstChild();
+            
+            IrExpression cond = (IrExpression)fromAST(next);
+            
+            next = next.getNextSibling();
+            IrBlock true_block = (IrBlock)fromAST(next);
+            
+            outIr = new IrWhileSmt(cond, true_block);
+            break;
         
 
         case DecafParserTokenTypes.NOT:
@@ -155,24 +192,26 @@ public class IrGenerator {
         
 
         case DecafParserTokenTypes.ASSIGN:
-            // IrAssignStmt
-            return null;
+            next = ast.getFirstChild();
+            outIr = new IrAssignStmt((IrLocation)fromAST(next),
+                                     (IrExpression)fromAST(next.getNextSibling()));
+            break;
         
-
         case DecafParserTokenTypes.INC_ASSIGN:
-            // IrPlusAssignStmt
-            return null;
+            next = ast.getFirstChild();
+            outIr = new IrPlusAssignStmt((IrLocation)fromAST(next),
+                                     (IrExpression)fromAST(next.getNextSibling()));
+            break;
         
-
         case DecafParserTokenTypes.DEC_ASSIGN:
-            // IrMinusAssignStmt
-            return null;
+            next = ast.getFirstChild();
+            outIr = new IrMinusAssignStmt((IrLocation)fromAST(next),
+                                     (IrExpression)fromAST(next.getNextSibling()));
+            break;
         
-        
-
         case DecafParserTokenTypes.ID:
-            return null;
-        
+            outIr = new IrIdentifier(ast.getText());
+            break;
 
         case DecafParserTokenTypes.INTLITERAL:
             return null;
