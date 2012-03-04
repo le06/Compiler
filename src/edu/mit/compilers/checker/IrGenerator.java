@@ -15,7 +15,7 @@ public class IrGenerator {
      *         the object by analyzing the AST to fill the parameters
      *         of the returned object.
      */
-    public Ir fromAST(AST ast) {
+    public static Ir fromAST(AST ast) {
         /*
          * This switch statement encompasses the logic of this function.
          * fromAST works recursively, looking at the type of the current node
@@ -242,7 +242,7 @@ public class IrGenerator {
         return outIr;
     }
     
-    private Ir parseBinOp(AST node, IrBinOperator op) {
+    private static Ir parseBinOp(AST node, IrBinOperator op) {
         AST l = node.getFirstChild();
         AST r = l.getNextSibling();
         return new IrBinopExpr(op,
