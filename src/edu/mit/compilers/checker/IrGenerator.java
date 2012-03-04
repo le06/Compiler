@@ -115,7 +115,7 @@ public class IrGenerator {
             next = next.getNextSibling();
             IrBlock true_block = (IrBlock)fromAST(next);
             
-            outIr = new IrWhileSmt(cond, true_block);
+            outIr = new IrWhileStmt(cond, true_block);
             break;
         
 

@@ -1,7 +1,7 @@
 package edu.mit.compilers.checker.Ir;
 
-public class IrWhileSmt extends IrStatement {
-    public IrWhileSmt(IrExpression test, IrBlock true_block) {
+public class IrWhileStmt extends IrStatement {
+    public IrWhileStmt(IrExpression test, IrBlock true_block) {
         condition = test;
         block = true_block;
     }

@@ -1,3 +1,4 @@
 package edu.mit.compilers.checker.Ir;
 
-public abstract class IrLiteral extends Ir {}
+public abstract class IrLiteral extends Ir {
+}
