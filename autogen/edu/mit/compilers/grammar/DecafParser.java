@@ -112,9 +112,6 @@ public DecafParser(ParserSharedInputState state) {
 				tmp1_AST = astFactory.create(LT(1));
 				astFactory.makeASTRoot(currentAST, tmp1_AST);
 				match(TK_class);
-				AST tmp2_AST = null;
-				tmp2_AST = astFactory.create(LT(1));
-				astFactory.addASTChild(currentAST, tmp2_AST);
 				match(TK_Program);
 				match(LCURLY);
 				{

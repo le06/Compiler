@@ -1,5 +1,9 @@
 package edu.mit.compilers.checker.Ir;
 
 public class IrBoolLiteral extends IrLiteral {
-    boolean literal;
+    public IrBoolLiteral(boolean val) {
+        literal = val;
+    }
+    
+    private boolean literal;
 }

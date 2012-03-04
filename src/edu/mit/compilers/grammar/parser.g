@@ -79,7 +79,7 @@ tokens
   }
 }
 
-program: TK_class^ TK_Program LCURLY! (field_dec)* (method_dec)* RCURLY! EOF!;
+program: TK_class^ TK_Program! LCURLY! (field_dec)* (method_dec)* RCURLY! EOF!;
 
 field_dec : type (ID | array_dec) 
                           (COMMA! (ID | array_dec))* SEMI!

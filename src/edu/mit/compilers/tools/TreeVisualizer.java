@@ -23,7 +23,8 @@ public class TreeVisualizer {
             return;
         }
         
-        out.append((parent + name) + " [label=\"" + ast.getText() + "\"]\n");
+        out.append((parent + name) + " [label=\"" + ast.getText() 
+                                        + " (" + ast.getType() + ") \"]\n");
         
         out.append(parent + " -> " + (parent + name) // Link
                 
