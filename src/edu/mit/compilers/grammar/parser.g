@@ -26,6 +26,7 @@ tokens
   ARRAY;
   FN_CALL;
   FOR_INIT;
+  PARAM;
 }
 
 // Java glue code that makes error reporting easier.
@@ -87,8 +88,11 @@ field_dec : type (ID | array_dec)
 array_dec : ID LSQUARE! INTLITERAL RSQUARE!
            {#array_dec = #([ARRAY, "array"], #array_dec);};
 
-method_dec : (type | TK_void^) ID LPAREN! ((type ID) (COMMA! type ID)*)? RPAREN! block
+method_dec : (type | TK_void) ID LPAREN! (method_param (COMMA! method_param)*)? RPAREN! block
            {#method_dec = #([METHOD, "method"], #method_dec); };
+           
+method_param! : left:type right:ID
+           { #method_param = #([PARAM, "param"], left, right); };
 
 
 block : LCURLY! (var_decl | statement)* RCURLY!
@@ -121,8 +125,10 @@ if_statement! : TK_if LPAREN! cond:expr RPAREN! if_block:block (TK_else! else_bl
             
 for_statement : TK_for^ for_init block;
 
-for_init : LPAREN! ID ASSIGN expr SEMI! expr RPAREN!
+for_init : LPAREN! for_assign SEMI! expr RPAREN!
             { #for_init = #([FOR_INIT, "init"], #for_init); };
+            
+for_assign : ID ASSIGN^ expr;
 
 assign_op :  ASSIGN
            | INC_ASSIGN
