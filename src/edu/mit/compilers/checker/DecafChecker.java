@@ -30,6 +30,7 @@ public class DecafChecker {
         
         IrNodeChecker checker = new IrNodeChecker();
         ir.accept(checker);
+        wasError |= checker.getError();
     }
     
     public boolean getError() {

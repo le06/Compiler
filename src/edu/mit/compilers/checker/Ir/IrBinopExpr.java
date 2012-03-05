@@ -1,5 +1,7 @@
 package edu.mit.compilers.checker.Ir;
 
+import edu.mit.compilers.checker.Ir.IrNodeChecker.Type;
+
 public class IrBinopExpr extends Ir implements IrExpression {
     public IrBinopExpr(IrBinOperator op, IrExpression left, IrExpression right) {
         operator = op;
@@ -33,6 +35,30 @@ public class IrBinopExpr extends Ir implements IrExpression {
 		IrType rhs_type = rhs.getExprType(c);
 
 		if (lhs_type.myType == rhs_type.myType) {
+			
+			switch (operator) {
+			// arith_op
+			case PLUS:
+			case MINUS:
+			case MUL:
+			case DIV:
+			case MOD:
+				return new IrType(IrType.Type.INT);
+			// rel_op
+			case LT:
+			case GT:
+			case LEQ:
+			case GEQ:
+				return new IrType(IrType.Type.BOOLEAN);
+			case EQ:
+			case NEQ:
+				return new IrType(IrType.Type.BOOLEAN);
+			case AND:
+			case OR:
+				return new IrType(IrType.Type.BOOLEAN);
+			}
+			
+			
 			return new IrType(lhs_type.myType);
 		} else {
 			return new IrType(IrType.Type.MIXED);

@@ -74,7 +74,7 @@ public class IrNodeChecker implements IrNodeVisitor {
 
 	private boolean error_flag = false;
 	
-	public boolean wasError() { return error_flag; }
+	public boolean getError() { return error_flag; }
 	
 	private Stack<Env> env_stack;
 	private HashMap<String, IrMethodDecl> method_table;
@@ -399,7 +399,6 @@ public class IrNodeChecker implements IrNodeVisitor {
 			// TODO: complain hard!
 			error_flag = true;
 		}
-		 = true
 		if (!legal_stmt) {
 			error_flag = true;
 			int line = node.getLineNumber();
@@ -555,8 +554,8 @@ public class IrNodeChecker implements IrNodeVisitor {
 		Type type = determineType(type_node);
 		if (type != Type.BOOLEAN) {
 			error_flag = true;
-			int line = type_node.getLineNumber();
-			int column = type_node.getColumnNumber();
+			int line = node.getLineNumber();
+			int column = node.getColumnNumber();
 			String message = "If loop condition must have a boolean type";
 			System.out.println(errorPosMessage(line, column) + message);
 		}
@@ -666,9 +665,9 @@ public class IrNodeChecker implements IrNodeVisitor {
 		if (loc_type == Type.MIXED || loc_type == Type.VOID ||
 			expr_type == Type.MIXED || expr_type == Type.VOID) {
 			error_flag = true;
-			int line = loc.getLineNumber();
-			int column = loc.getColumnNumber();
-			String message = "Assignment operands have non-int or non-boolean types";
+			int line = loc.getId().getLineNumber();
+			int column = loc.getId().getColumnNumber();
+			String message = "Assignment operands have invalid types";
 			System.out.println(errorPosMessage(line, column) + message);
 		} else if (loc_type != expr_type) {
 			error_flag = true;
@@ -696,8 +695,8 @@ public class IrNodeChecker implements IrNodeVisitor {
 		
 		if (loc_type != Type.INT) {
 			error_flag = true;
-			int line = loc.getLineNumber();
-			int column = loc.getColumnNumber();
+			int line = loc.getId().getLineNumber();
+			int column = loc.getId().getColumnNumber();
 			String message = "LHS of plus assignment must be int type";
 			System.out.println(errorPosMessage(line, column) + message);
 		}
@@ -727,8 +726,8 @@ public class IrNodeChecker implements IrNodeVisitor {
 		
 		if (loc_type != Type.INT) {
 			error_flag = true;
-			int line = loc.getLineNumber();
-			int column = loc.getColumnNumber();
+			int line = loc.getId().getLineNumber();
+			int column = loc.getId().getColumnNumber();
 			String message = "LHS of minus assignment must be int type";
 			System.out.println(errorPosMessage(line, column) + message);
 		}
@@ -826,10 +825,42 @@ public class IrNodeChecker implements IrNodeVisitor {
 			case LEQ:
 			case GEQ:
 				if (lhs_type != Type.INT || rhs_type != Type.INT) {
-					
+					error_flag = true;
+					int line = lhs.getLineNumber();
+					int column = lhs.getColumnNumber();
+					String message = "Expression operands must have int type";
+					System.out.println(errorPosMessage(line, column) + message);
 				}
 				break;
-			
+			// eq_op
+			case EQ:
+			case NEQ:
+				if (lhs_type == Type.MIXED || lhs_type == Type.VOID ||
+					rhs_type == Type.MIXED || rhs_type == Type.VOID) {
+					error_flag = true;
+					int line = lhs.getLineNumber();
+					int column = lhs.getColumnNumber();
+					String message = "Expression operands have invalid types";
+					System.out.println(errorPosMessage(line, column) + message);
+				} else {
+					error_flag = true;
+					int line = lhs.getLineNumber();
+					int column = lhs.getColumnNumber();
+					String message = "Expression operands have mismatching types";
+					System.out.println(errorPosMessage(line, column) + message);
+				}
+				break;
+			// cond_op
+			case AND:
+			case OR:
+				if (lhs_type != Type.BOOLEAN || rhs_type != Type.BOOLEAN) {
+					error_flag = true;
+					int line = lhs.getLineNumber();
+					int column = lhs.getColumnNumber();
+					String message = "Expression operands must have boolean type";
+					System.out.println(errorPosMessage(line, column) + message);
+				}
+				break;
 			}
 			
 		}
