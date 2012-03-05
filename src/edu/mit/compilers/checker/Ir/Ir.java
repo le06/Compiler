@@ -16,5 +16,7 @@ public abstract class Ir {// implements IrNode {
         return col_num;
     }
     
+    //public abstract String toString(int spaces_before);
+    
     // abstract walk()
 }

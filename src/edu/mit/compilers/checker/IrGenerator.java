@@ -100,7 +100,7 @@ public class IrGenerator {
             break;
         
         case DecafParserTokenTypes.TK_return:
-            outIr = new IrReturnStmt();
+            outIr = new IrReturnStmt((IrExpression)fromAST(ast.getFirstChild()));
             break;
         
         case DecafParserTokenTypes.TK_void:
@@ -231,6 +231,26 @@ public class IrGenerator {
 
         case DecafParserTokenTypes.STRING:
             outIr = new IrStringLiteral(ast.getText());
+            break;
+            
+        case DecafParserTokenTypes.ARRAY_ACCESS:
+            next = ast.getFirstChild();
+            outIr = new IrArrayLocation((IrIdentifier)fromAST(next),
+                                        (IrExpression)fromAST(next.getFirstChild()));
+            break;
+            
+        case DecafParserTokenTypes.FN_CALL:
+            next = ast.getFirstChild();
+            IrIdentifier name = (IrIdentifier)fromAST(next);
+            IrMethodCallStmt mstmt = new IrMethodCallStmt(name);
+            
+            next = next.getNextSibling();
+            for (int i = 0; i < ast.getNumberOfChildren() - 1; i++) {
+                mstmt.addArg((IrExpression)fromAST(next));
+                next = next.getNextSibling();
+            }
+            
+            outIr = mstmt;
             break;
         
         default:
