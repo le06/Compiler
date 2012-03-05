@@ -9,9 +9,9 @@ public interface IrNodeVisitor {
 
 	public void visit(IrMethodDecl node);
 
-	public void visit(IrVarDecl node);
-
 	public void visit(IrBlock node);
+	
+	public void visit(IrVarDecl node);
 
 	public void visit(IrAssignStmt node);
 

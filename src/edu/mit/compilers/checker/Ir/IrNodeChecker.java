@@ -77,14 +77,14 @@ public class IrNodeChecker implements IrNodeVisitor {
 		}
 		
 		for (IrMethodDecl m : method_table.values()) {
-			m.accept(this);
+			m.getBlock().accept(this);
 		}
 	}
 
 	// note that the parser rejects any fields that are declared after
 	// method declarations; hence we do not worry about method ids.
 	@Override
-	public void visit(IrGlobalDecl node) {
+	public void visit(IrBaseDecl node) {
 		IrType type_node = node.getType();
 		IrIdentifier id_node = node.getId();
 		
