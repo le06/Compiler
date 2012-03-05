@@ -11,20 +11,36 @@ public class IrBinopExpr extends Ir implements IrExpression {
     private IrExpression lhs;
     private IrExpression rhs;
     
+    public IrBinOperator getOperator() {
+		return operator;
+	}
 
-    public String toString() {
+	public IrExpression getLeft() {
+		return lhs;
+	}
+
+	public IrExpression getRight() {
+		return rhs;
+	}
+
+	public String toString() {
         return lhs.toString() + " " + operator.toString() + " " + rhs.toString();
     }
 
 	@Override
 	public IrType getExprType(IrNodeChecker c) {
-		// TODO Auto-generated method stub
-		return null;
+		IrType lhs_type = lhs.getExprType(c);
+		IrType rhs_type = rhs.getExprType(c);
+
+		if (lhs_type.myType == rhs_type.myType) {
+			return new IrType(lhs_type.myType);
+		} else {
+			return new IrType(IrType.Type.MIXED);
+		}
+		
 	}
 	@Override
 	public void accept(IrNodeVisitor v) {
-		lhs.accept(v);
-		rhs.accept(v);
 		v.visit(this);
 	}
 }

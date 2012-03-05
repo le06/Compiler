@@ -9,14 +9,29 @@ public class IrUnopExpr extends Ir implements IrExpression {
     private IrUnaryOperator operator;
     private IrExpression expr;
 
+	public IrUnaryOperator getOperator() {
+		return operator;
+	}
+	public IrExpression getExpr() {
+		return expr;
+	}
+	
 	@Override
 	public IrType getExprType(IrNodeChecker c) {
-		// TODO Auto-generated method stub
-		return null;
+		IrType exprType = expr.getExprType(c);
+		
+		if (operator == IrUnaryOperator.NOT &&
+			exprType.myType == IrType.Type.BOOLEAN) {
+			return new IrType(IrType.Type.BOOLEAN);
+		} else if (operator == IrUnaryOperator.MINUS &&
+				exprType.myType == IrType.Type.INT) {
+			return new IrType(IrType.Type.INT);
+		} else {
+			return new IrType(IrType.Type.MIXED);
+		}
 	}
 	@Override
 	public void accept(IrNodeVisitor v) {
-		// TODO Auto-generated method stub
-		
+		v.visit(this);
 	}
 }

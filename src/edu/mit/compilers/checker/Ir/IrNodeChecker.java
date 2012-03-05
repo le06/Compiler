@@ -83,7 +83,7 @@ public class IrNodeChecker implements IrNodeVisitor {
 
 	private Type current_type = Type.VOID;
 	private boolean found_main_method = false;
-	private boolean currently_evaluating_expr = false;
+	private int currently_evaluating_expr = 0; // true if non-zero.
 	
 	private Env getCurrentEnv() { return env_stack.peek(); }
 	
@@ -399,7 +399,7 @@ public class IrNodeChecker implements IrNodeVisitor {
 			// TODO: complain hard!
 			error_flag = true;
 		}
-		
+		 = true
 		if (!legal_stmt) {
 			error_flag = true;
 			int line = node.getLineNumber();
@@ -630,7 +630,7 @@ public class IrNodeChecker implements IrNodeVisitor {
 		
 		// if the method call is part of an expression...
 		Type return_type = determineType(called_method.getReturnType());
-		if (currently_evaluating_expr && return_type == Type.VOID) {
+		if (currently_evaluating_expr > 0 && return_type == Type.VOID) {
 			error_flag = true;
 			int line = node.getMethodName().getLineNumber();
 			int column = node.getMethodName().getColumnNumber();
@@ -642,17 +642,17 @@ public class IrNodeChecker implements IrNodeVisitor {
 
 	@Override
 	public void visit(IrCalloutStmt node) {
-		currently_evaluating_expr = true;
+		currently_evaluating_expr++;
 		// check that the args are well-formed.
 		for (IrCalloutArg arg : node.getArgs()) {
 			arg.accept(this);
 		}
-		currently_evaluating_expr = false;
+		currently_evaluating_expr--;
 	}
 
 	@Override
 	public void visit(IrAssignStmt node) {
-		currently_evaluating_expr = true;
+		currently_evaluating_expr++;
 		
 		IrLocation loc = node.getLeft();
 		IrExpression expr = node.getRight();
@@ -678,12 +678,12 @@ public class IrNodeChecker implements IrNodeVisitor {
 			System.out.println(errorPosMessage(line, column) + message);
 		}
 		
-		currently_evaluating_expr = false;
+		currently_evaluating_expr--;
 	}
 
 	@Override
 	public void visit(IrPlusAssignStmt node) {
-		currently_evaluating_expr = true;
+		currently_evaluating_expr++;
 
 		IrLocation loc = node.getLeft();
 		IrExpression expr = node.getRight();
@@ -694,27 +694,27 @@ public class IrNodeChecker implements IrNodeVisitor {
 		Type loc_type = determineType(loc.getExprType(this));
 		Type expr_type = determineType(expr.getExprType(this));
 		
-		if (loc_type == Type.MIXED || loc_type == Type.VOID ||
-			expr_type == Type.MIXED || expr_type == Type.VOID) {
+		if (loc_type != Type.INT) {
 			error_flag = true;
 			int line = loc.getLineNumber();
 			int column = loc.getColumnNumber();
-			String message = "Assignment operands have non-int or non-boolean types";
+			String message = "LHS of plus assignment must be int type";
 			System.out.println(errorPosMessage(line, column) + message);
-		} else if (loc_type != expr_type) {
+		}
+		if (expr_type != Type.INT) {
 			error_flag = true;
-			int line = loc.getLineNumber();
-			int column = loc.getColumnNumber();
-			String message = "Assignment operands have mismatching types";
+			int line = expr.getLineNumber();
+			int column = expr.getColumnNumber();
+			String message = "RHS of plus assignment must be int type";
 			System.out.println(errorPosMessage(line, column) + message);
 		}
 		
-		currently_evaluating_expr = false;
+		currently_evaluating_expr--;
 	}
 
 	@Override
 	public void visit(IrMinusAssignStmt node) {
-		currently_evaluating_expr = true;
+		currently_evaluating_expr++;
 
 		IrLocation loc = node.getLeft();
 		IrExpression expr = node.getRight();
@@ -725,22 +725,22 @@ public class IrNodeChecker implements IrNodeVisitor {
 		Type loc_type = determineType(loc.getExprType(this));
 		Type expr_type = determineType(expr.getExprType(this));
 		
-		if (loc_type == Type.MIXED || loc_type == Type.VOID ||
-			expr_type == Type.MIXED || expr_type == Type.VOID) {
+		if (loc_type != Type.INT) {
 			error_flag = true;
 			int line = loc.getLineNumber();
 			int column = loc.getColumnNumber();
-			String message = "Assignment operands have non-int or non-boolean types";
+			String message = "LHS of minus assignment must be int type";
 			System.out.println(errorPosMessage(line, column) + message);
-		} else if (loc_type != expr_type) {
+		}
+		if (expr_type != Type.INT) {
 			error_flag = true;
-			int line = loc.getLineNumber();
-			int column = loc.getColumnNumber();
-			String message = "Assignment operands have mismatching types";
+			int line = expr.getLineNumber();
+			int column = expr.getColumnNumber();
+			String message = "RHS of minus assignment must be int type";
 			System.out.println(errorPosMessage(line, column) + message);
 		}
 		
-		currently_evaluating_expr = false;
+		currently_evaluating_expr--;
 	}
 
 	@Override
@@ -783,19 +783,65 @@ public class IrNodeChecker implements IrNodeVisitor {
 			System.out.println(errorPosMessage(line, column) + message);
 		}
 	}
-
+	
 	@Override
 	public void visit(IrBinopExpr node) {
-		currently_evaluating_expr = true;
-		// TODO fill in...
-		currently_evaluating_expr = false;
+		currently_evaluating_expr++;
+
+		IrExpression lhs = node.getLeft();
+		IrExpression rhs = node.getRight();
+		// check that lhs and rhs are well-formed.
+		lhs.accept(this);
+		rhs.accept(this);
+		
+		IrType type_node = node.getExprType(this);
+		Type type = determineType(type_node);
+
+		if (type == Type.MIXED) {
+			error_flag = true;
+			int line = lhs.getLineNumber();
+			int column = lhs.getColumnNumber();
+			String message = "Mismatching types of operands in expression";
+			System.out.println(errorPosMessage(line, column) + message);
+			
+			return;
+		} else {
+			IrBinOperator op = node.getOperator();
+			
+			IrType lhs_type_node = lhs.getExprType(this);
+			IrType rhs_type_node = rhs.getExprType(this);
+			Type lhs_type = determineType(lhs_type_node);
+			Type rhs_type = determineType(rhs_type_node);
+			
+			switch (op) {
+			// arith_op
+			case PLUS:
+			case MINUS:
+			case MUL:
+			case DIV:
+			case MOD:
+			// rel_op
+			case LT:
+			case GT:
+			case LEQ:
+			case GEQ:
+				if (lhs_type != Type.INT || rhs_type != Type.INT) {
+					
+				}
+				break;
+			
+			}
+			
+		}
+		
+		currently_evaluating_expr--;
 	}
 
 	@Override
 	public void visit(IrUnopExpr node) {
-		currently_evaluating_expr = true;
+		currently_evaluating_expr++;
 		// TODO fill in...
-		currently_evaluating_expr = false;
+		currently_evaluating_expr--;
 	}
 
 	@Override
