@@ -1,0 +1,22 @@
+Division of Work
+----------------
+We split the work around the intermediate representation:
+ - Patrick (patrickv) worked mainly around producing the IR
+ - Jae (jaechung) worked on walking the IR and doing the semantic checks
+
+The other group members did not contribute.
+
+Clarifications
+--------------
+
+
+Overview
+--------
+
+
+Interesting Implementation Issues
+---------------------------------
+
+
+Known Issues
+------------
