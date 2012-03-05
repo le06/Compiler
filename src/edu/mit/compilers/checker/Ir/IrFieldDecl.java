@@ -27,4 +27,20 @@ public class IrFieldDecl extends IrMemberDecl {
 		v.visit(this);
 	}
 	
+	public String toString(int s) {
+	    StringBuilder out = new StringBuilder();
+	    for (int i = 0; i < s; i++) {
+	        out.append(" ");
+	    }
+	    out.append(type.toString().concat("\n"));
+	    
+	    for (IrGlobalDecl g : globals) {
+	        for (int i = 0; i < s; i++) {
+	            out.append(" ");
+	        }
+	        out.append(g.toString().concat("\n"));
+	    }
+	     
+	    return out.toString();
+	}
 }

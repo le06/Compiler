@@ -14,4 +14,8 @@ public class IrBaseDecl extends IrGlobalDecl {
 	public void accept(IrNodeVisitor v) {
 		v.visit(this);
 	}
+	
+	public String toString() {
+	    return id.toString();
+	}
 }

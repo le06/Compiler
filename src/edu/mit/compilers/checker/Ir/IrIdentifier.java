@@ -21,4 +21,7 @@ public class IrIdentifier extends Ir implements IrExpression {
 		// do nothing! scanner enforces correctness.
 	}
 
+	public String toString() {
+	    return id;
+	}
 }

@@ -21,4 +21,8 @@ public class IrArrayDecl extends IrGlobalDecl {
 	public void accept(IrNodeVisitor v) {
 		v.visit(this);
 	}
+	
+	public String toString() {
+	    return id.toString() + "[" + array_size.toString() + "]";
+	}
 }

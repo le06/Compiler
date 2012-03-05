@@ -32,4 +32,8 @@ public class IrIntLiteral extends Ir implements IrExpression {
 	public IrType getExprType(IrNodeChecker c) {
 		return new IrType(IrType.Type.INT);
 	}
+	
+	public String toString() {
+	    return representation;
+	}
 }

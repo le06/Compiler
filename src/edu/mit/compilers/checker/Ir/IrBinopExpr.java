@@ -11,6 +11,11 @@ public class IrBinopExpr extends Ir implements IrExpression {
     private IrExpression lhs;
     private IrExpression rhs;
     
+
+    public String toString() {
+        return lhs.toString() + " " + operator.toString() + " " + rhs.toString();
+    }
+
 	@Override
 	public IrType getExprType(IrNodeChecker c) {
 		// TODO Auto-generated method stub

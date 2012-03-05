@@ -33,4 +33,8 @@ public class IrAssignStmt extends IrStatement {
         out.append(rhs.toString(spaces_before+1));
         return out.toString();
     }*/
+    
+    public String toString() {
+        return lhs.toString() + " = " + rhs.toString();
+    }
 }

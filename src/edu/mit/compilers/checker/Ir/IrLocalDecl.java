@@ -14,4 +14,8 @@ public class IrLocalDecl extends Ir {
 	public void accept(IrNodeVisitor v) {
 		v.visit(this);
 	}
+	
+	public String toString() {
+	    return id.toString();
+	}
 }
