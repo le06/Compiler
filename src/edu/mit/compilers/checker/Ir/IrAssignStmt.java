@@ -21,7 +21,7 @@ public class IrAssignStmt extends IrStatement {
 		v.visit(this);		
 	}
     
-/*    @Override
+    @Override
     public String toString(int spaces_before) {
         StringBuilder out = new StringBuilder();
         for (int i = 0; i < spaces_before; i++) {
@@ -32,7 +32,7 @@ public class IrAssignStmt extends IrStatement {
         out.append(lhs.toString(spaces_before+1));
         out.append(rhs.toString(spaces_before+1));
         return out.toString();
-    }*/
+    }
     
     public String toString() {
         return lhs.toString() + " = " + rhs.toString();

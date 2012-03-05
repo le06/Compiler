@@ -32,4 +32,19 @@ public class IrMethodCallStmt extends IrInvokeStmt {
 	public IrType getExprType(IrNodeChecker c) {
 		return c.lookupMethodType(method_name);
 	}
+	
+	@Override
+    public String toString(int s) {
+        StringBuilder out = new StringBuilder();
+        for (int i = 0; i < s; i++) {
+            out.append(" ");
+        }
+        out.append("Method Call:\n");
+        out.append(method_name.toString(s+1).concat("\n"));
+        for (IrExpression d : args) {
+            out.append(d.toString(s+1).concat("\n"));
+        }
+        
+        return out.toString();
+    }
 }

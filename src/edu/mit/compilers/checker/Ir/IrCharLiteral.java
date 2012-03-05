@@ -41,4 +41,17 @@ public class IrCharLiteral extends Ir implements IrExpression {
 		// TODO Auto-generated method stub
 		// no need to visit; bad chars should be caught by the scanner.
 	}
+	
+	public String toString() {
+	    return Character.toString(literal);
+	}
+	
+	public String toString(int s) {
+        StringBuilder out = new StringBuilder();
+        for (int i = 0; i < s; i++) {
+            out.append(" ");
+        }
+        out.append(this.toString());
+        return out.toString();
+    }
 }

@@ -25,4 +25,13 @@ public class IrParameterDecl extends Ir {
 	public String toString() {
 	    return type.toString() + " " + id.toString();
 	}
+	
+	public String toString(int s) {
+        StringBuilder out = new StringBuilder();
+        for (int i = 0; i < s; i++) {
+            out.append(" ");
+        }
+        out.append(this.toString());
+        return out.toString();
+    }
 }

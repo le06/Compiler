@@ -25,4 +25,14 @@ public class IrArrayDecl extends IrGlobalDecl {
 	public String toString() {
 	    return id.toString() + "[" + array_size.toString() + "]";
 	}
+
+    @Override
+    public String toString(int spaces_before) {
+        StringBuilder out = new StringBuilder();
+        for (int i = 0; i < spaces_before; i++) {
+            out.append(" ");
+        }
+        out.append(this.toString());
+        return out.toString();
+    }
 }

@@ -22,8 +22,12 @@ public class DecafChecker {
     }
     
     public void check() throws RecognitionException, TokenStreamException {
-        @SuppressWarnings("unused")
         Ir ir = generateIr();
+        
+        if (debug) {
+            System.out.println(ir.toString(0));
+        }
+        
         IrNodeChecker checker = new IrNodeChecker();
         ir.accept(checker);
     }

@@ -42,4 +42,21 @@ public class IrMethodDecl extends IrMemberDecl {
 	public void accept(IrNodeVisitor v) {
 		v.visit(this);
 	}
+
+    @Override
+    public String toString(int s) {
+        StringBuilder out = new StringBuilder();
+        for (int i = 0; i < s; i++) {
+            out.append(" ");
+        }
+        out.append("Method:\n");
+        out.append(return_type.toString(s+1).concat("\n"));
+        out.append(id.toString(s+1).concat("\n"));
+        for (IrParameterDecl d : params) {
+            out.append(d.toString(s+1).concat("\n"));
+        }
+        
+        out.append(block.toString(s+1).concat("\n"));
+        return out.toString();
+    }
 }

@@ -43,4 +43,23 @@ public class IrBinopExpr extends Ir implements IrExpression {
 	public void accept(IrNodeVisitor v) {
 		v.visit(this);
 	}
+	
+	   public String toString (int s) {
+	        StringBuilder out = new StringBuilder();
+	        for (int i = 0; i < s; i++) {
+	            out.append(" ");
+	        }
+	        out.append(operator.toString().concat("\n"));
+	        for (int i = 0; i < s; i++) {
+                out.append(" ");
+            }
+	        out.append(lhs.toString(s+1));
+	        
+	        for (int i = 0; i < s; i++) {
+                out.append(" ");
+            }
+	        out.append(rhs.toString(s+1));
+	        
+	        return out.toString();
+	    }
 }
