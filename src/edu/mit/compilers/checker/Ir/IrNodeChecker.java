@@ -71,10 +71,15 @@ public class IrNodeChecker implements IrNodeVisitor {
 		}
 	}
 	*/
+
+	private boolean error_flag = false;
+	
+	public boolean wasError() { return error_flag; }
 	
 	private Stack<Env> env_stack;
 	private HashMap<String, IrMethodDecl> method_table;
-	private HashMap<String, Long> array_table;
+	private HashMap<String, Type> array_types;
+	private HashMap<String, Long> array_sizes;
 
 	private Type current_type = Type.VOID;
 	private boolean found_main_method = false;
@@ -85,20 +90,80 @@ public class IrNodeChecker implements IrNodeVisitor {
 		env_stack = new Stack<Env>();
 		env_stack.push(new Env());
 		method_table = new HashMap<String, IrMethodDecl>();
-		array_table = new HashMap<String, Long>();
+		array_types = new HashMap<String, Type>();
+		array_sizes = new HashMap<String, Long>();
 	}
 	
+	// null type means a variable or array was declared incorrectly,
+	// or simply wasn't declared.
+	public IrType lookupArrayType(IrIdentifier id) {
+		String name = id.getId();
+		Type type = array_types.get(name);
+		if (type == null || type == Type.VOID) {
+			return null;
+		} else if (type == Type.INT) {
+			return new IrType(IrType.Type.INT);
+		} else {
+			return new IrType(IrType.Type.BOOLEAN);
+		}
+	}
 	
+	public IrType lookupVarType(IrIdentifier id) {
+		String name = id.getId();
+		Env current_env = getCurrentEnv();
+		while (current_env != null) {
+			Type type = current_env.getFieldTable().get(name);
+			if (type != null && type != Type.VOID) {
+				if (type == Type.INT) {
+					return new IrType(IrType.Type.INT);
+				} else {
+					return new IrType(IrType.Type.BOOLEAN);
+				}
+			}
+			current_env = current_env.getPreviousEnv();
+		}
+		return null;
+	}
+
+	private boolean varIsDefined(String name) {
+		Env current_env = getCurrentEnv();
+		while (current_env != null) {
+			if (current_env.getFieldTable().containsKey(name)) {
+				return true;
+			}			
+			current_env = current_env.getPreviousEnv();
+		}
+		return false;
+	}
+	
+	private boolean arrayIsDefined(String name) {
+		return array_types.containsKey(name);
+	}
 	
 	/*
 	 * Implemention of the IrNodeVisitor interface.
 	 */
 
+	public void visit(IrClassDecl node) {
+		if (!found_main_method) {
+			error_flag = true;
+			int line = node.getLineNumber();
+			int column = node.getColumnNumber();
+			String message = "No main method";
+			System.out.println(errorPosMessage(line, column) + message);
+		}
+	}
+	
 	public void visit(IrFieldDecl node) {
-		current_type = determineType(node.getType());
-		
+		IrType type_node = node.getType();
+		current_type = determineType(type_node);
+		// this should be caught by the parser!
 		if (current_type == Type.VOID) {
-			// TODO complain!
+			error_flag = true;
+			int line = type_node.getLineNumber();
+			int column = type_node.getColumnNumber();
+			String message = "Invalid type for variable declaration";
+			System.out.println(errorPosMessage(line, column) + message);
 		}
 
 		ArrayList<IrGlobalDecl> globals = node.getGlobals();
@@ -117,7 +182,11 @@ public class IrNodeChecker implements IrNodeVisitor {
 		HashMap<String, Type> field_table = getCurrentEnv().getFieldTable();
 		
 		if (field_table.containsKey(id)) {
-			// TODO complain!
+			error_flag = true;
+			int line = id_node.getLineNumber();
+			int column = id_node.getColumnNumber();
+			String message = "Duplicate base variable identifier";
+			System.out.println(errorPosMessage(line, column) + message);
 		} else {
 			// visitor will add id regardless of current_type's validity.
 			field_table.put(id, current_type);
@@ -125,15 +194,18 @@ public class IrNodeChecker implements IrNodeVisitor {
 	}
 
 	@Override
-	public void visit(IrArrayDecl node) { //TODO: check array size decl
+	public void visit(IrArrayDecl node) {
 		IrIdentifier id_node = node.getId();
 		
 		String id = id_node.getId();
-		HashMap<String, Type> field_table = getCurrentEnv().getFieldTable();
-		
-		if (field_table.containsKey(id)) {
-			// TODO complain!
+		if (array_types.containsKey(id)) {
+			error_flag = true;
+			int line = id_node.getLineNumber();
+			int column = id_node.getColumnNumber();
+			String message = "Duplicate array variable identifier";
+			System.out.println(errorPosMessage(line, column) + message);
 		} else {
+			
 			Type type = Type.VOID_ARRAY;
 			if (current_type == Type.INT) {
 				type = Type.INT_ARRAY;
@@ -142,28 +214,44 @@ public class IrNodeChecker implements IrNodeVisitor {
 			}
 			
 			long array_size;
+			IrIntLiteral literal_node = node.getArraySize();
 			try {
-				array_size = parseIntLiteral(node.getArraySize());
+				array_size = parseIntLiteral(literal_node);
 				if (array_size <= 0) {
-					// TODO: complain!
+					error_flag = true;
+					int line = literal_node.getLineNumber();
+					int column = literal_node.getColumnNumber();
+					String message = "Array size must be non-negative";
+					System.out.println(errorPosMessage(line, column) + message);
 				}
 				else {
-			// visitor will add id regardless of current_type's validity.
-					field_table.put(id, type);
-					array_table.put(id, array_size);
+				// visitor will add id regardless of current_type's validity.
+				// note that defining both a and a[] is legal, due to the
+				// semantics of Decaf!
+					array_types.put(id, type);
+					array_sizes.put(id, array_size);
 				}
 			} catch (NumberFormatException e) {
-				// TODO: complain!
-				// intliteral out of bounds.
-			}
+				error_flag = true;
+				int line = literal_node.getLineNumber();
+				int column = literal_node.getColumnNumber();
+				String message = "IntLiteral out of bounds";
+				System.out.println(errorPosMessage(line, column) + message);
+			}	
 			
-		}	
+		}
+		
 	}
 	
 	@Override
 	public void visit(IrMethodDecl node) {
 		if (found_main_method) { // ignore methods defined after main().
-			return; // TODO: possibly complain!
+			IrType type_node = node.getReturnType();
+			int line = type_node.getLineNumber();
+			int column = type_node.getColumnNumber();
+			String message = "Methods defined after main can never be referenced";
+			System.out.println(warningPosMessage(line, column) + message);
+			return;
 		}
 		
 		IrIdentifier id_node = node.getId();
@@ -172,13 +260,20 @@ public class IrNodeChecker implements IrNodeVisitor {
 		// variable calls and method calls are unambiguous.
 		// hence, variable decls and method decls are also unambiguous.
 		if (method_table.containsKey(id)) {
-			// TODO complain!
+			int line = id_node.getLineNumber();
+			int column = id_node.getColumnNumber();
+			String message = "Duplicate method identifier";
+			System.out.println(errorPosMessage(line, column) + message);
 		} else {
 			method_table.put(id, node);
 			if (id.equals("main")) {
 				found_main_method = true;
 				if (node.getParams().size() > 0) {
-					// TODO complain!
+					IrParameterDecl param_node = node.getParams().get(0);
+					int line = param_node.getLineNumber();
+					int column = param_node.getColumnNumber();
+					String message = "main() method cannot have any arguments";
+					System.out.println(errorPosMessage(line, column) + message);
 				}
 			}
 		}
@@ -194,18 +289,18 @@ public class IrNodeChecker implements IrNodeVisitor {
 	/*
 	 * Visiting method contents!
 	 */
-	@Override
-	public void visit(IrBlock node) {
-		// never called.
-		// it's enough for var_decls and statements to accept this visitor.
-	}
 	
 	@Override
 	public void visit(IrVarDecl node) {
-		current_type = determineType(node.getType());
-		
+		IrType type_node = node.getType();
+		current_type = determineType(type_node);
+		// again, this should be caught by the parser
 		if (current_type == Type.VOID) {
-			// TODO complain!
+			error_flag = true;
+			int line = type_node.getLineNumber();
+			int column = type_node.getColumnNumber();
+			String message = "Invalid type for variable declaration";
+			System.out.println(errorPosMessage(line, column) + message);
 		}
 
 		ArrayList<IrLocalDecl> locals = node.getLocals();
@@ -225,7 +320,11 @@ public class IrNodeChecker implements IrNodeVisitor {
 		// note that since method calls and decls can be distinguished,
 		// method ids are never shadowed!
 		if (field_table.containsKey(id)) {
-			// TODO complain!
+			error_flag = true;
+			int line = id_node.getLineNumber();
+			int column = id_node.getColumnNumber();
+			String message = "Duplicate local variable identifier";
+			System.out.println(errorPosMessage(line, column) + message);
 		} else {
 			// visitor will add id regardless of current_type's validity.
 			field_table.put(id, current_type);
@@ -259,12 +358,18 @@ public class IrNodeChecker implements IrNodeVisitor {
 			env = env.getPreviousEnv();
 			current_body = env.getCurrentBody();
 		}
-		if (env == null) { // sanity check.
+		if (env == null) { // sanity check. this should never be true!
 			// TODO: complain hard!
+			error_flag = true;
+			System.out.println(node.getLineNumber() + "," + node.getColumnNumber());
 		}
 		
 		if (!legal_stmt) {
-			// TODO: complain!
+			error_flag = true;
+			int line = node.getLineNumber();
+			int column = node.getColumnNumber();
+			String message = "Continue statements must be placed in the body of a for or while statement";
+			System.out.println(errorPosMessage(line, column) + message);
 		}
 	}
 
@@ -285,12 +390,18 @@ public class IrNodeChecker implements IrNodeVisitor {
 			env = env.getPreviousEnv();
 			current_body = env.getCurrentBody();
 		}
-		if (env == null) { // sanity check.
+		if (env == null) { // sanity check. this should never be true!
 			// TODO: complain hard!
+			error_flag = true;
+			System.out.println(node.getLineNumber() + "," + node.getColumnNumber());
 		}
 		
 		if (!legal_stmt) {
-			// TODO: complain!
+			error_flag = true;
+			int line = node.getLineNumber();
+			int column = node.getColumnNumber();
+			String message = "Break statements must be placed in the body of a for or while statement";
+			System.out.println(errorPosMessage(line, column) + message);
 		}
 	}
 	
@@ -302,44 +413,161 @@ public class IrNodeChecker implements IrNodeVisitor {
 			env = env.getPreviousEnv();
 			current_body = env.getCurrentBody();
 		}
-		if (env == null) { // sanity check.
+		if (env == null) { // sanity check. this should never be true!
 			// TODO: complain hard!
+			error_flag = true;
+			System.out.println(node.getLineNumber() + "," + node.getColumnNumber());
 		}
-		
+
+		IrExpression return_expr = node.getReturnExpr();
 		// what is this method's return value?
 		IrType method_type_node = ((IrMethodDecl)current_body).getReturnType();
-		IrType return_type_node = node.getReturnExpr().getType();
 		Type method_type = determineType(method_type_node);
-		Type return_type = determineType(return_type_node);
-
-		if (method_type != return_type) {
-			// TODO: complain! return type mismatch.
+		
+		if (method_type == Type.VOID) {
+			if (return_expr != null) {
+				error_flag = true;
+				int line = node.getLineNumber();
+				int column = node.getColumnNumber();
+				String message = "Void-type methods cannot return expressions";
+				System.out.println(errorPosMessage(line, column) + message);
+			}
+		}
+		else {
+			if (return_expr == null) {
+				error_flag = true;
+				int line = node.getLineNumber();
+				int column = node.getColumnNumber();
+				String message = "Non-void-type method missing return expression";
+				System.out.println(errorPosMessage(line, column) + message);
+			}
+			
+			return_expr.accept(this); // check that the expr is well-formed.
+			if (method_type != determineType(return_expr.getExprType(this))) {
+				error_flag = true;
+				int line = node.getLineNumber();
+				int column = node.getColumnNumber();
+				String message = "Type mismatch in return expression";
+				System.out.println(errorPosMessage(line, column) + message);
+			}
 		}
 
 	}
 	
 	@Override
 	public void visit(IrWhileStmt node) {
-		IrType type_node = node.getCondition().getType();
+		IrExpression condition = node.getCondition();
+		
+		// while condition well-formed?
+		condition.accept(this);
+		IrType type_node = condition.getExprType(this);
 		Type type = determineType(type_node);
 		if (type != Type.BOOLEAN) {
-			// TODO: complain!
+			error_flag = true;
+			int line = type_node.getLineNumber();
+			int column = type_node.getColumnNumber();
+			String message = "While loop condition must have a boolean type";
+			System.out.println(errorPosMessage(line, column) + message);
 		}
 		
 		IrBlock block = node.getBlock();
 		// create a new scope...
-		Env method_env = new Env(getCurrentEnv(), node);
-		env_stack.push(method_env); // enter the new env.
+		Env while_env = new Env(getCurrentEnv(), node);
+		env_stack.push(while_env); // enter the new env.
 		block.accept(this);	// execute the block.
 		env_stack.pop();	// exit the env.
 	}
 
 	@Override
 	public void visit(IrForStmt node) {
-		// TODO Auto-generated method stub
+		IrExpression startExpr = node.getStartValue();
+		IrExpression stopExpr = node.getStopValue();
+
+		// are the exprs well-formed?
+		startExpr.accept(this);
+		stopExpr.accept(this);
+		if (determineType(startExpr.getExprType(this)) != Type.INT) {
+			error_flag = true;
+			int line = startExpr.getLineNumber();
+			int column = startExpr.getColumnNumber();
+			String message = "For loop initialization expr must have int type";
+			System.out.println(errorPosMessage(line, column) + message);
+		}
+		if (determineType(stopExpr.getExprType(this)) != Type.INT) {
+			error_flag = true;
+			int line = stopExpr.getLineNumber();
+			int column = stopExpr.getColumnNumber();
+			String message = "For loop end condition expr must have int type";
+			System.out.println(errorPosMessage(line, column) + message);
+		}
+		
+		IrBlock block = node.getBlock();
+		IrIdentifier id = node.getCounter();
+		Env for_env = new Env(getCurrentEnv(), node);
+		// add the counter to the for loop env.
+		for_env.getFieldTable().put(id.getId(), Type.INT);
+		
+		env_stack.push(for_env); // enter the new env.		
+		block.accept(this);      // execute the block.
+		env_stack.pop();         // exit the env.
+	}
+	
+	@Override
+	public void visit(IrIfStmt node) {
+		IrExpression condition = node.getCondition();
+		// if condition well-formed?
+		condition.accept(this);
+		IrType type_node = condition.getExprType(this);
+		Type type = determineType(type_node);
+		if (type != Type.BOOLEAN) {
+			error_flag = true;
+			int line = type_node.getLineNumber();
+			int column = type_node.getColumnNumber();
+			String message = "If loop condition must have a boolean type";
+			System.out.println(errorPosMessage(line, column) + message);
+		}
+		
+		IrBlock true_block = node.getTrueBlock();
+		IrBlock false_block = node.getFalseBlock();
+		
+		Env true_env = new Env(getCurrentEnv(), node);
+		env_stack.push(true_env); // enter the new env.
+		true_block.accept(this);  // execute the block.
+		env_stack.pop();		  // exit the env.
+		
+		if (false_block != null) {
+			Env false_env = new Env(getCurrentEnv(), node);
+			env_stack.push(false_env); // enter the new env.
+			false_block.accept(this);  // execute the block.
+			env_stack.pop();           // exit the env.
+		}
 
 	}
 	
+	
+	
+	@Override
+	public void visit(IrMethodCallStmt node) {
+		IrIdentifier method_name = node.getMethodName();
+		ArrayList<IrExpression> args = node.getArgs();
+
+		// if the method is undefined...
+		if (!method_table.containsKey(method_name.getId())) {
+			// TODO: complain!
+
+		}
+		
+		
+	}
+
+	@Override
+	public void visit(IrCalloutStmt node) {
+		// TODO Auto-generated method stub
+
+	}	
+	
+	
+
 	@Override
 	public void visit(IrAssignStmt node) {
 		// TODO Auto-generated method stub
@@ -358,23 +586,7 @@ public class IrNodeChecker implements IrNodeVisitor {
 
 	}
 
-	@Override
-	public void visit(IrIfStmt node) {
-		// TODO Auto-generated method stub
 
-	}
-
-	@Override
-	public void visit(IrMethodCallStmt node) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void visit(IrCalloutStmt node) {
-		// TODO Auto-generated method stub
-
-	}
 
 	@Override
 	public void visit(IrStringArg node) {
@@ -390,38 +602,37 @@ public class IrNodeChecker implements IrNodeVisitor {
 
 	@Override
 	public void visit(IrVarLocation node) {
-		// TODO Auto-generated method stub
-
+		IrIdentifier id_node = node.getId();
+		if (!varIsDefined(id_node.getId())) {
+			error_flag = true;
+			int line = id_node.getLineNumber();
+			int column = id_node.getColumnNumber();
+			String message = "Variable identifier is undefined";
+			System.out.println(errorPosMessage(line, column) + message);
+		}
 	}
 
 	@Override
 	public void visit(IrArrayLocation node) {
-		// TODO Auto-generated method stub
+		IrIdentifier id_node = node.getId();
+		if (!arrayIsDefined(id_node.getId())) {
+			error_flag = true;
+			int line = id_node.getLineNumber();
+			int column = id_node.getColumnNumber();
+			String message = "Array identifier is undefined";
+			System.out.println(errorPosMessage(line, column) + message);
+		}
+		
+		IrExpression index_node = node.getIndex();
+		Type index_type = determineType(index_node.getExprType(this));
 
-	}
-
-	@Override
-	public void visit(IrLocationExpr node) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void visit(IrMethodCallExpr node) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void visit(IrCalloutExpr node) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void visit(IrLiteralExpr node) {
-		// TODO Auto-generated method stub
-
+		if (index_type != Type.INT) {
+			error_flag = true;
+			int line = index_node.getLineNumber();
+			int column = index_node.getColumnNumber();
+			String message = "Array index must be int type";
+			System.out.println(errorPosMessage(line, column) + message);
+		}
 	}
 
 	@Override
@@ -449,57 +660,42 @@ public class IrNodeChecker implements IrNodeVisitor {
 	}
 
 	@Override
-	public void visit(IrType node) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void visit(IrIdentifier node) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
 	public void visit(IrIntLiteral node) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void visit(IrCharLiteral node) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void visit(IrBoolLiteral node) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void visit(IrStringLiteral node) {
-		// TODO Auto-generated method stub
-
+		try {
+			parseIntLiteral(node);
+		} catch (NumberFormatException e) {
+			error_flag = true;
+			int line = node.getLineNumber();
+			int column = node.getColumnNumber();
+			String message = "IntLiteral out of bounds";
+			System.out.println(errorPosMessage(line, column) + message);
+		}	
 	}
 	
 	/*
 	 * Helper functions.
 	 */
-
+	
+	private String errorPosMessage(int line, int column) {
+		return "Error at line " + line + ", column " + column + ": ";
+	}
+	
+	private String warningPosMessage(int line, int column) {
+		return "Warning at line " + line + ", column " + column + ": ";
+	}
+	
 	// if x < -9223372036854775808L or > 9223372036854775807L,
 	// this method will throw an exception.
 	private long parseIntLiteral(IrIntLiteral literal) 
 		throws NumberFormatException {
 
-		IrIntLiteral.Type type = literal.getType();
+		IrIntLiteral.NumType num_type = literal.getNumType();
 		String representation = literal.getRepresentation();
 
-		if (type == IrIntLiteral.Type.DECIMAL) { // #####
+		if (num_type == IrIntLiteral.NumType.DECIMAL) { // #####
 			return Long.parseLong(representation);
 		}
-		else if (type == IrIntLiteral.Type.HEX) { // 0x####
+		else if (num_type == IrIntLiteral.NumType.HEX) { // 0x####
 			return Long.parseLong(representation.substring(2), 16);
 		}
 		else { // 0b####

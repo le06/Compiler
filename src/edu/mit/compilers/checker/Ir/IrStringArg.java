@@ -6,4 +6,10 @@ public class IrStringArg extends IrCalloutArg {
     }
     
 	private IrStringLiteral arg;
+
+	@Override
+	public void accept(IrNodeVisitor v) {
+		// TODO Auto-generated method stub
+		
+	}
 }

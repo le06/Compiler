@@ -1,6 +1,6 @@
 package edu.mit.compilers.tools;
 
-import antlr.collections.*;
+import antlr.collections.AST;
 
 public class TreeVisualizer {
     public TreeVisualizer() {

@@ -254,15 +254,15 @@ public class IrGenerator {
             break;
 
         case DecafParserTokenTypes.DEC_LITERAL:
-            outIr = new IrIntLiteral(ast.getText(), IrIntLiteral.Type.DECIMAL);
+            outIr = new IrIntLiteral(ast.getText(), IrIntLiteral.NumType.DECIMAL);
             break;
 
         case DecafParserTokenTypes.HEX_LITERAL:
-            outIr = new IrIntLiteral(ast.getText(), IrIntLiteral.Type.HEX);
+            outIr = new IrIntLiteral(ast.getText(), IrIntLiteral.NumType.HEX);
             break;
 
         case DecafParserTokenTypes.BIN_LITERAL:
-            outIr = new IrIntLiteral(ast.getText(), IrIntLiteral.Type.BINARY);
+            outIr = new IrIntLiteral(ast.getText(), IrIntLiteral.NumType.BINARY);
             break;
 
         case DecafParserTokenTypes.CHAR:

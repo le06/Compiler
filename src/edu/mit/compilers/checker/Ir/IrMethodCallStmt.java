@@ -12,7 +12,25 @@ public class IrMethodCallStmt extends IrInvokeStmt {
         args.add(arg);
     }
     
-    
 	private IrIdentifier method_name;
 	private ArrayList<IrExpression> args;
+	
+	public IrIdentifier getMethodName() {
+		return method_name;
+	}
+
+	public ArrayList<IrExpression> getArgs() {
+		return args;
+	}
+
+	@Override
+	public void accept(IrNodeVisitor v) {
+		//v.visit(this);		
+	}
+	
+	@Override
+	public IrType getExprType(IrNodeChecker c) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

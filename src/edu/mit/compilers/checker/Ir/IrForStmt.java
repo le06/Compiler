@@ -13,4 +13,22 @@ public class IrForStmt extends IrStatement {
     private IrExpression myStart_value;
     private IrExpression myStop_value;
     private IrBlock myBlock;
+    
+	public IrIdentifier getCounter() {
+		return myCounter;
+	}
+	public IrExpression getStartValue() {
+		return myStart_value;
+	}
+	public IrExpression getStopValue() {
+		return myStop_value;
+	}
+	public IrBlock getBlock() {
+		return myBlock;
+	}
+
+	@Override
+	public void accept(IrNodeVisitor v) {
+		v.visit(this);
+	}
 }

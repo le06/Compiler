@@ -8,6 +8,11 @@ public class IrAssignStmt extends IrStatement {
     
     private IrLocation lhs;
     private IrExpression rhs;
+	@Override
+	public void accept(IrNodeVisitor v) {
+		// TODO Auto-generated method stub
+		
+	}
     
 /*    @Override
     public String toString(int spaces_before) {

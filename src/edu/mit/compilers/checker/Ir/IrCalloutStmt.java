@@ -13,4 +13,23 @@ public class IrCalloutStmt extends IrInvokeStmt {
     public void addArg(IrCalloutArg arg) {
         args.add(arg);
     }
+
+	public IrStringLiteral getFunctionName() {
+		return function_name;
+	}
+
+	public ArrayList<IrCalloutArg> getArgs() {
+		return args;
+	}
+
+	@Override
+	public void accept(IrNodeVisitor v) {
+		//v.visit(this);
+	}
+
+	@Override
+	public IrType getExprType(IrNodeChecker c) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
