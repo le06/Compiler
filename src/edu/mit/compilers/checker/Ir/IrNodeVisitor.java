@@ -28,8 +28,6 @@ public interface IrNodeVisitor {
 	public void visit(IrForStmt node);
 	
 	public void visit(IrIfStmt node);
-
-	
 	
 	public void visit(IrMethodCallStmt node);
 

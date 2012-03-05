@@ -8,9 +8,16 @@ public class IrMinusAssignStmt extends IrStatement {
     
     private IrLocation lhs;
     private IrExpression rhs;
+    
+	public IrLocation getLeft() {
+		return lhs;
+	}
+	public IrExpression getRight() {
+		return rhs;
+	}
+	
 	@Override
 	public void accept(IrNodeVisitor v) {
-		// TODO Auto-generated method stub
-		
+		v.visit(this);
 	}
 }
