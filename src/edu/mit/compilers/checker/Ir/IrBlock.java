@@ -40,17 +40,11 @@ public class IrBlock extends Ir {
 	    }
 	    out.append("BLOCK:\n");
 	    for (IrVarDecl v : var_decls) {
-	        for (int i = 0; i < s; i++) {
-	            out.append(" ");
-	        }
-	        out.append(v.toString().concat("\n"));
+	        out.append(v.toString(s+1).concat("\n"));
 	    }
 	    
 	    for (IrStatement st : statements) {
-	        for (int i = 0; i < s; i++) {
-	            out.append(" ");
-	        }
-	        out.append(st.toString().concat("\n"));
+	        out.append(st.toString(s+1).concat("\n"));
 	    }
 	    
 	    return out.toString();

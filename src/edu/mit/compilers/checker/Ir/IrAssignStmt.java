@@ -29,8 +29,8 @@ public class IrAssignStmt extends IrStatement {
         }
         
         out.append("=\n");
-        out.append(lhs.toString(spaces_before+1));
-        out.append(rhs.toString(spaces_before+1));
+        out.append(lhs.toString(spaces_before+1).concat("\n"));
+        out.append(rhs.toString(spaces_before+1).concat("\n"));
         return out.toString();
     }
     
