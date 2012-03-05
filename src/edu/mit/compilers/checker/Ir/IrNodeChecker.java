@@ -10,7 +10,7 @@ public class IrNodeChecker implements IrNodeVisitor {
 	 * Auxilliary classes for implementing symbol tables.
 	 */
 	protected enum Type {
-		MIXED, VOID, VOID_ARRAY, INT, INT_ARRAY, BOOLEAN, BOOLEAN_ARRAY
+		MIXED, VOID, INT, BOOLEAN
 	}
 
 	protected class Env {
@@ -83,7 +83,7 @@ public class IrNodeChecker implements IrNodeVisitor {
 
 	private Type current_type = Type.VOID;
 	private boolean found_main_method = false;
-	private boolean currently_walking_expr = false;
+	private boolean currently_evaluating_expr = false;
 	
 	private Env getCurrentEnv() { return env_stack.peek(); }
 	
@@ -231,14 +231,6 @@ public class IrNodeChecker implements IrNodeVisitor {
 			String message = "Duplicate array variable identifier";
 			System.out.println(errorPosMessage(line, column) + message);
 		} else {
-			
-			Type type = Type.VOID_ARRAY;
-			if (current_type == Type.INT) {
-				type = Type.INT_ARRAY;
-			} else if (current_type == Type.BOOLEAN) {
-				type = Type.BOOLEAN_ARRAY;
-			}
-			
 			long array_size;
 			IrIntLiteral literal_node = node.getArraySize();
 			try {
@@ -254,7 +246,7 @@ public class IrNodeChecker implements IrNodeVisitor {
 				// visitor will add id regardless of current_type's validity.
 				// note that defining both a and a[] is legal, due to the
 				// semantics of Decaf!
-					array_types.put(id, type);
+					array_types.put(id, current_type);
 					array_sizes.put(id, array_size);
 				}
 			} catch (NumberFormatException e) {
@@ -595,38 +587,162 @@ public class IrNodeChecker implements IrNodeVisitor {
 		ArrayList<IrExpression> args = node.getArgs();
 
 		// if the method is undefined...
-		if (!method_table.containsKey(method_name.getId())) {
-			// TODO: complain!
-
+		if (!methodIsDefined(method_name.getId())) {
+			error_flag = true;
+			int line = method_name.getLineNumber();
+			int column = method_name.getColumnNumber();
+			String message = "Cannot call to undefined method";
+			System.out.println(errorPosMessage(line, column) + message);
+			
+			return;
+		}
+		IrMethodDecl called_method = method_table.get(method_name.getId());
+		ArrayList<IrParameterDecl> params = called_method.getParams();
+		
+		// check that the args are well-formed.
+		for (IrExpression arg : node.getArgs()) {
+			arg.accept(this);
 		}
 		
+		// if the signatures don't match...
+		if (args.size() != params.size()) {
+			error_flag = true;
+			int line = args.get(0).getLineNumber();
+			int column = args.get(0).getColumnNumber();
+			String message = "Mismatching number of arguments";
+			System.out.println(errorPosMessage(line, column) + message);
+		} else {
+			for (int i = 0; i < args.size(); i++) {
+				IrType arg_type = args.get(i).getExprType(this);
+				IrType param_type = params.get(i).getType();
+				
+				if (arg_type.myType != param_type.myType) {
+					error_flag = true;
+					int line = param_type.getLineNumber();
+					int column = param_type.getColumnNumber();
+					String message = "Mismatching types of arguments";
+					System.out.println(errorPosMessage(line, column) + message);
+
+					break;
+				}
+			}
+		}
+		
+		// if the method call is part of an expression...
+		Type return_type = determineType(called_method.getReturnType());
+		if (currently_evaluating_expr && return_type == Type.VOID) {
+			error_flag = true;
+			int line = node.getMethodName().getLineNumber();
+			int column = node.getMethodName().getColumnNumber();
+			String message = "Void methods cannot be part of int or boolean expressions";
+			System.out.println(errorPosMessage(line, column) + message);
+		}
 		
 	}
 
 	@Override
 	public void visit(IrCalloutStmt node) {
-		// TODO Auto-generated method stub
-
+		currently_evaluating_expr = true;
+		// check that the args are well-formed.
+		for (IrCalloutArg arg : node.getArgs()) {
+			arg.accept(this);
+		}
+		currently_evaluating_expr = false;
 	}	
 	
 	
 
 	@Override
 	public void visit(IrAssignStmt node) {
-		// TODO Auto-generated method stub
-
+		currently_evaluating_expr = true;
+		
+		IrLocation loc = node.getLeft();
+		IrExpression expr = node.getRight();
+		// check that loc and expr are well-formed.
+		loc.accept(this);
+		expr.accept(this);
+		// check that the types match up.
+		Type loc_type = determineType(loc.getExprType(this));
+		Type expr_type = determineType(expr.getExprType(this));
+		
+		if (loc_type == Type.MIXED || loc_type == Type.VOID ||
+			expr_type == Type.MIXED || expr_type == Type.VOID) {
+			error_flag = true;
+			int line = loc.getLineNumber();
+			int column = loc.getColumnNumber();
+			String message = "Assignment operands have non-int or non-boolean types";
+			System.out.println(errorPosMessage(line, column) + message);
+		} else if (loc_type != expr_type) {
+			error_flag = true;
+			int line = loc.getLineNumber();
+			int column = loc.getColumnNumber();
+			String message = "Assignment operands have mismatching types";
+			System.out.println(errorPosMessage(line, column) + message);
+		}
+		
+		currently_evaluating_expr = false;
 	}
 
 	@Override
 	public void visit(IrPlusAssignStmt node) {
-		// TODO Auto-generated method stub
+		currently_evaluating_expr = true;
 
+		IrLocation loc = node.getLeft();
+		IrExpression expr = node.getRight();
+		// check that loc and expr are well-formed.
+		loc.accept(this);
+		expr.accept(this);
+		// check that the types match up.
+		Type loc_type = determineType(loc.getExprType(this));
+		Type expr_type = determineType(expr.getExprType(this));
+		
+		if (loc_type == Type.MIXED || loc_type == Type.VOID ||
+			expr_type == Type.MIXED || expr_type == Type.VOID) {
+			error_flag = true;
+			int line = loc.getLineNumber();
+			int column = loc.getColumnNumber();
+			String message = "Assignment operands have non-int or non-boolean types";
+			System.out.println(errorPosMessage(line, column) + message);
+		} else if (loc_type != expr_type) {
+			error_flag = true;
+			int line = loc.getLineNumber();
+			int column = loc.getColumnNumber();
+			String message = "Assignment operands have mismatching types";
+			System.out.println(errorPosMessage(line, column) + message);
+		}
+		
+		currently_evaluating_expr = false;
 	}
 
 	@Override
 	public void visit(IrMinusAssignStmt node) {
-		// TODO Auto-generated method stub
+		currently_evaluating_expr = true;
 
+		IrLocation loc = node.getLeft();
+		IrExpression expr = node.getRight();
+		// check that loc and expr are well-formed.
+		loc.accept(this);
+		expr.accept(this);
+		// check that the types match up.
+		Type loc_type = determineType(loc.getExprType(this));
+		Type expr_type = determineType(expr.getExprType(this));
+		
+		if (loc_type == Type.MIXED || loc_type == Type.VOID ||
+			expr_type == Type.MIXED || expr_type == Type.VOID) {
+			error_flag = true;
+			int line = loc.getLineNumber();
+			int column = loc.getColumnNumber();
+			String message = "Assignment operands have non-int or non-boolean types";
+			System.out.println(errorPosMessage(line, column) + message);
+		} else if (loc_type != expr_type) {
+			error_flag = true;
+			int line = loc.getLineNumber();
+			int column = loc.getColumnNumber();
+			String message = "Assignment operands have mismatching types";
+			System.out.println(errorPosMessage(line, column) + message);
+		}
+		
+		currently_evaluating_expr = false;
 	}
 
 	@Override
@@ -666,26 +782,16 @@ public class IrNodeChecker implements IrNodeVisitor {
 
 	@Override
 	public void visit(IrBinopExpr node) {
-		// TODO Auto-generated method stub
-
+		currently_evaluating_expr = true;
+		// TODO fill in...
+		currently_evaluating_expr = false;
 	}
 
 	@Override
 	public void visit(IrUnopExpr node) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void visit(IrBinOperator node) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void visit(IrUnaryOperator node) {
-		// TODO Auto-generated method stub
-
+		currently_evaluating_expr = true;
+		// TODO fill in...
+		currently_evaluating_expr = false;
 	}
 
 	@Override

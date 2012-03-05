@@ -28,8 +28,6 @@ public interface IrNodeVisitor {
 	public void visit(IrForStmt node);
 	
 	public void visit(IrIfStmt node);
-
-	
 	
 	public void visit(IrMethodCallStmt node);
 
@@ -48,10 +46,6 @@ public interface IrNodeVisitor {
 	public void visit(IrBinopExpr node);
 
 	public void visit(IrUnopExpr node);
-
-	public void visit(IrBinOperator node);
-
-	public void visit(IrUnaryOperator node);
 
 	public void visit(IrIntLiteral node);
 }
