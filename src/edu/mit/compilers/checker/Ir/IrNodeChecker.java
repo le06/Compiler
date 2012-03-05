@@ -83,6 +83,7 @@ public class IrNodeChecker implements IrNodeVisitor {
 
 	private Type current_type = Type.VOID;
 	private boolean found_main_method = false;
+	private boolean currently_walking_expr = false;
 	
 	private Env getCurrentEnv() { return env_stack.peek(); }
 	
@@ -125,12 +126,33 @@ public class IrNodeChecker implements IrNodeVisitor {
 		return null;
 	}
 
+	public IrType lookupMethodType(IrIdentifier id) {
+		String name = id.getId();
+		IrMethodDecl signature = method_table.get(name);
+		
+		if (signature == null) {
+			return null; // method undefined.
+		}
+		
+		Type return_type = determineType(signature.getReturnType());
+		if (return_type == Type.VOID) {
+			return new IrType(IrType.Type.VOID);
+		} else if (return_type == Type.INT) {
+			return new IrType(IrType.Type.INT);
+		} else {
+			return new IrType(IrType.Type.BOOLEAN);
+		}
+	}
+	
 	private boolean varIsDefined(String name) {
 		Env current_env = getCurrentEnv();
 		while (current_env != null) {
+			// is the var in the current env?
 			if (current_env.getFieldTable().containsKey(name)) {
 				return true;
-			}			
+			}
+
+			// else, go down the env stack.
 			current_env = current_env.getPreviousEnv();
 		}
 		return false;
@@ -138,6 +160,10 @@ public class IrNodeChecker implements IrNodeVisitor {
 	
 	private boolean arrayIsDefined(String name) {
 		return array_types.containsKey(name);
+	}
+	
+	private boolean methodIsDefined(String name) {
+		return method_table.containsKey(name);
 	}
 	
 	/*
@@ -270,6 +296,7 @@ public class IrNodeChecker implements IrNodeVisitor {
 				found_main_method = true;
 				if (node.getParams().size() > 0) {
 					IrParameterDecl param_node = node.getParams().get(0);
+					error_flag = true;
 					int line = param_node.getLineNumber();
 					int column = param_node.getColumnNumber();
 					String message = "main() method cannot have any arguments";
@@ -281,6 +308,24 @@ public class IrNodeChecker implements IrNodeVisitor {
 		// check contents of method no matter what, assuming that main()
 		// hasn't been found yet.
 		Env method_env = new Env(getCurrentEnv(), node);
+		// don't forget to add the formal parameters to the symbol table,
+		// and also check their consistency.
+		ArrayList<IrParameterDecl> params = node.getParams();
+		for (IrParameterDecl p : params) {
+			String name = p.getId().getId();
+			Type type = determineType(p.getType());
+			if (method_env.getFieldTable().containsKey(name)) {
+				error_flag = true;
+				int line = p.getId().getLineNumber();
+				int column = p.getId().getColumnNumber();
+				String message = "Duplicate identifier in method args";
+				System.out.println(errorPosMessage(line, column) + message);
+			}
+			else {
+				method_env.getFieldTable().put(name, type);
+			}
+		}
+		
 		env_stack.push(method_env); // new env for each method.
 		node.getBlock().accept(this);
 		env_stack.pop();	// on exit, destroy the env.
@@ -361,7 +406,6 @@ public class IrNodeChecker implements IrNodeVisitor {
 		if (env == null) { // sanity check. this should never be true!
 			// TODO: complain hard!
 			error_flag = true;
-			System.out.println(node.getLineNumber() + "," + node.getColumnNumber());
 		}
 		
 		if (!legal_stmt) {
@@ -393,7 +437,6 @@ public class IrNodeChecker implements IrNodeVisitor {
 		if (env == null) { // sanity check. this should never be true!
 			// TODO: complain hard!
 			error_flag = true;
-			System.out.println(node.getLineNumber() + "," + node.getColumnNumber());
 		}
 		
 		if (!legal_stmt) {
@@ -416,7 +459,6 @@ public class IrNodeChecker implements IrNodeVisitor {
 		if (env == null) { // sanity check. this should never be true!
 			// TODO: complain hard!
 			error_flag = true;
-			System.out.println(node.getLineNumber() + "," + node.getColumnNumber());
 		}
 
 		IrExpression return_expr = node.getReturnExpr();
@@ -545,7 +587,8 @@ public class IrNodeChecker implements IrNodeVisitor {
 	}
 	
 	
-	
+	// need to be careful with currently_walking_expr, so that we can tell
+	// whether a method call is part of an expression or not.
 	@Override
 	public void visit(IrMethodCallStmt node) {
 		IrIdentifier method_name = node.getMethodName();
@@ -582,20 +625,6 @@ public class IrNodeChecker implements IrNodeVisitor {
 
 	@Override
 	public void visit(IrMinusAssignStmt node) {
-		// TODO Auto-generated method stub
-
-	}
-
-
-
-	@Override
-	public void visit(IrStringArg node) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void visit(IrExprArg node) {
 		// TODO Auto-generated method stub
 
 	}

@@ -25,12 +25,11 @@ public class IrMethodCallStmt extends IrInvokeStmt {
 
 	@Override
 	public void accept(IrNodeVisitor v) {
-		//v.visit(this);		
+		v.visit(this);		
 	}
 	
 	@Override
 	public IrType getExprType(IrNodeChecker c) {
-		// TODO Auto-generated method stub
-		return null;
+		return c.lookupMethodType(method_name);
 	}
 }

@@ -9,7 +9,6 @@ public class IrExprArg extends IrCalloutArg {
 
 	@Override
 	public void accept(IrNodeVisitor v) {
-		// TODO Auto-generated method stub
-		
+		arg.accept(v); // is the arg well-formed?
 	}
 }

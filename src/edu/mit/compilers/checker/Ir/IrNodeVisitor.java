@@ -41,10 +41,6 @@ public interface IrNodeVisitor {
 
 	public void visit(IrMinusAssignStmt node);
 
-	public void visit(IrStringArg node);
-
-	public void visit(IrExprArg node);
-
 	public void visit(IrVarLocation node);
 
 	public void visit(IrArrayLocation node);

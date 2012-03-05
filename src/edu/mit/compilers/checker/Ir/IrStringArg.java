@@ -9,7 +9,6 @@ public class IrStringArg extends IrCalloutArg {
 
 	@Override
 	public void accept(IrNodeVisitor v) {
-		// TODO Auto-generated method stub
-		
+		// no need to visit. scanner enforces correctness
 	}
 }

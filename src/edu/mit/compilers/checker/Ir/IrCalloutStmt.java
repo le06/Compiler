@@ -24,12 +24,14 @@ public class IrCalloutStmt extends IrInvokeStmt {
 
 	@Override
 	public void accept(IrNodeVisitor v) {
-		//v.visit(this);
+		// check that the args are well-formed.
+		for (IrCalloutArg arg : args) {
+			arg.accept(v);
+		}
 	}
 
 	@Override
 	public IrType getExprType(IrNodeChecker c) {
-		// TODO Auto-generated method stub
-		return null;
+		return new IrType(IrType.Type.INT); // callouts always return int.
 	}
 }
