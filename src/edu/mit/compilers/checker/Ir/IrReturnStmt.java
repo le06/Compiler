@@ -6,4 +6,13 @@ public class IrReturnStmt extends IrStatement {
     }
     
 	private IrExpression return_expr;
+
+	public IrExpression getReturnExpr() {
+		return return_expr;
+	}
+
+	@Override
+	public void accept(IrNodeVisitor v) {
+		v.visit(this);
+	}
 }

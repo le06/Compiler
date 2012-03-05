@@ -10,7 +10,7 @@ public class IrType extends Ir {
     Type myType;
     
     public enum Type {
-        VOID, BOOLEAN, INT;
+        VOID, BOOLEAN, INT, MIXED;
     }
 
 	@Override
