@@ -55,6 +55,7 @@ public class IrNodeChecker implements IrNodeVisitor {
 	
 	private Stack<Env> env_stack;
 	private HashMap<String, IrMethodDecl> method_table;
+	private HashMap<String, Integer> array_table;
 
 	private boolean found_main_method = false;
 	
@@ -64,6 +65,7 @@ public class IrNodeChecker implements IrNodeVisitor {
 		env_stack = new Stack<Env>();
 		env_stack.push(new Env());
 		method_table = new HashMap<String, IrMethodDecl>();
+		array_table = new HashMap<String, Integer>();
 	}
 	
 	/*
@@ -128,9 +130,29 @@ public class IrNodeChecker implements IrNodeVisitor {
 			}
 			
 			fieldTable.put(id, type);
+			
+			int array_size = parseIntLiteral(node.getArraySize());
+			
 		}	
 	}
 
+	private int parseIntLiteral(IrIntLiteral literal) {
+
+		IrIntLiteral.Type type = literal.getType();
+		String representation = literal.getRepresentation();
+
+		if (type == IrIntLiteral.Type.DECIMAL) { // #####
+			return Integer.parseInt(representation);
+		}
+		else if (type == IrIntLiteral.Type.HEX) { // 0x####
+			return Integer.parseInt(representation.substring(2), 16);
+		}
+		else { // 0b####
+			return Integer.parseInt(representation.substring(2), 2);
+		}
+		
+	}
+	
 	@Override
 	public void visit(IrMethodDecl node) {
 		if (found_main_method) { // ignore methods defined after main().

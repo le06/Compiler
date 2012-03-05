@@ -9,9 +9,23 @@ public class IrIntLiteral extends IrLiteral {
     private String representation;
     private Type num_type;
     
-    public enum Type {
+    public String getRepresentation() {
+		return representation;
+	}
+
+	public Type getType() {
+		return num_type;
+	}
+
+	public enum Type {
         DECIMAL,
         HEX,
         BINARY;
     }
+
+	@Override
+	public void accept(IrNodeVisitor v) {
+		// TODO Auto-generated method stub
+		// do nothing! v never accepts this class.
+	}
 }
