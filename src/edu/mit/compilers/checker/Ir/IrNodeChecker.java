@@ -55,8 +55,9 @@ public class IrNodeChecker implements IrNodeVisitor {
 	
 	private Stack<Env> env_stack;
 	private HashMap<String, IrMethodDecl> method_table;
-	private HashMap<String, Integer> array_table;
+	private HashMap<String, Long> array_table;
 
+	private Type current_type = Type.VOID;
 	private boolean found_main_method = false;
 	
 	private Env getCurrentEnv() { return env_stack.peek(); }
@@ -65,7 +66,7 @@ public class IrNodeChecker implements IrNodeVisitor {
 		env_stack = new Stack<Env>();
 		env_stack.push(new Env());
 		method_table = new HashMap<String, IrMethodDecl>();
-		array_table = new HashMap<String, Integer>();
+		array_table = new HashMap<String, Long>();
 	}
 	
 	/*
@@ -81,74 +82,93 @@ public class IrNodeChecker implements IrNodeVisitor {
 		}
 	}
 
+	public void visit(IrFieldDecl node) {
+		IrType type_node = node.getType();
+		
+		if (type_node.myType == IrType.Type.INT) {
+			current_type = Type.INT;
+		} else if (type_node.myType == IrType.Type.BOOLEAN) {
+			current_type = Type.BOOLEAN;
+		} else {
+			// TODO complain!
+			current_type = Type.VOID;
+		}
+
+		ArrayList<IrGlobalDecl> globals = node.getGlobals();
+		for (IrGlobalDecl g : globals) {
+			g.accept(this);
+		}
+	}
+	
 	// note that the parser rejects any fields that are declared after
 	// method declarations; hence we do not worry about method ids.
 	@Override
 	public void visit(IrBaseDecl node) {
-		IrType type_node = node.getType();
 		IrIdentifier id_node = node.getId();
 		
 		String id = id_node.getId();
-		HashMap<String, Type> fieldTable = getCurrentEnv().getFieldTable();
+		HashMap<String, Type> field_table = getCurrentEnv().getFieldTable();
 		
-		if (fieldTable.containsKey(id)) {
+		if (field_table.containsKey(id)) {
 			// TODO complain!
 		} else {
-			Type type;
-			if (type_node.myType == IrType.Type.INT) {
-				type = Type.INT;
-			} else if (type_node.myType == IrType.Type.BOOLEAN) {
-				type = Type.BOOLEAN;
-			} else {
-				// TODO complain!
-				type = Type.VOID;
-			}
-			
-			fieldTable.put(id, type);
+			// visitor will add id regardless of current_type's validity.
+			field_table.put(id, current_type);
 		}
 	}
 
 	@Override
 	public void visit(IrArrayDecl node) { //TODO: check array size decl
-		IrType type_node = node.getType();
 		IrIdentifier id_node = node.getId();
 		
 		String id = id_node.getId();
-		HashMap<String, Type> fieldTable = getCurrentEnv().getFieldTable();
+		HashMap<String, Type> field_table = getCurrentEnv().getFieldTable();
 		
-		if (fieldTable.containsKey(id)) {
+		if (field_table.containsKey(id)) {
 			// TODO complain!
 		} else {
-			Type type;
-			if (type_node.myType == IrType.Type.INT) {
+			Type type = Type.VOID;
+			if (current_type == Type.INT) {
 				type = Type.INT_ARRAY;
-			} else if (type_node.myType == IrType.Type.BOOLEAN) {
+			} else if (current_type == Type.BOOLEAN) {
 				type = Type.BOOLEAN_ARRAY;
-			} else {
-				// TODO complain!
-				type = Type.VOID;
 			}
 			
-			fieldTable.put(id, type);
-			
-			int array_size = parseIntLiteral(node.getArraySize());
+			long array_size;
+			try {
+				array_size = parseIntLiteral(node.getArraySize());
+				if (array_size <= 0) {
+					// TODO: complain!
+				}
+				else {
+			// visitor will add id regardless of current_type's validity.
+					field_table.put(id, type);
+					array_table.put(id, array_size);
+				}
+			} catch (NumberFormatException e) {
+				// TODO: complain!
+				// intliteral out of bounds.
+			}
 			
 		}	
 	}
-
-	private int parseIntLiteral(IrIntLiteral literal) {
+	
+	// if x < -9223372036854775808L or > 9223372036854775807L,
+	// this method will throw an exception.
+	private long parseIntLiteral(IrIntLiteral literal) 
+		throws NumberFormatException {
 
 		IrIntLiteral.Type type = literal.getType();
 		String representation = literal.getRepresentation();
 
 		if (type == IrIntLiteral.Type.DECIMAL) { // #####
-			return Integer.parseInt(representation);
+			return Long.parseLong(representation);
 		}
 		else if (type == IrIntLiteral.Type.HEX) { // 0x####
-			return Integer.parseInt(representation.substring(2), 16);
+			return Long.parseLong(representation.substring(2), 16);
 		}
 		else { // 0b####
-			return Integer.parseInt(representation.substring(2), 2);
+			return Long.parseLong(representation.substring(2), 2);
 		}
 		
 	}
@@ -161,9 +181,9 @@ public class IrNodeChecker implements IrNodeVisitor {
 		
 		IrIdentifier id_node = node.getId();
 		String id = id_node.getId();
-		HashMap<String, Type> fieldTable = getCurrentEnv().getFieldTable();
+		HashMap<String, Type> field_table = getCurrentEnv().getFieldTable();
 		
-		if (fieldTable.containsKey(id)) {
+		if (field_table.containsKey(id)) {
 			// TODO complain!
 		} else if (method_table.containsKey(id)) {
 			// TODO complain!

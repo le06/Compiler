@@ -6,10 +6,18 @@ public class IrFieldDecl extends IrMemberDecl {
 	
 	IrType type;
 	ArrayList<IrGlobalDecl> globals;
+	
+	public IrType getType() {
+		return type;
+	}
+
+	public ArrayList<IrGlobalDecl> getGlobals() {
+		return globals;
+	}
+
 	@Override
 	public void accept(IrNodeVisitor v) {
-		// TODO Auto-generated method stub
-		
+		v.visit(this);
 	}
 	
 }
