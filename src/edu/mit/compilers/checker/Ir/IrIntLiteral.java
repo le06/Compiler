@@ -36,4 +36,13 @@ public class IrIntLiteral extends Ir implements IrExpression {
 	public String toString() {
 	    return representation;
 	}
+	
+	public String toString(int s) {
+        StringBuilder out = new StringBuilder();
+        for (int i = 0; i < s; i++) {
+            out.append(" ");
+        }
+        out.append(this.toString());
+        return out.toString();
+    }
 }

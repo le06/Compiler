@@ -19,4 +19,17 @@ public class IrUnopExpr extends Ir implements IrExpression {
 		// TODO Auto-generated method stub
 		
 	}
+	
+	public String toString() {
+	    return operator.toString() + " " + expr.toString();
+	}
+	
+    public String toString(int s) {
+        StringBuilder out = new StringBuilder();
+        for (int i = 0; i < s; i++) {
+            out.append(" ");
+        }
+        out.append(this.toString());
+        return out.toString();
+    }
 }

@@ -20,4 +20,21 @@ public class IrPlusAssignStmt extends IrStatement {
 	public void accept(IrNodeVisitor v) {
 		v.visit(this);
 	}
+	
+	@Override
+    public String toString(int spaces_before) {
+        StringBuilder out = new StringBuilder();
+        for (int i = 0; i < spaces_before; i++) {
+            out.append(" ");
+        }
+        
+        out.append("+=\n");
+        out.append(lhs.toString(spaces_before+1));
+        out.append(rhs.toString(spaces_before+1));
+        return out.toString();
+    }
+    
+    public String toString() {
+        return lhs.toString() + " = " + rhs.toString();
+    }
 }

@@ -11,4 +11,12 @@ public class IrExprArg extends IrCalloutArg {
 	public void accept(IrNodeVisitor v) {
 		arg.accept(v); // is the arg well-formed?
 	}
+	
+	public String toString() {
+	    return arg.toString();
+	}
+	
+	public String toString(int s) {
+        return arg.toString(s);
+    }
 }

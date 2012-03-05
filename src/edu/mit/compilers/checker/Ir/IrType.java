@@ -18,4 +18,17 @@ public class IrType extends Ir {
 		// TODO Auto-generated method stub
 		// do nothing! v never accepts this class.
 	}
+	
+	public String toString() {
+	    return myType.toString();
+	}
+	
+    public String toString(int s) {
+        StringBuilder out = new StringBuilder();
+        for (int i = 0; i < s; i++) {
+            out.append(" ");
+        }
+        out.append(this.toString());
+        return out.toString();
+    }
 }

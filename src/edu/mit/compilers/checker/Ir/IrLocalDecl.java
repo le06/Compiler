@@ -18,4 +18,13 @@ public class IrLocalDecl extends Ir {
 	public String toString() {
 	    return id.toString();
 	}
+	
+	public String toString(int s) {
+        StringBuilder out = new StringBuilder();
+        for (int i = 0; i < s; i++) {
+            out.append(" ");
+        }
+        out.append(this.toString());
+        return out.toString();
+    }
 }
