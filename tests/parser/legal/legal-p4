@@ -1,5 +1,6 @@
 class Program {
   int a[5], b;
+  int c;
   void main() {
     if (a == !b && c == d) {
       a -= 0b10101001;

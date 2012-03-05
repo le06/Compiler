@@ -8,6 +8,20 @@ public class IrMethodDecl extends IrMemberDecl {
 	private ArrayList<IrVarDecl> args;
 	private IrBlock block;
 	
+	public IrMethodDecl(IrType type, IrIdentifier name) {
+	    return_type = type;
+	    id = name;
+	    args = new ArrayList<IrVarDecl>();
+	}
+	
+	public void addArg(IrVarDecl arg) {
+	    args.add(arg);
+	}
+	
+	public void addBlock(IrBlock b) {
+	    block = b;
+	}
+	
 	public IrType getReturnType() {
 		return return_type;
 	}

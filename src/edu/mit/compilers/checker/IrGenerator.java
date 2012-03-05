@@ -45,8 +45,27 @@ public class IrGenerator {
             break;
             
         case DecafParserTokenTypes.TK_callout:
-            // outIr = new IrCalloutStmt TODO
-            return null;
+            next = ast.getFirstChild();
+            IrStringLiteral fn = (IrStringLiteral)fromAST(next);
+            
+            Ir c_arg;
+            IrCalloutStmt callout_dec = new IrCalloutStmt(fn);
+            
+            next = next.getNextSibling();
+            for (int i = 1; i < ast.getNumberOfChildren(); i++) {
+                c_arg = fromAST(next);
+                if (c_arg instanceof IrStringLiteral) {
+                    callout_dec.addArg(new IrStringArg((IrStringLiteral)c_arg));
+                } else if (c_arg instanceof IrExpression) {
+                    callout_dec.addArg(new IrExprArg((IrExpression)c_arg));
+                } else {
+                    throw new RuntimeException("Illegal field declaration!");
+                }
+                next = next.getNextSibling();
+            }
+            
+            outIr = callout_dec;
+            break;
             
         case DecafParserTokenTypes.TK_class:
             IrClassDecl cdecl = new IrClassDecl();
@@ -245,12 +264,83 @@ public class IrGenerator {
             IrMethodCallStmt mstmt = new IrMethodCallStmt(name);
             
             next = next.getNextSibling();
-            for (int i = 0; i < ast.getNumberOfChildren() - 1; i++) {
+            for (int i = 1; i < ast.getNumberOfChildren(); i++) {
                 mstmt.addArg((IrExpression)fromAST(next));
                 next = next.getNextSibling();
             }
             
             outIr = mstmt;
+            break;
+            
+        case DecafParserTokenTypes.FIELD:
+            next = ast.getFirstChild();
+            IrType type = (IrType)fromAST(next);
+            
+            Ir global;
+            IrFieldDecl field_dec = new IrFieldDecl(type);
+            
+            next = next.getNextSibling();
+            for (int i = 1; i < ast.getNumberOfChildren(); i++) {
+                global = fromAST(next);
+                if (global instanceof IrIdentifier) {
+                    field_dec.addGlobal(new IrBaseDecl((IrIdentifier)global));
+                } else if (global instanceof IrArrayDecl) {
+                    field_dec.addGlobal((IrArrayDecl)global);
+                } else {
+                    throw new RuntimeException("Illegal field declaration!");
+                }
+                next = next.getNextSibling();
+            }
+            
+            outIr = field_dec;
+            break;
+            
+        case DecafParserTokenTypes.ARRAY:
+            next = ast.getFirstChild();
+            
+            outIr = new IrArrayDecl((IrIdentifier)fromAST(next),
+                                    (IrIntLiteral)fromAST(next.getNextSibling()));
+            break;
+            
+        case DecafParserTokenTypes.METHOD:
+            next = ast.getFirstChild();
+            type = (IrType)fromAST(next);
+            
+            next = next.getNextSibling();
+            IrIdentifier n = (IrIdentifier)fromAST(next);
+            
+            IrMethodDecl method = new IrMethodDecl(type, n);
+            
+            next = next.getNextSibling();
+            for (int i = 2; i < ast.getNumberOfChildren() - 1; i++) {
+                method.addArg((IrVarDecl)fromAST(next));
+                next = next.getNextSibling();
+            }
+            
+            method.addBlock((IrBlock)fromAST(next));
+            
+            outIr = method;
+            break;
+            
+        case DecafParserTokenTypes.BLOCK:
+            IrBlock this_block = new IrBlock();
+            
+            next = ast.getFirstChild();
+            for (int i = 0; i < ast.getNumberOfChildren(); i++) {
+                Ir node = fromAST(next);
+                
+                if (node instanceof IrStatement) {
+                    this_block.addStatement((IrStatement)node);
+                } else if (node instanceof IrVarDecl) {
+                    this_block.addDecl((IrVarDecl)node);
+                } else {
+                    throw new RuntimeException("Illegal line in block");
+                }
+                
+                next = next.getNextSibling();
+            }
+            
+            outIr = this_block;
             break;
         
         default:

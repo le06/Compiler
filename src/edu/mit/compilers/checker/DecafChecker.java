@@ -17,9 +17,6 @@ public class DecafChecker {
     
     public void check() throws RecognitionException, TokenStreamException {
         Ir ir = generateIr();
-        @SuppressWarnings("unused")
-        int a;
-        a = 3;
     }
     
     public boolean getError() {

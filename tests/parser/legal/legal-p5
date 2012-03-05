@@ -1,3 +1,7 @@
 class Program {
   int j, i[10];
+
+  int a(int b, int c) {
+    return b + c;
+  }
 }
