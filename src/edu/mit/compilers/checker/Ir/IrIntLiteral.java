@@ -1,23 +1,23 @@
 package edu.mit.compilers.checker.Ir;
 
-public class IrIntLiteral extends IrLiteral {
-    public IrIntLiteral(String value, Type type) {
+public class IrIntLiteral extends Ir implements IrExpression {
+    public IrIntLiteral(String value, NumType type) {
         representation = value;
         num_type = type;
     }
     
     private String representation;
-    private Type num_type;
+    private NumType num_type;
     
     public String getRepresentation() {
 		return representation;
 	}
 
-	public Type getType() {
+	public NumType getNumType() {
 		return num_type;
 	}
 
-	public enum Type {
+	public enum NumType {
         DECIMAL,
         HEX,
         BINARY;
@@ -25,7 +25,11 @@ public class IrIntLiteral extends IrLiteral {
 
 	@Override
 	public void accept(IrNodeVisitor v) {
-		// TODO Auto-generated method stub
-		// do nothing! v never accepts this class.
+		v.visit(this);
+	}
+
+	@Override
+	public IrType getExprType(IrNodeChecker c) {
+		return new IrType(IrType.Type.INT);
 	}
 }

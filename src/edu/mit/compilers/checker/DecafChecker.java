@@ -4,7 +4,7 @@ import antlr.ASTFactory;
 import antlr.RecognitionException;
 import antlr.TokenStreamException;
 import antlr.collections.AST;
-import edu.mit.compilers.checker.Ir.Ir;
+import edu.mit.compilers.checker.Ir.*;
 import edu.mit.compilers.grammar.DecafParser;
 import edu.mit.compilers.grammar.LineNumberedAST;
 
@@ -24,6 +24,8 @@ public class DecafChecker {
     public void check() throws RecognitionException, TokenStreamException {
         @SuppressWarnings("unused")
         Ir ir = generateIr();
+        IrNodeChecker checker = new IrNodeChecker();
+        ir.accept(checker);
     }
     
     public boolean getError() {

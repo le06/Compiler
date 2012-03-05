@@ -13,8 +13,13 @@ public class IrIdentifier extends Ir implements IrExpression {
     
 	@Override
 	public void accept(IrNodeVisitor v) {
-		// TODO Auto-generated method stub
-		// do nothing! v never accepts this class.
+		// do nothing! scanner enforces correctness.
+	}
+
+	@Override
+	public IrType getExprType(IrNodeChecker c) {
+		// identifiers != locations. an identifier type is meaningless.
+		return null;
 	}
 
 }

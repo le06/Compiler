@@ -6,4 +6,10 @@ public class IrStringLiteral extends Ir {
     }
     
 	String literal;
+
+	@Override
+	public void accept(IrNodeVisitor v) {
+		// TODO Auto-generated method stub
+		// no need to visit; correctness enforced by scanner.
+	}
 }

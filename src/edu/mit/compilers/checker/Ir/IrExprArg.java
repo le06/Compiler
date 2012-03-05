@@ -6,4 +6,9 @@ public class IrExprArg extends IrCalloutArg {
     }
     
 	private IrExpression arg;
+
+	@Override
+	public void accept(IrNodeVisitor v) {
+		arg.accept(v); // is the arg well-formed?
+	}
 }

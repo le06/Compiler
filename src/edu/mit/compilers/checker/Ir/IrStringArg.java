@@ -6,4 +6,9 @@ public class IrStringArg extends IrCalloutArg {
     }
     
 	private IrStringLiteral arg;
+
+	@Override
+	public void accept(IrNodeVisitor v) {
+		// no need to visit. scanner enforces correctness
+	}
 }

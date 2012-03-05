@@ -21,6 +21,7 @@ public class IrClassDecl extends Ir {
 		for (IrMemberDecl m : members) {
 			m.accept(v);
 		}
+		v.visit(this);
 	}
 	
 	public String toString() {

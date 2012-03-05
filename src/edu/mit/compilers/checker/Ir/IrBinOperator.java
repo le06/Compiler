@@ -1,6 +1,6 @@
 package edu.mit.compilers.checker.Ir;
 
-public enum IrBinOperator{
+public enum IrBinOperator {
     MUL,
     DIV,
     MOD,
