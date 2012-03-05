@@ -17,7 +17,4 @@ public abstract class Ir implements IrNode {
     }
 
     public abstract String toString(int s);
-/*    public String toString() {
-        return "";
-    }*/
 }

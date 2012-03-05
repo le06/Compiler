@@ -31,4 +31,19 @@ public class IrCalloutStmt extends IrInvokeStmt {
 	public IrType getExprType(IrNodeChecker c) {
 		return new IrType(IrType.Type.INT); // callouts always return int.
 	}
+	
+	@Override
+    public String toString(int s) {
+        StringBuilder out = new StringBuilder();
+        for (int i = 0; i < s; i++) {
+            out.append(" ");
+        }
+        out.append("Callout:\n");
+        out.append(function_name.toString(s+1).concat("\n"));
+        for (IrCalloutArg d : args) {
+            out.append(d.toString(s+1).concat("\n"));
+        }
+        
+        return out.toString();
+    }
 }

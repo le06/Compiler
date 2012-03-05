@@ -24,12 +24,15 @@ public class IrClassDecl extends Ir {
 		v.visit(this);
 	}
 	
-	public String toString() {
+	public String toString(int s) {
 	    StringBuilder out = new StringBuilder();
+	    for (int i = 0; i < s; i++) {
+            out.append(" ");
+        }
 	    out.append("Program:\n");
 	    
 	    for (int i = 0; i < members.size(); i++) {
-	        out.append(members.get(i).toString() + "\n");
+	        out.append(members.get(i).toString(s+1) + "\n");
 	    }
 	    
 	    return out.toString();
