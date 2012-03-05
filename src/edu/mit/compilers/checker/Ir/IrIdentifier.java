@@ -22,4 +22,7 @@ public class IrIdentifier extends Ir implements IrExpression {
 		return null;
 	}
 
+	public String toString() {
+	    return id;
+	}
 }

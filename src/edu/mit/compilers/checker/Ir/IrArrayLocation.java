@@ -8,11 +8,6 @@ public class IrArrayLocation extends IrLocation {
     
 	private IrIdentifier id;
 	private IrExpression index;
-	
-
-	public String toString() {
-	    return id.toString() + "[\n" + index.toString() + "\n]";
-	}
 
 	public IrIdentifier getId() {
 		return id;
@@ -30,4 +25,8 @@ public class IrArrayLocation extends IrLocation {
 		v.visit(this);
 		index.accept(v);
 	}
+	
+	public String toString() {
+        return id.toString() + "[" + index.toString() + "]";
+    }
 }

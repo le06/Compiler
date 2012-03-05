@@ -17,4 +17,8 @@ public class IrBoolLiteral extends Ir implements IrExpression {
 		// TODO Auto-generated method stub
 		// no need to visit; the parser guarantees validity.
 	}
+	
+	public String toString() {
+	    return Boolean.toString(literal);
+	}
 }

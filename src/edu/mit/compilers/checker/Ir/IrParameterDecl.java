@@ -21,4 +21,8 @@ public class IrParameterDecl extends Ir {
 		// TODO Auto-generated method stub
 		// do nothing! v never accepts this class.
 	}
+	
+	public String toString() {
+	    return type.toString() + " " + id.toString();
+	}
 }

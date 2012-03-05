@@ -28,4 +28,21 @@ public class IrVarDecl extends Ir {
 		v.visit(this);
 	}
 	
+	public String toString() {
+	    StringBuilder out = new StringBuilder();
+	    out.append(type.toString().concat(" "));
+	    for (IrLocalDecl i : locals) {
+	        out.append(i.toString());
+	    }
+	    return out.toString();
+	}
+	
+	public String toString(int s) {
+	    StringBuilder out = new StringBuilder();
+	    for (int i = 0; i < s; i++) {
+	        out.append(" ");
+	    }
+	    out.append(this.toString());
+	    return out.toString();
+	}
 }
