@@ -11,11 +11,11 @@ public class IrMethodDecl extends IrMemberDecl {
 	public IrMethodDecl(IrType type, IrIdentifier name) {
 	    return_type = type;
 	    id = name;
-	    args = new ArrayList<IrVarDecl>();
+	    params = new ArrayList<IrParameterDecl>();
 	}
 	
-	public void addArg(IrVarDecl arg) {
-	    args.add(arg);
+	public void addArg(IrParameterDecl arg) {
+	    params.add(arg);
 	}
 	
 	public void addBlock(IrBlock b) {
