@@ -8,4 +8,15 @@ public class IrWhileStmt extends IrStatement {
     
     private IrExpression condition;
     private IrBlock block;
+    
+	public IrExpression getCondition() {
+		return condition;
+	}
+	public IrBlock getBlock() {
+		return block;
+	}
+	@Override
+	public void accept(IrNodeVisitor v) {
+		v.visit(this);
+	}
 }

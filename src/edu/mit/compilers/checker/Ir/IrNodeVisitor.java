@@ -23,16 +23,17 @@ public interface IrNodeVisitor {
 	
 	public void visit(IrReturnStmt node);
 	
+	public void visit(IrWhileStmt node);
+
+	
+	
+	public void visit(IrForStmt node);	
 	
 	public void visit(IrAssignStmt node);
 
 	public void visit(IrPlusAssignStmt node);
 
 	public void visit(IrMinusAssignStmt node);
-
-	public void visit(IrWhileStmt node);
-
-	public void visit(IrForStmt node);
 
 	public void visit(IrIfStmt node);
 

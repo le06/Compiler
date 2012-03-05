@@ -10,7 +10,7 @@ public class IrNodeChecker implements IrNodeVisitor {
 	 * Auxilliary classes for implementing symbol tables.
 	 */
 	protected enum Type {
-		VOID, INT, INT_ARRAY, BOOLEAN, BOOLEAN_ARRAY
+		MIXED, VOID, VOID_ARRAY, INT, INT_ARRAY, BOOLEAN, BOOLEAN_ARRAY
 	}
 
 	protected class Env {
@@ -95,15 +95,10 @@ public class IrNodeChecker implements IrNodeVisitor {
 	 */
 
 	public void visit(IrFieldDecl node) {
-		IrType type_node = node.getType();
+		current_type = determineType(node.getType());
 		
-		if (type_node.myType == IrType.Type.INT) {
-			current_type = Type.INT;
-		} else if (type_node.myType == IrType.Type.BOOLEAN) {
-			current_type = Type.BOOLEAN;
-		} else {
+		if (current_type == Type.VOID) {
 			// TODO complain!
-			current_type = Type.VOID;
 		}
 
 		ArrayList<IrGlobalDecl> globals = node.getGlobals();
@@ -139,7 +134,7 @@ public class IrNodeChecker implements IrNodeVisitor {
 		if (field_table.containsKey(id)) {
 			// TODO complain!
 		} else {
-			Type type = Type.VOID;
+			Type type = Type.VOID_ARRAY;
 			if (current_type == Type.INT) {
 				type = Type.INT_ARRAY;
 			} else if (current_type == Type.BOOLEAN) {
@@ -207,15 +202,10 @@ public class IrNodeChecker implements IrNodeVisitor {
 	
 	@Override
 	public void visit(IrVarDecl node) {
-		IrType type_node = node.getType();
+		current_type = determineType(node.getType());
 		
-		if (type_node.myType == IrType.Type.INT) {
-			current_type = Type.INT;
-		} else if (type_node.myType == IrType.Type.BOOLEAN) {
-			current_type = Type.BOOLEAN;
-		} else {
+		if (current_type == Type.VOID) {
 			// TODO complain!
-			current_type = Type.VOID;
 		}
 
 		ArrayList<IrLocalDecl> locals = node.getLocals();
@@ -260,7 +250,7 @@ public class IrNodeChecker implements IrNodeVisitor {
 		Ir current_body = env.getCurrentBody();
 		boolean legal_stmt = false;
 		
-		while (!(current_body instanceof IrMethodDecl)) {			
+		while (env != null && !(current_body instanceof IrMethodDecl)) {
 			if ((current_body instanceof IrForStmt) ||
 				(current_body instanceof IrWhileStmt)) {
 				legal_stmt = true;
@@ -269,7 +259,10 @@ public class IrNodeChecker implements IrNodeVisitor {
 			env = env.getPreviousEnv();
 			current_body = env.getCurrentBody();
 		}
-
+		if (env == null) { // sanity check.
+			// TODO: complain hard!
+		}
+		
 		if (!legal_stmt) {
 			// TODO: complain!
 		}
@@ -283,7 +276,7 @@ public class IrNodeChecker implements IrNodeVisitor {
 		Ir current_body = env.getCurrentBody();
 		boolean legal_stmt = false;
 		
-		while (!(current_body instanceof IrMethodDecl)) {			
+		while (env != null && !(current_body instanceof IrMethodDecl)) {			
 			if ((current_body instanceof IrForStmt) ||
 				(current_body instanceof IrWhileStmt)) {
 				legal_stmt = true;
@@ -292,7 +285,10 @@ public class IrNodeChecker implements IrNodeVisitor {
 			env = env.getPreviousEnv();
 			current_body = env.getCurrentBody();
 		}
-
+		if (env == null) { // sanity check.
+			// TODO: complain hard!
+		}
+		
 		if (!legal_stmt) {
 			// TODO: complain!
 		}
@@ -300,11 +296,49 @@ public class IrNodeChecker implements IrNodeVisitor {
 	
 	@Override
 	public void visit(IrReturnStmt node) {
+		Env env = getCurrentEnv();
+		Ir current_body = env.getCurrentBody();
+		while (env != null && !(current_body instanceof IrMethodDecl)) {
+			env = env.getPreviousEnv();
+			current_body = env.getCurrentBody();
+		}
+		if (env == null) { // sanity check.
+			// TODO: complain hard!
+		}
+		
+		// what is this method's return value?
+		IrType method_type_node = ((IrMethodDecl)current_body).getReturnType();
+		IrType return_type_node = node.getReturnExpr().getType();
+		Type method_type = determineType(method_type_node);
+		Type return_type = determineType(return_type_node);
+
+		if (method_type != return_type) {
+			// TODO: complain! return type mismatch.
+		}
+
+	}
+	
+	@Override
+	public void visit(IrWhileStmt node) {
+		IrType type_node = node.getCondition().getType();
+		Type type = determineType(type_node);
+		if (type != Type.BOOLEAN) {
+			// TODO: complain!
+		}
+		
+		IrBlock block = node.getBlock();
+		// create a new scope...
+		Env method_env = new Env(getCurrentEnv(), node);
+		env_stack.push(method_env); // enter the new env.
+		block.accept(this);	// execute the block.
+		env_stack.pop();	// exit the env.
+	}
+
+	@Override
+	public void visit(IrForStmt node) {
 		// TODO Auto-generated method stub
 
-	}	
-	
-	
+	}
 	
 	@Override
 	public void visit(IrAssignStmt node) {
@@ -320,18 +354,6 @@ public class IrNodeChecker implements IrNodeVisitor {
 
 	@Override
 	public void visit(IrMinusAssignStmt node) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void visit(IrWhileStmt node) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void visit(IrForStmt node) {
 		// TODO Auto-generated method stub
 
 	}
@@ -483,6 +505,18 @@ public class IrNodeChecker implements IrNodeVisitor {
 		else { // 0b####
 			return Long.parseLong(representation.substring(2), 2);
 		}
-		
 	}
+	
+	private Type determineType(IrType type) {
+		if (type.myType == IrType.Type.INT) {
+			return Type.INT;
+		} else if (type.myType == IrType.Type.BOOLEAN) {
+			return Type.BOOLEAN;
+		} else if (type.myType == IrType.Type.VOID) {
+			return Type.VOID;
+		} else {
+			return Type.MIXED; // only for binary exprs. invalid type.
+		}
+	}
+	
 }
