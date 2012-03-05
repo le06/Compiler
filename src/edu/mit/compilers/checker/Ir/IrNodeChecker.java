@@ -189,7 +189,7 @@ public class IrNodeChecker implements IrNodeVisitor {
 			error_flag = true;
 			int line = type_node.getLineNumber();
 			int column = type_node.getColumnNumber();
-			String message = "Invalid type for variable declaration";
+			String message = "Invalid type for variable declaration: VOID";
 			System.out.println(errorPosMessage(line, column) + message);
 		}
 
@@ -212,7 +212,7 @@ public class IrNodeChecker implements IrNodeVisitor {
 			error_flag = true;
 			int line = id_node.getLineNumber();
 			int column = id_node.getColumnNumber();
-			String message = "Duplicate base variable identifier";
+			String message = "Duplicate base variable identifier: " + id;
 			System.out.println(errorPosMessage(line, column) + message);
 		} else {
 			// visitor will add id regardless of current_type's validity.
@@ -229,7 +229,7 @@ public class IrNodeChecker implements IrNodeVisitor {
 			error_flag = true;
 			int line = id_node.getLineNumber();
 			int column = id_node.getColumnNumber();
-			String message = "Duplicate array variable identifier";
+			String message = "Duplicate array variable identifier: " + id;
 			System.out.println(errorPosMessage(line, column) + message);
 		} else {
 			long array_size;
@@ -281,7 +281,7 @@ public class IrNodeChecker implements IrNodeVisitor {
 		if (method_table.containsKey(id)) {
 			int line = id_node.getLineNumber();
 			int column = id_node.getColumnNumber();
-			String message = "Duplicate method identifier";
+			String message = "Duplicate method identifier: " + id;
 			System.out.println(errorPosMessage(line, column) + message);
 		} else {
 			method_table.put(id, node);
@@ -311,7 +311,7 @@ public class IrNodeChecker implements IrNodeVisitor {
 				error_flag = true;
 				int line = p.getId().getLineNumber();
 				int column = p.getId().getColumnNumber();
-				String message = "Duplicate identifier in method args";
+				String message = "Duplicate identifier in method args: " + name;
 				System.out.println(errorPosMessage(line, column) + message);
 			}
 			else {
@@ -337,7 +337,7 @@ public class IrNodeChecker implements IrNodeVisitor {
 			error_flag = true;
 			int line = type_node.getLineNumber();
 			int column = type_node.getColumnNumber();
-			String message = "Invalid type for variable declaration";
+			String message = "Invalid type for variable declaration: void";
 			System.out.println(errorPosMessage(line, column) + message);
 		}
 
@@ -361,7 +361,7 @@ public class IrNodeChecker implements IrNodeVisitor {
 			error_flag = true;
 			int line = id_node.getLineNumber();
 			int column = id_node.getColumnNumber();
-			String message = "Duplicate local variable identifier";
+			String message = "Duplicate local variable identifier: " + id;
 			System.out.println(errorPosMessage(line, column) + message);
 		} else {
 			// visitor will add id regardless of current_type's validity.
@@ -591,7 +591,7 @@ public class IrNodeChecker implements IrNodeVisitor {
 			error_flag = true;
 			int line = method_name.getLineNumber();
 			int column = method_name.getColumnNumber();
-			String message = "Cannot call to undefined method";
+			String message = "Cannot call to undefined method: " + method_name.getId();
 			System.out.println(errorPosMessage(line, column) + message);
 			
 			return;
@@ -750,7 +750,7 @@ public class IrNodeChecker implements IrNodeVisitor {
 			error_flag = true;
 			int line = id_node.getLineNumber();
 			int column = id_node.getColumnNumber();
-			String message = "Variable identifier is undefined";
+			String message = "Variable identifier is undefined: " + id_node.getId();
 			System.out.println(errorPosMessage(line, column) + message);
 		}
 	}
@@ -762,7 +762,7 @@ public class IrNodeChecker implements IrNodeVisitor {
 			error_flag = true;
 			int line = id_node.getLineNumber();
 			int column = id_node.getColumnNumber();
-			String message = "Array identifier is undefined";
+			String message = "Array identifier is undefined: " + id_node.getId();
 			System.out.println(errorPosMessage(line, column) + message);
 		}
 		
