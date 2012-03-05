@@ -101,7 +101,7 @@ public class IrNodeChecker implements IrNodeVisitor {
 		String name = id.getId();
 		Type type = array_types.get(name);
 		if (type == null || type == Type.VOID) {
-			return null;
+			return null; // array undefined.
 		} else if (type == Type.INT) {
 			return new IrType(IrType.Type.INT);
 		} else {
@@ -123,7 +123,7 @@ public class IrNodeChecker implements IrNodeVisitor {
 			}
 			current_env = current_env.getPreviousEnv();
 		}
-		return null;
+		return null; // var undefined.
 	}
 
 	public IrType lookupMethodType(IrIdentifier id) {
@@ -498,8 +498,8 @@ public class IrNodeChecker implements IrNodeVisitor {
 		Type type = determineType(type_node);
 		if (type != Type.BOOLEAN) {
 			error_flag = true;
-			int line = type_node.getLineNumber();
-			int column = type_node.getColumnNumber();
+			int line = node.getLineNumber();
+			int column = node.getColumnNumber();
 			String message = "While loop condition must have a boolean type";
 			System.out.println(errorPosMessage(line, column) + message);
 		}
@@ -579,7 +579,7 @@ public class IrNodeChecker implements IrNodeVisitor {
 	}
 	
 	
-	// need to be careful with currently_walking_expr, so that we can tell
+	// need to be careful with currently_evaluating_expr, so that we can tell
 	// whether a method call is part of an expression or not.
 	@Override
 	public void visit(IrMethodCallStmt node) {
@@ -648,9 +648,7 @@ public class IrNodeChecker implements IrNodeVisitor {
 			arg.accept(this);
 		}
 		currently_evaluating_expr = false;
-	}	
-	
-	
+	}
 
 	@Override
 	public void visit(IrAssignStmt node) {
@@ -771,7 +769,13 @@ public class IrNodeChecker implements IrNodeVisitor {
 		IrExpression index_node = node.getIndex();
 		Type index_type = determineType(index_node.getExprType(this));
 
-		if (index_type != Type.INT) {
+		if (index_type == null) {
+			error_flag = true;
+			int line = index_node.getLineNumber();
+			int column = index_node.getColumnNumber();
+			String message = "Array index is undefined";
+			System.out.println(errorPosMessage(line, column) + message);
+		} else if (index_type != Type.INT) {
 			error_flag = true;
 			int line = index_node.getLineNumber();
 			int column = index_node.getColumnNumber();
@@ -839,6 +843,10 @@ public class IrNodeChecker implements IrNodeVisitor {
 	}
 	
 	private Type determineType(IrType type) {
+		if (type == null) {
+			return null;
+		}
+		
 		if (type.myType == IrType.Type.INT) {
 			return Type.INT;
 		} else if (type.myType == IrType.Type.BOOLEAN) {

@@ -12,14 +12,13 @@ public class IrIdentifier extends Ir implements IrExpression {
 	}
     
 	@Override
+	public IrType getExprType(IrNodeChecker c) {
+		return c.lookupVarType(this);
+	}
+	
+	@Override
 	public void accept(IrNodeVisitor v) {
 		// do nothing! scanner enforces correctness.
-	}
-
-	@Override
-	public IrType getExprType(IrNodeChecker c) {
-		// identifiers != locations. an identifier type is meaningless.
-		return null;
 	}
 
 }
