@@ -26,7 +26,9 @@ public class IrReturnStmt extends IrStatement {
             out.append(" ");
         }
         out.append("return\n");
-        out.append(return_expr.toString(s+1));
+        if (return_expr != null) {
+            out.append(return_expr.toString(s+1));
+        }
         return out.toString();
     }
 }

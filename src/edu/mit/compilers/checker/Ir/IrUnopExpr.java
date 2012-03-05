@@ -6,6 +6,15 @@ public class IrUnopExpr extends Ir implements IrExpression {
         expr = expression;
     }
     
+    public boolean isNegativeLiteral() {
+    	if (operator == IrUnaryOperator.MINUS &&
+    			(expr instanceof IrIntLiteral)) {
+    		return true;
+    	} else {
+    		return false;
+    	}
+    }
+    
     private IrUnaryOperator operator;
     private IrExpression expr;
 

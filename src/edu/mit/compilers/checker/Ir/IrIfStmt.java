@@ -36,7 +36,9 @@ public class IrIfStmt extends IrStatement {
         out.append("IF:\n");
         out.append(condition.toString(s + 1).concat("\n"));
         out.append(true_block.toString(s+1).concat("\n"));
-        out.append(false_block.toString(s+1).concat("\n"));
+        if (false_block != null) {
+            out.append(false_block.toString(s+1).concat("\n"));
+        }
 
         return out.toString();
     }

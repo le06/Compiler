@@ -102,18 +102,14 @@ public class IrGenerator {
             
         case DecafParserTokenTypes.TK_if:
             next = ast.getFirstChild();
-            
             IrExpression test = (IrExpression)fromAST(next);
-            
             next = next.getNextSibling();
             IrBlock if_block = (IrBlock)fromAST(next);
-            
             next = next.getNextSibling();
             IrBlock else_block = null;
             if (next != null) {
                 else_block = (IrBlock)fromAST(next);
             }
-            
             outIr = new IrIfStmt(test, if_block, else_block);
             break;
             
@@ -146,27 +142,31 @@ public class IrGenerator {
         
 
         case DecafParserTokenTypes.NOT:
-            IrExpression expr = (IrExpression)fromAST(ast.getFirstChild());
-            expr.setNot();
-            
-/*            outIr = new IrUnopExpr(IrUnaryOperator.NOT,
-                         ));*/
-            outIr = (Ir) expr;
+            outIr = new IrUnopExpr(IrUnaryOperator.NOT,
+                         (IrExpression)fromAST(ast.getFirstChild()));
             break;
         
 
         case DecafParserTokenTypes.MINUS:
             if (ast.getNumberOfChildren() == 1) {
-                expr = (IrExpression)fromAST(ast.getFirstChild());
-                expr.setNeg();
-/*            outIr = new IrUnopExpr(IrUnaryOperator.MINUS,
-                    (IrExpression)fromAST(ast.getFirstChild()));*/
-                outIr = (Ir)expr;
+            	IrExpression expr = (IrExpression)fromAST(ast.getFirstChild());
+            	
+	            IrUnopExpr negNode = new IrUnopExpr(IrUnaryOperator.MINUS,
+	                    expr);
+	            
+	            if (negNode.isNegativeLiteral()) {
+	            	IrIntLiteral literal = (IrIntLiteral)expr;
+	            	outIr = new IrIntLiteral(literal.getRepresentation(),
+	            			literal.getNumType(),
+	            			true);
+	            }
+	            else {
+	            	outIr = negNode;
+	            }
             } else {
                 outIr = parseBinOp(ast, IrBinOperator.MINUS);
             }
             break;
-        
 
         case DecafParserTokenTypes.MUL:
             outIr = parseBinOp(ast, IrBinOperator.MUL);

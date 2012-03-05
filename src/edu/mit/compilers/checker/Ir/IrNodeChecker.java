@@ -1,5 +1,6 @@
 package edu.mit.compilers.checker.Ir;
 
+import java.math.BigInteger;
 import java.util.Stack;
 import java.util.HashMap;
 import java.util.ArrayList;
@@ -871,7 +872,27 @@ public class IrNodeChecker implements IrNodeVisitor {
 	@Override
 	public void visit(IrUnopExpr node) {
 		currently_evaluating_expr++;
-		// TODO fill in...
+
+		IrUnaryOperator op = node.getOperator();
+		
+		IrExpression expr = node.getExpr();
+		Type expr_type = determineType(expr.getExprType(this));
+
+		if (expr_type == Type.MIXED || expr_type == Type.VOID) {
+			error_flag = true;
+			int line = expr.getLineNumber();
+			int column = expr.getColumnNumber();
+			String message = "Unary expression has invalid type";
+			System.out.println(errorPosMessage(line, column) + message);
+		} else if ((expr_type == Type.INT && op == IrUnaryOperator.NOT) || 
+				(expr_type == Type.BOOLEAN && op == IrUnaryOperator.MINUS)) {
+			error_flag = true;
+			int line = expr.getLineNumber();
+			int column = expr.getColumnNumber();
+			String message = "Unary operator and expression have mismatching types";
+			System.out.println(errorPosMessage(line, column) + message);
+		}
+		
 		currently_evaluating_expr--;
 	}
 
@@ -901,22 +922,37 @@ public class IrNodeChecker implements IrNodeVisitor {
 	}
 	
 	// if x < -9223372036854775808L or > 9223372036854775807L,
-	// this method will throw an exception.
+	// this method should throw an exception.
 	private long parseIntLiteral(IrIntLiteral literal) 
 		throws NumberFormatException {
 
 		IrIntLiteral.NumType num_type = literal.getNumType();
 		String representation = literal.getRepresentation();
 
+		BigInteger result;
+		
 		if (num_type == IrIntLiteral.NumType.DECIMAL) { // #####
-			return Long.parseLong(representation);
+			result = new BigInteger(representation);
 		}
 		else if (num_type == IrIntLiteral.NumType.HEX) { // 0x####
-			return Long.parseLong(representation.substring(2), 16);
+			result = new BigInteger(representation.substring(2), 16);
 		}
 		else { // 0b####
-			return Long.parseLong(representation.substring(2), 2);
+			result = new BigInteger(representation.substring(2), 2);
 		}
+		
+		if (literal.isNegative()) {
+			result = result.negate();
+		}
+		
+		Long truncated_result = result.longValue();
+		BigInteger comparison = new BigInteger(truncated_result.toString());
+		
+		if (!result.equals(comparison)) {
+			throw new NumberFormatException();
+		}
+		
+		return truncated_result;
 	}
 	
 	private Type determineType(IrType type) {

@@ -4,10 +4,18 @@ public class IrIntLiteral extends Ir implements IrExpression {
     public IrIntLiteral(String value, NumType type) {
         representation = value;
         num_type = type;
+        is_negative = false;
+    }
+    
+    public IrIntLiteral(String value, NumType type, boolean is_negative) {
+        representation = value;
+        num_type = type;
+        this.is_negative = is_negative;
     }
     
     private String representation;
     private NumType num_type;
+    private boolean is_negative;
     
     public String getRepresentation() {
 		return representation;
@@ -17,6 +25,10 @@ public class IrIntLiteral extends Ir implements IrExpression {
 		return num_type;
 	}
 
+	public boolean isNegative() {
+		return is_negative;
+	}
+	
 	public enum NumType {
         DECIMAL,
         HEX,
