@@ -10,4 +10,8 @@ public class IrBinopExpr extends Ir implements IrExpression {
     private IrBinOperator operator;
     private IrExpression lhs;
     private IrExpression rhs;
+    
+    public String toString() {
+        return lhs.toString() + " " + operator.toString() + " " + rhs.toString();
+    }
 }

@@ -22,4 +22,15 @@ public class IrClassDecl extends Ir {
 			m.accept(v);
 		}
 	}
+	
+	public String toString() {
+	    StringBuilder out = new StringBuilder();
+	    out.append("Program:\n");
+	    
+	    for (int i = 0; i < members.size(); i++) {
+	        out.append(members.get(i).toString() + "\n");
+	    }
+	    
+	    return out.toString();
+	}
 }

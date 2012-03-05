@@ -8,4 +8,8 @@ public class IrArrayLocation extends IrLocation {
     
 	private IrIdentifier id;
 	private IrExpression index;
+	
+	public String toString() {
+	    return id.toString() + "[\n" + index.toString() + "\n]";
+	}
 }
