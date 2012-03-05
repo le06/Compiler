@@ -17,9 +17,11 @@ public class IrBlock extends Ir {
 
 	@Override
 	public void accept(IrNodeVisitor v) {
-		// TODO Auto-generated method stub
-
-		// push a new env on stack...
-		// then iterate through decls and stmts.
+		for (IrVarDecl d : var_decls) {
+			d.accept(v);
+		}
+		for (IrStatement s : statements) {
+			s.accept(v);
+		}
 	}
 }

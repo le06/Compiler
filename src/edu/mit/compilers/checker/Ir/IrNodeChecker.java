@@ -15,11 +15,29 @@ public class IrNodeChecker implements IrNodeVisitor {
 
 	protected class Env {
 		private HashMap<String, Type> field_table;
+		private Env previous_env;
+		private IrMethodDecl current_method;
 
 		public Env() {
 			field_table = new HashMap<String, Type>();
+			previous_env = null;
+			current_method = null;
+		}
+		
+		public Env(Env previous_env, IrMethodDecl invoker) {
+			field_table = new HashMap<String, Type>();
+			this.previous_env = previous_env;
+			this.current_method = invoker;
+		}
+		
+		public Env getPreviousEnv() {
+			return previous_env;
 		}
 
+		public IrMethodDecl getCurrentMethod() {
+			return current_method;
+		}
+		
 		public HashMap<String, Type> getFieldTable() {
 			return field_table;
 		}
@@ -78,7 +96,10 @@ public class IrNodeChecker implements IrNodeVisitor {
 		}
 		
 		for (IrMethodDecl m : method_table.values()) {
+			Env method_env = new Env(getCurrentEnv(), m);
+			env_stack.push(method_env); // new env for each method.
 			m.getBlock().accept(this);
+			env_stack.pop();	// on exit, destroy the env.
 		}
 	}
 
@@ -183,7 +204,8 @@ public class IrNodeChecker implements IrNodeVisitor {
 	 */
 	@Override
 	public void visit(IrBlock node) {
-		// TODO Auto-generated method stub
+		// never called.
+		// it's enough for var_decls and statements to accept this visitor.
 	}
 	
 	@Override
@@ -207,8 +229,20 @@ public class IrNodeChecker implements IrNodeVisitor {
 	
 	@Override
 	public void visit(IrLocalDecl node) {
-		// TODO Auto-generated method stub
-		// local scope; need to be careful!
+		IrIdentifier id_node = node.getId();
+		
+		String id = id_node.getId();
+		HashMap<String, Type> field_table = getCurrentEnv().getFieldTable();
+		
+		// i.e. if the id is declared twice IN THE SAME SCOPE.
+		// note that since method calls and decls can be distinguished,
+		// method ids are never shadowed!
+		if (field_table.containsKey(id)) {
+			// TODO complain!
+		} else {
+			// visitor will add id regardless of current_type's validity.
+			field_table.put(id, current_type);
+		}
 	}
 
 	@Override
