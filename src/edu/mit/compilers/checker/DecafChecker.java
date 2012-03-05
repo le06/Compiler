@@ -1,10 +1,12 @@
 package edu.mit.compilers.checker;
 
+import antlr.ASTFactory;
 import antlr.RecognitionException;
 import antlr.TokenStreamException;
 import antlr.collections.AST;
 import edu.mit.compilers.checker.Ir.Ir;
 import edu.mit.compilers.grammar.DecafParser;
+import edu.mit.compilers.grammar.LineNumberedAST;
 
 public class DecafChecker {
     private DecafParser parser;
@@ -12,7 +14,11 @@ public class DecafChecker {
     private boolean debug;
     
     public DecafChecker (DecafParser decaf_parser) {
+        // Save the line/column numbers so we get meaningful parse data.
+        ASTFactory factory = new ASTFactory();
+        factory.setASTNodeClass(LineNumberedAST.class);
         parser = decaf_parser;
+        parser.setASTFactory(factory);
     }
     
     public void check() throws RecognitionException, TokenStreamException {
