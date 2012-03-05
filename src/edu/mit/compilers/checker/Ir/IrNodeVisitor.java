@@ -14,6 +14,8 @@ public interface IrNodeVisitor {
 	public void visit(IrBlock node);
 	
 	public void visit(IrVarDecl node);
+	
+	public void visit(IrLocalDecl node);
 
 	public void visit(IrAssignStmt node);
 

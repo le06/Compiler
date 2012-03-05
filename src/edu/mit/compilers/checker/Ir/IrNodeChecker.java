@@ -153,26 +153,6 @@ public class IrNodeChecker implements IrNodeVisitor {
 		}	
 	}
 	
-	// if x < -9223372036854775808L or > 9223372036854775807L,
-	// this method will throw an exception.
-	private long parseIntLiteral(IrIntLiteral literal) 
-		throws NumberFormatException {
-
-		IrIntLiteral.Type type = literal.getType();
-		String representation = literal.getRepresentation();
-
-		if (type == IrIntLiteral.Type.DECIMAL) { // #####
-			return Long.parseLong(representation);
-		}
-		else if (type == IrIntLiteral.Type.HEX) { // 0x####
-			return Long.parseLong(representation.substring(2), 16);
-		}
-		else { // 0b####
-			return Long.parseLong(representation.substring(2), 2);
-		}
-		
-	}
-	
 	@Override
 	public void visit(IrMethodDecl node) {
 		if (found_main_method) { // ignore methods defined after main().
@@ -191,23 +171,44 @@ public class IrNodeChecker implements IrNodeVisitor {
 			method_table.put(id, node);
 			if (id.equals("main")) {
 				found_main_method = true;
-				if (node.getArgs().size() > 0) {
+				if (node.getParams().size() > 0) {
 					// TODO complain!
 				}
 			}
 		}
 	}
 	
-	@Override
-	public void visit(IrVarDecl node) {
-		// TODO Auto-generated method stub
-		
-	}
-	
+	/*
+	 * Visiting method contents!
+	 */
 	@Override
 	public void visit(IrBlock node) {
 		// TODO Auto-generated method stub
+	}
+	
+	@Override
+	public void visit(IrVarDecl node) {
+		IrType type_node = node.getType();
+		
+		if (type_node.myType == IrType.Type.INT) {
+			current_type = Type.INT;
+		} else if (type_node.myType == IrType.Type.BOOLEAN) {
+			current_type = Type.BOOLEAN;
+		} else {
+			// TODO complain!
+			current_type = Type.VOID;
+		}
 
+		ArrayList<IrLocalDecl> locals = node.getLocals();
+		for (IrLocalDecl l : locals) {
+			l.accept(this);
+		}
+	}
+	
+	@Override
+	public void visit(IrLocalDecl node) {
+		// TODO Auto-generated method stub
+		// local scope; need to be careful!
 	}
 
 	@Override
@@ -383,5 +384,28 @@ public class IrNodeChecker implements IrNodeVisitor {
 		// TODO Auto-generated method stub
 
 	}
+	
+	/*
+	 * Helper functions.
+	 */
 
+	// if x < -9223372036854775808L or > 9223372036854775807L,
+	// this method will throw an exception.
+	private long parseIntLiteral(IrIntLiteral literal) 
+		throws NumberFormatException {
+
+		IrIntLiteral.Type type = literal.getType();
+		String representation = literal.getRepresentation();
+
+		if (type == IrIntLiteral.Type.DECIMAL) { // #####
+			return Long.parseLong(representation);
+		}
+		else if (type == IrIntLiteral.Type.HEX) { // 0x####
+			return Long.parseLong(representation.substring(2), 16);
+		}
+		else { // 0b####
+			return Long.parseLong(representation.substring(2), 2);
+		}
+		
+	}
 }
