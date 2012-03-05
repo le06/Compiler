@@ -3,6 +3,6 @@ class Program {
 
   int a(int b, boolean c) {
     int z;
-    return b + c;
+    return;
   }
 }

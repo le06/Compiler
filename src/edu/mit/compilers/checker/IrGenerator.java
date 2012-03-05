@@ -122,9 +122,11 @@ public class IrGenerator {
             break;
         
         case DecafParserTokenTypes.TK_return:
-            Ir temp = fromAST(ast.getFirstChild());
-            IrExpression temp0 = (IrExpression)temp;
-            outIr = new IrReturnStmt((IrExpression)fromAST(ast.getFirstChild()));
+            if (ast.getFirstChild() != null) {
+                outIr = new IrReturnStmt((IrExpression)fromAST(ast.getFirstChild()));
+            } else {
+                outIr = new IrReturnStmt(null);
+            }
             break;
         
         case DecafParserTokenTypes.TK_void:
