@@ -85,7 +85,7 @@ field_dec : type (ID | array_dec)
                           (COMMA! (ID | array_dec))* SEMI!
            {#field_dec = #([FIELD, "field"], #field_dec);};
 
-array_dec : ID LSQUARE! INTLITERAL RSQUARE!
+array_dec : ID LSQUARE! int_literal RSQUARE!
            {#array_dec = #([ARRAY, "array"], #array_dec);};
 
 method_dec : (type | TK_void) ID LPAREN! (method_param (COMMA! method_param)*)? RPAREN! block
@@ -108,7 +108,6 @@ type : TK_int | TK_boolean;
 
 statement :  assignment SEMI!
            | method_call SEMI!
-           //| TK_if^ (expr) block (TK_else block)? 
            | if_statement
            | for_statement
            | TK_while^ LPAREN! expr RPAREN! block
@@ -122,19 +121,12 @@ assignment! : left:location op:assign_op right:expr
 			
 if_statement! : TK_if LPAREN! cond:expr RPAREN! if_block:block (TK_else! else_block:block)? 
             { #if_statement = #(TK_if, cond, if_block, else_block); } ;
-            
-/*for_statement : TK_for^ for_init block;
-
-for_init : LPAREN! for_assign SEMI! expr RPAREN!
-            { #for_init = #([FOR_INIT, "init"], #for_init); };
-            
-for_assign : ID ASSIGN^ expr;*/
 
 for_statement : TK_for^ LPAREN! ID ASSIGN! expr SEMI! expr RPAREN! block;
 
 assign_op :  ASSIGN
            | INC_ASSIGN
-           | MINUS_ASSIGN;
+           | DEC_ASSIGN;
 
 method_call :  fn_call | callout;
              
@@ -202,4 +194,8 @@ or_op : OR;
 and_op : AND;
 linear_op : PLUS | MINUS;
 
-literal : INTLITERAL | CHAR | BOOLEANLITERAL;
+literal : int_literal | CHAR | bool_literal;
+
+bool_literal : TK_true | TK_false;
+
+int_literal : DEC_LITERAL | HEX_LITERAL | BIN_LITERAL;

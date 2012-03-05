@@ -5,6 +5,7 @@ import java.io.*;
 import antlr.CommonAST;
 import antlr.Token;
 import antlr.collections.AST;
+import edu.mit.compilers.checker.DecafChecker;
 import edu.mit.compilers.grammar.*;
 import edu.mit.compilers.tools.CLI;
 import edu.mit.compilers.tools.CLI.Action;
@@ -38,7 +39,9 @@ class Main {
                case DecafScannerTokenTypes.STRING:
                 type = " STRINGLITERAL";
                 break;
-               case DecafScannerTokenTypes.INTLITERAL:
+               case DecafScannerTokenTypes.DEC_LITERAL:
+               case DecafScannerTokenTypes.HEX_LITERAL:
+               case DecafScannerTokenTypes.BIN_LITERAL:
                 type = " INTLITERAL";
                 break; 
                case DecafScannerTokenTypes.CHAR:
@@ -73,14 +76,20 @@ class Main {
           System.exit(-1);
         }
         
-        AST tree = parser.getAST();
-        //GenericTreeWalk.walk(tree, null);
-        
-//        System.out.println(((CommonAST)tree).toStringList());
-        
         if (CLI.target == Action.DOT) {
-            System.out.println(TreeVisualizer.generateDOT(tree));
+            System.out.println(TreeVisualizer.generateDOT(parser.getAST()));
         }
+      } else if (CLI.target == Action.INTER) {
+        DecafScanner scanner = 
+            new DecafScanner(new DataInputStream(inputStream));
+        DecafParser parser = new DecafParser(scanner);
+        DecafChecker checker = new DecafChecker(parser);
+        checker.setTrace(CLI.debug);
+        checker.check();
+        if (checker.getError()) {
+            System.exit(-1);
+        }
+        
       }
     } catch(Exception e) {
       // print the error:

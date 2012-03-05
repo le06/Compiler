@@ -15,7 +15,7 @@ public class IrGenerator {
      *         the object by analyzing the AST to fill the parameters
      *         of the returned object.
      */
-    public Ir fromAST(AST ast) {
+    public static Ir fromAST(AST ast) {
         /*
          * This switch statement encompasses the logic of this function.
          * fromAST works recursively, looking at the type of the current node
@@ -213,58 +213,25 @@ public class IrGenerator {
             outIr = new IrIdentifier(ast.getText());
             break;
 
-        case DecafParserTokenTypes.INTLITERAL:
-            return null;
-        
-
         case DecafParserTokenTypes.DEC_LITERAL:
-            return null;
-        
+            outIr = new IrIntLiteral(ast.getText(), IrIntLiteral.Type.DECIMAL);
+            break;
 
         case DecafParserTokenTypes.HEX_LITERAL:
-            return null;
-        
+            outIr = new IrIntLiteral(ast.getText(), IrIntLiteral.Type.HEX);
+            break;
 
         case DecafParserTokenTypes.BIN_LITERAL:
-            return null;
-        
-
-        case DecafParserTokenTypes.ALPHA_NUM:
-            return null;
-        
-
-        case DecafParserTokenTypes.ALPHA:
-            return null;
-        
-
-        case DecafParserTokenTypes.DIGIT:
-            return null;
-        
-
-        case DecafParserTokenTypes.HEX_DIGIT:
-            return null;
-        
-
-        case DecafParserTokenTypes.BIN_DIGIT:
-            return null;
-        
+            outIr = new IrIntLiteral(ast.getText(), IrIntLiteral.Type.BINARY);
+            break;
 
         case DecafParserTokenTypes.CHAR:
-            return null;
-        
+            outIr = IrCharLiteral.fromString(ast.getText());
+            break;
 
         case DecafParserTokenTypes.STRING:
-            return null;
-        
-
-        case DecafParserTokenTypes.MINUS_ASSIGN:
-            return null;
-        
-
-        case DecafParserTokenTypes.BOOLEANLITERAL:
-            return null;
-        
-
+            outIr = new IrStringLiteral(ast.getText());
+            break;
         
         default:
             return null;
@@ -275,7 +242,7 @@ public class IrGenerator {
         return outIr;
     }
     
-    private Ir parseBinOp(AST node, IrBinOperator op) {
+    private static Ir parseBinOp(AST node, IrBinOperator op) {
         AST l = node.getFirstChild();
         AST r = l.getNextSibling();
         return new IrBinopExpr(op,
