@@ -146,15 +146,22 @@ public class IrGenerator {
         
 
         case DecafParserTokenTypes.NOT:
-            outIr = new IrUnopExpr(IrUnaryOperator.NOT,
-                         (IrExpression)fromAST(ast.getFirstChild()));
+            IrExpression expr = (IrExpression)fromAST(ast.getFirstChild());
+            expr.setNot();
+            
+/*            outIr = new IrUnopExpr(IrUnaryOperator.NOT,
+                         ));*/
+            outIr = (Ir) expr;
             break;
         
 
         case DecafParserTokenTypes.MINUS:
             if (ast.getNumberOfChildren() == 1) {
-            outIr = new IrUnopExpr(IrUnaryOperator.MINUS,
-                    (IrExpression)fromAST(ast.getFirstChild()));
+                expr = (IrExpression)fromAST(ast.getFirstChild());
+                expr.setNeg();
+/*            outIr = new IrUnopExpr(IrUnaryOperator.MINUS,
+                    (IrExpression)fromAST(ast.getFirstChild()));*/
+                outIr = (Ir)expr;
             } else {
                 outIr = parseBinOp(ast, IrBinOperator.MINUS);
             }

@@ -8,6 +8,7 @@ public class IrArrayLocation extends IrLocation {
     
 	private IrIdentifier id;
 	private IrExpression index;
+	private boolean not = false, neg = false;
 
 	public IrIdentifier getId() {
 		return id;
@@ -37,5 +38,22 @@ public class IrArrayLocation extends IrLocation {
         }
         out.append(this.toString());
         return out.toString();
+    }
+    @Override
+    public boolean isNot() {
+        return not;
+    }
+    @Override
+    public boolean isNeg() {
+        return neg;
+    }
+    @Override
+    public void setNot() {
+        not = true;
+        
+    }
+    @Override
+    public void setNeg() {
+        neg = true;
     }
 }

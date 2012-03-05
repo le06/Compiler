@@ -53,4 +53,5 @@ Interesting Implementation Issues
 
 Known Issues
 ------------
-None at this point.
+- The debug output of the Ir tree contains some extraneous newlines, but that
+  does not affect the correctness of the output.
