@@ -1,11 +1,11 @@
 class Program {
-  int a;
+  int a[5], b;
   void main() {
     if (a == !b && c == d) {
       a -= 0b10101001;
       b = 2;
     } else {
-      a = a + b;
+      a[1] = a + b;
     }
   }
 }

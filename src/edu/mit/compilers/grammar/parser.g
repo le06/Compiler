@@ -24,6 +24,7 @@ tokens
   METHOD;
   FIELD;
   ARRAY;
+  ARRAY_ACCESS;
   FN_CALL;
   FOR_INIT;
   PARAM;
@@ -141,7 +142,7 @@ location :  ID
           | array_access;
           
 array_access! : left:ID LSQUARE! right:expr RSQUARE!
-              { #array_access = #([ARRAY, "array access"], left, right); };
+              { #array_access = #([ARRAY_ACCESS, "array access"], left, right); };
 
 
 /*

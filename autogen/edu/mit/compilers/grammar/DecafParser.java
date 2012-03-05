@@ -1310,7 +1310,7 @@ public DecafParser(ParserSharedInputState state) {
 				right_AST = (AST)returnAST;
 				match(RSQUARE);
 				array_access_AST = (AST)currentAST.root;
-				array_access_AST = (AST)astFactory.make( (new ASTArray(3)).add(astFactory.create(ARRAY,"array access")).add(left_AST).add(right_AST));
+				array_access_AST = (AST)astFactory.make( (new ASTArray(3)).add(astFactory.create(ARRAY_ACCESS,"array access")).add(left_AST).add(right_AST));
 				currentAST.root = array_access_AST;
 				currentAST.child = array_access_AST!=null &&array_access_AST.getFirstChild()!=null ?
 					array_access_AST.getFirstChild() : array_access_AST;
@@ -2172,6 +2172,7 @@ public DecafParser(ParserSharedInputState state) {
 		"METHOD",
 		"FIELD",
 		"ARRAY",
+		"ARRAY_ACCESS",
 		"FN_CALL",
 		"FOR_INIT",
 		"PARAM"

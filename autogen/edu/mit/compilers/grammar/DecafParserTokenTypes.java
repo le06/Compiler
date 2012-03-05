@@ -67,7 +67,8 @@ public interface DecafParserTokenTypes {
 	int METHOD = 63;
 	int FIELD = 64;
 	int ARRAY = 65;
-	int FN_CALL = 66;
-	int FOR_INIT = 67;
-	int PARAM = 68;
+	int ARRAY_ACCESS = 66;
+	int FN_CALL = 67;
+	int FOR_INIT = 68;
+	int PARAM = 69;
 }
