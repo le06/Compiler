@@ -109,7 +109,10 @@ public class IrGenerator {
             IrBlock if_block = (IrBlock)fromAST(next);
             
             next = next.getNextSibling();
-            IrBlock else_block = (IrBlock)fromAST(next);
+            IrBlock else_block = null;
+            if (next != null) {
+                else_block = (IrBlock)fromAST(next);
+            }
             
             outIr = new IrIfStmt(test, if_block, else_block);
             break;
