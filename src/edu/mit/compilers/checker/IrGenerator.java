@@ -246,14 +246,28 @@ public class IrGenerator {
         
         case DecafParserTokenTypes.INC_ASSIGN:
             next = ast.getFirstChild();
-            outIr = new IrPlusAssignStmt((IrLocation)fromAST(next),
-                                     (IrExpression)fromAST(next.getNextSibling()));
+            Ir location = fromAST(next);
+            if (location instanceof IrIdentifier) {
+            	outIr = new IrPlusAssignStmt(new IrVarLocation((IrIdentifier)location),
+                        (IrExpression)fromAST(next.getNextSibling()));
+            }
+            else {
+            	outIr = new IrPlusAssignStmt((IrLocation)fromAST(next),
+                        (IrExpression)fromAST(next.getNextSibling()));
+            }
             break;
         
         case DecafParserTokenTypes.DEC_ASSIGN:
             next = ast.getFirstChild();
-            outIr = new IrMinusAssignStmt((IrLocation)fromAST(next),
-                                     (IrExpression)fromAST(next.getNextSibling()));
+            location = fromAST(next);
+            if (location instanceof IrIdentifier) {
+            	outIr = new IrMinusAssignStmt(new IrVarLocation((IrIdentifier)location),
+                        (IrExpression)fromAST(next.getNextSibling()));
+            }
+            else {
+            	outIr = new IrMinusAssignStmt((IrLocation)fromAST(next),
+                        (IrExpression)fromAST(next.getNextSibling()));
+            }
             break;
         
         case DecafParserTokenTypes.ID:
