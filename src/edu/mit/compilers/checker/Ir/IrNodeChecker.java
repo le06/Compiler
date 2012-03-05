@@ -596,37 +596,89 @@ public class IrNodeChecker implements IrNodeVisitor {
 
 		// if the method is undefined...
 		if (!method_table.containsKey(method_name.getId())) {
-			// TODO: complain!
-
+			error_flag = true;
+			int line = method_name.getLineNumber();
+			int column = method_name.getColumnNumber();
+			String message = "Cannot call to undefined method";
+			System.out.println(errorPosMessage(line, column) + message);
+			
+			return;
+		}
+		IrMethodDecl called_method = method_table.get(method_name.getId());
+		ArrayList<IrParameterDecl> params = called_method.getParams();
+		
+		// check that the args are well-formed.
+		for (IrExpression arg : node.getArgs()) {
+			arg.accept(this);
 		}
 		
+		// if the signatures don't match...
+		if (args.size() != params.size()) {
+			error_flag = true;
+			int line = args.get(0).getLineNumber();
+			int column = args.get(0).getColumnNumber();
+			String message = "Mismatching number of arguments";
+			System.out.println(errorPosMessage(line, column) + message);
+		} else {
+			for (int i = 0; i < args.size(); i++) {
+				IrType arg_type = args.get(i).getExprType(this);
+				IrType param_type = params.get(i).getType();
+				
+				if (arg_type.myType != param_type.myType) {
+					error_flag = true;
+					int line = param_type.getLineNumber();
+					int column = param_type.getColumnNumber();
+					String message = "Mismatching types of arguments";
+					System.out.println(errorPosMessage(line, column) + message);
+
+					break;
+				}
+			}
+		}
+		
+		// if the method call is part of an expression...
+		Type return_type = determineType(called_method.getReturnType());
+		if (currently_walking_expr && return_type == Type.VOID) {
+			error_flag = true;
+			int line = node.getMethodName().getLineNumber();
+			int column = node.getMethodName().getColumnNumber();
+			String message = "Void methods cannot be part of int or boolean expressions";
+			System.out.println(errorPosMessage(line, column) + message);
+		}
 		
 	}
 
 	@Override
 	public void visit(IrCalloutStmt node) {
-		// TODO Auto-generated method stub
-
+		currently_walking_expr = true;
+		// check that the args are well-formed.
+		for (IrCalloutArg arg : node.getArgs()) {
+			arg.accept(this);
+		}
+		currently_walking_expr = false;
 	}	
 	
 	
 
 	@Override
 	public void visit(IrAssignStmt node) {
-		// TODO Auto-generated method stub
-
+		currently_walking_expr = true;
+		// TODO fill in...
+		currently_walking_expr = false;
 	}
 
 	@Override
 	public void visit(IrPlusAssignStmt node) {
-		// TODO Auto-generated method stub
-
+		currently_walking_expr = true;
+		// TODO fill in...
+		currently_walking_expr = false;
 	}
 
 	@Override
 	public void visit(IrMinusAssignStmt node) {
-		// TODO Auto-generated method stub
-
+		currently_walking_expr = true;
+		// TODO fill in...
+		currently_walking_expr = false;
 	}
 
 	@Override
@@ -666,26 +718,16 @@ public class IrNodeChecker implements IrNodeVisitor {
 
 	@Override
 	public void visit(IrBinopExpr node) {
-		// TODO Auto-generated method stub
-
+		currently_walking_expr = true;
+		// TODO fill in...
+		currently_walking_expr = false;
 	}
 
 	@Override
 	public void visit(IrUnopExpr node) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void visit(IrBinOperator node) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void visit(IrUnaryOperator node) {
-		// TODO Auto-generated method stub
-
+		currently_walking_expr = true;
+		// TODO fill in...
+		currently_walking_expr = false;
 	}
 
 	@Override

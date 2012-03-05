@@ -49,9 +49,5 @@ public interface IrNodeVisitor {
 
 	public void visit(IrUnopExpr node);
 
-	public void visit(IrBinOperator node);
-
-	public void visit(IrUnaryOperator node);
-
 	public void visit(IrIntLiteral node);
 }

@@ -24,10 +24,7 @@ public class IrCalloutStmt extends IrInvokeStmt {
 
 	@Override
 	public void accept(IrNodeVisitor v) {
-		// check that the args are well-formed.
-		for (IrCalloutArg arg : args) {
-			arg.accept(v);
-		}
+		v.visit(this);
 	}
 
 	@Override
