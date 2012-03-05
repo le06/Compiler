@@ -3,7 +3,9 @@ package edu.mit.compilers.checker.Ir;
 public interface IrNodeVisitor {
 	public void visit(IrClassDecl node);
 
-	public void visit(IrGlobalDecl node);
+	public void visit(IrFieldDecl node);
+	
+	public void visit(IrBaseDecl node);
 
 	public void visit(IrArrayDecl node);
 
@@ -12,6 +14,8 @@ public interface IrNodeVisitor {
 	public void visit(IrBlock node);
 	
 	public void visit(IrVarDecl node);
+	
+	public void visit(IrLocalDecl node);
 
 	public void visit(IrAssignStmt node);
 

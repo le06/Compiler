@@ -15,7 +15,7 @@ public class IrBlock extends Ir {
 	    statements.add(line);
 	}
 	
-	public ArrayList<IrVarDecl> getVar_decls() {
+	public ArrayList<IrVarDecl> getVarDecls() {
 		return var_decls;
 	}
 
@@ -26,6 +26,8 @@ public class IrBlock extends Ir {
 	@Override
 	public void accept(IrNodeVisitor v) {
 		// TODO Auto-generated method stub
-		
+
+		// push a new env on stack...
+		// then iterate through decls and stmts.
 	}
 }

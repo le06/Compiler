@@ -14,11 +14,17 @@ public class IrFieldDecl extends IrMemberDecl {
         globals.add(id);
     }
 	
+	public IrType getType() {
+		return type;
+	}
+
+	public ArrayList<IrGlobalDecl> getGlobals() {
+		return globals;
+	}
 
 	@Override
 	public void accept(IrNodeVisitor v) {
-		// TODO Auto-generated method stub
-		
+		v.visit(this);
 	}
 	
 }

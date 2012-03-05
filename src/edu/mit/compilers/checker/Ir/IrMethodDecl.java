@@ -5,7 +5,7 @@ import java.util.ArrayList;
 public class IrMethodDecl extends IrMemberDecl {
 	private IrType return_type;
 	private IrIdentifier id;
-	private ArrayList<IrVarDecl> args;
+	private ArrayList<IrParameterDecl> params;
 	private IrBlock block;
 	
 	public IrMethodDecl(IrType type, IrIdentifier name) {
@@ -30,8 +30,8 @@ public class IrMethodDecl extends IrMemberDecl {
 		return id;
 	}
 
-	public ArrayList<IrVarDecl> getArgs() {
-		return args;
+	public ArrayList<IrParameterDecl> getParams() {
+		return params;
 	}
 
 	public IrBlock getBlock() {

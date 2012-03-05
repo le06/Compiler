@@ -1,13 +1,23 @@
 package edu.mit.compilers.checker.Ir;
 
+import java.util.ArrayList;
+
 public class IrVarDecl extends Ir {
-	private IrType type;
-	private IrIdentifier id;
+
+	IrType type;
+	ArrayList<IrLocalDecl> locals;
 	
 	public IrType getType() {
 		return type;
 	}
-	public IrIdentifier getId() {
-		return id;
+
+	public ArrayList<IrLocalDecl> getLocals() {
+		return locals;
 	}
+
+	@Override
+	public void accept(IrNodeVisitor v) {
+		v.visit(this);
+	}
+	
 }
