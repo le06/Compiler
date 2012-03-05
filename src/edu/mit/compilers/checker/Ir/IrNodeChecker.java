@@ -16,26 +16,27 @@ public class IrNodeChecker implements IrNodeVisitor {
 	protected class Env {
 		private HashMap<String, Type> field_table;
 		private Env previous_env;
-		private IrMethodDecl current_method;
-
+		private Ir current_body;
+		// i.e. the global scope, within a method, a for/while loop, etc...
+		
 		public Env() {
 			field_table = new HashMap<String, Type>();
 			previous_env = null;
-			current_method = null;
+			current_body = null;
 		}
 		
-		public Env(Env previous_env, IrMethodDecl invoker) {
+		public Env(Env previous_env, Ir current_body) {
 			field_table = new HashMap<String, Type>();
 			this.previous_env = previous_env;
-			this.current_method = invoker;
+			this.current_body = current_body;
 		}
 		
 		public Env getPreviousEnv() {
 			return previous_env;
 		}
 
-		public IrMethodDecl getCurrentMethod() {
-			return current_method;
+		public Ir getCurrentBody() {
+			return current_body;
 		}
 		
 		public HashMap<String, Type> getFieldTable() {
@@ -87,21 +88,11 @@ public class IrNodeChecker implements IrNodeVisitor {
 		array_table = new HashMap<String, Long>();
 	}
 	
+	
+	
 	/*
 	 * Implemention of the IrNodeVisitor interface.
 	 */
-	public void visit(IrClassDecl node) {
-		if (!found_main_method) {
-			// TODO: complain!
-		}
-		
-		for (IrMethodDecl m : method_table.values()) {
-			Env method_env = new Env(getCurrentEnv(), m);
-			env_stack.push(method_env); // new env for each method.
-			m.getBlock().accept(this);
-			env_stack.pop();	// on exit, destroy the env.
-		}
-	}
 
 	public void visit(IrFieldDecl node) {
 		IrType type_node = node.getType();
@@ -177,16 +168,15 @@ public class IrNodeChecker implements IrNodeVisitor {
 	@Override
 	public void visit(IrMethodDecl node) {
 		if (found_main_method) { // ignore methods defined after main().
-			return;
+			return; // TODO: possibly complain!
 		}
 		
 		IrIdentifier id_node = node.getId();
 		String id = id_node.getId();
-		HashMap<String, Type> field_table = getCurrentEnv().getFieldTable();
 		
-		if (field_table.containsKey(id)) {
-			// TODO complain!
-		} else if (method_table.containsKey(id)) {
+		// variable calls and method calls are unambiguous.
+		// hence, variable decls and method decls are also unambiguous.
+		if (method_table.containsKey(id)) {
 			// TODO complain!
 		} else {
 			method_table.put(id, node);
@@ -197,6 +187,13 @@ public class IrNodeChecker implements IrNodeVisitor {
 				}
 			}
 		}
+		
+		// check contents of method no matter what, assuming that main()
+		// hasn't been found yet.
+		Env method_env = new Env(getCurrentEnv(), node);
+		env_stack.push(method_env); // new env for each method.
+		node.getBlock().accept(this);
+		env_stack.pop();	// on exit, destroy the env.
 	}
 	
 	/*
@@ -246,6 +243,70 @@ public class IrNodeChecker implements IrNodeVisitor {
 	}
 
 	@Override
+	public void visit(IrBlockStmt node) {
+		IrBlock block = node.getBlock();
+		// create a new scope...
+		Env method_env = new Env(getCurrentEnv(), node);
+		env_stack.push(method_env); // enter the new env.
+		block.accept(this);	// execute the block.
+		env_stack.pop();	// exit the env.
+	}
+	
+	@Override
+	public void visit(IrContinueStmt node) {
+		// recursively check through the environments to see if the stmt is
+		// contained in the body of a for or while stmt.
+		Env env = getCurrentEnv();
+		Ir current_body = env.getCurrentBody();
+		boolean legal_stmt = false;
+		
+		while (!(current_body instanceof IrMethodDecl)) {			
+			if ((current_body instanceof IrForStmt) ||
+				(current_body instanceof IrWhileStmt)) {
+				legal_stmt = true;
+				break;
+			}
+			env = env.getPreviousEnv();
+			current_body = env.getCurrentBody();
+		}
+
+		if (!legal_stmt) {
+			// TODO: complain!
+		}
+	}
+
+	@Override
+	public void visit(IrBreakStmt node) {
+		// recursively check through the environments to see if the stmt is
+		// contained in the body of a for or while stmt.
+		Env env = getCurrentEnv();
+		Ir current_body = env.getCurrentBody();
+		boolean legal_stmt = false;
+		
+		while (!(current_body instanceof IrMethodDecl)) {			
+			if ((current_body instanceof IrForStmt) ||
+				(current_body instanceof IrWhileStmt)) {
+				legal_stmt = true;
+				break;
+			}
+			env = env.getPreviousEnv();
+			current_body = env.getCurrentBody();
+		}
+
+		if (!legal_stmt) {
+			// TODO: complain!
+		}
+	}
+	
+	@Override
+	public void visit(IrReturnStmt node) {
+		// TODO Auto-generated method stub
+
+	}	
+	
+	
+	
+	@Override
 	public void visit(IrAssignStmt node) {
 		// TODO Auto-generated method stub
 
@@ -259,24 +320,6 @@ public class IrNodeChecker implements IrNodeVisitor {
 
 	@Override
 	public void visit(IrMinusAssignStmt node) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void visit(IrContinueStmt node) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void visit(IrBreakStmt node) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void visit(IrReturnStmt node) {
 		// TODO Auto-generated method stub
 
 	}

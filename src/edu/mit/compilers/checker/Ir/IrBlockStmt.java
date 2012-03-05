@@ -9,7 +9,6 @@ public class IrBlockStmt extends IrStatement {
 
 	@Override
 	public void accept(IrNodeVisitor v) {
-		// TODO Auto-generated method stub
-		
+		v.visit(this);
 	}
 }
