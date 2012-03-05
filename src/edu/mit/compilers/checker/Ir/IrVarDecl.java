@@ -5,7 +5,15 @@ import java.util.ArrayList;
 public class IrVarDecl extends Ir {
 
 	IrType type;
-	ArrayList<IrLocalDecl> locals;
+	ArrayList<IrLocalDecl> locals = new ArrayList<IrLocalDecl>();
+	
+	public IrVarDecl(IrType var_type) {
+	    type = var_type;
+	}
+	
+	public void addLocal(IrIdentifier id) {
+	    locals.add(new IrLocalDecl(id));
+	}
 	
 	public IrType getType() {
 		return type;

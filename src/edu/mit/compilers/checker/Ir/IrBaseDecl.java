@@ -1,6 +1,10 @@
 package edu.mit.compilers.checker.Ir;
 
 public class IrBaseDecl extends IrGlobalDecl {
+    public IrBaseDecl(IrIdentifier name) {
+        id =  name;
+    }
+    
 	private IrIdentifier id;
 	
 	public IrIdentifier getId() {

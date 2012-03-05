@@ -1,6 +1,6 @@
 package edu.mit.compilers.checker.Ir;
 
-public class IrIdentifier extends Ir {
+public class IrIdentifier extends IrExpression {
     public IrIdentifier(String name) {
         id = name;
     }

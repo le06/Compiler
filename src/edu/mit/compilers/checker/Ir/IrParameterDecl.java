@@ -4,6 +4,11 @@ public class IrParameterDecl extends Ir {
 	private IrType type;
 	private IrIdentifier id;
 	
+	public IrParameterDecl(IrType t, IrIdentifier name) {
+	    type = t;
+	    id = name;
+	}
+	
 	public IrType getType() {
 		return type;
 	}
