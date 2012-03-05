@@ -1,3 +1,5 @@
+package edu.mit.compilers.checker.Ir;
+
 import java.util.Stack;
 import java.util.HashMap;
 import java.util.ArrayList;
@@ -23,6 +25,7 @@ public class IrNodeChecker implements IrNodeVisitor {
 		}
 	}
 
+	/*
 	protected class MethodSignature {
 
 		private final ArrayList<Type> param_types;
@@ -48,49 +51,117 @@ public class IrNodeChecker implements IrNodeVisitor {
 			return return_type;
 		}
 	}
-
+	*/
+	
 	private Stack<Env> env_stack;
-	private HashMap<String, MethodSignature> method_table;
+	private HashMap<String, IrMethodDecl> method_table;
 
+	private boolean found_main_method = false;
+	
+	private Env getCurrentEnv() { return env_stack.peek(); }
+	
 	public IrNodeChecker() {
 		env_stack = new Stack<Env>();
 		env_stack.push(new Env());
-		method_table = new HashMap<String, MethodSignature>();
+		method_table = new HashMap<String, IrMethodDecl>();
 	}
-
+	
 	/*
 	 * Implemention of the IrNodeVisitor interface.
 	 */
-	@Override
 	public void visit(IrClassDecl node) {
-		// TODO Auto-generated method stub
-
+		if (!found_main_method) {
+			// TODO: complain!
+		}
+		
+		for (IrMethodDecl m : method_table.values()) {
+			m.accept(this);
+		}
 	}
 
+	// note that the parser rejects any fields that are declared after
+	// method declarations; hence we do not worry about method ids.
 	@Override
 	public void visit(IrGlobalDecl node) {
-		// TODO Auto-generated method stub
-
+		IrType type_node = node.getType();
+		IrIdentifier id_node = node.getId();
+		
+		String id = id_node.getId();
+		HashMap<String, Type> fieldTable = getCurrentEnv().getFieldTable();
+		
+		if (fieldTable.containsKey(id)) {
+			// TODO complain!
+		} else {
+			Type type;
+			if (type_node.myType == IrType.Type.INT) {
+				type = Type.INT;
+			} else if (type_node.myType == IrType.Type.BOOLEAN) {
+				type = Type.BOOLEAN;
+			} else {
+				// TODO complain!
+				type = Type.VOID;
+			}
+			
+			fieldTable.put(id, type);
+		}
 	}
 
 	@Override
-	public void visit(IrArrayDecl node) {
-		// TODO Auto-generated method stub
-
+	public void visit(IrArrayDecl node) { //TODO: check array size decl
+		IrType type_node = node.getType();
+		IrIdentifier id_node = node.getId();
+		
+		String id = id_node.getId();
+		HashMap<String, Type> fieldTable = getCurrentEnv().getFieldTable();
+		
+		if (fieldTable.containsKey(id)) {
+			// TODO complain!
+		} else {
+			Type type;
+			if (type_node.myType == IrType.Type.INT) {
+				type = Type.INT_ARRAY;
+			} else if (type_node.myType == IrType.Type.BOOLEAN) {
+				type = Type.BOOLEAN_ARRAY;
+			} else {
+				// TODO complain!
+				type = Type.VOID;
+			}
+			
+			fieldTable.put(id, type);
+		}	
 	}
 
 	@Override
 	public void visit(IrMethodDecl node) {
-		// TODO Auto-generated method stub
-
+		if (found_main_method) { // ignore methods defined after main().
+			return;
+		}
+		
+		IrIdentifier id_node = node.getId();
+		String id = id_node.getId();
+		HashMap<String, Type> fieldTable = getCurrentEnv().getFieldTable();
+		
+		if (fieldTable.containsKey(id)) {
+			// TODO complain!
+		} else if (method_table.containsKey(id)) {
+			// TODO complain!
+		} else {
+			method_table.put(id, node);
+			if (id.equals("main")) {
+				found_main_method = true;
+				if (node.getArgs().size() > 0) {
+					// TODO complain!
+				}
+			}
+		}
 	}
-
+	
 	@Override
 	public void visit(IrVarDecl node) {
 		// TODO Auto-generated method stub
-
+		
 	}
-
+	
 	@Override
 	public void visit(IrBlock node) {
 		// TODO Auto-generated method stub
@@ -237,12 +308,6 @@ public class IrNodeChecker implements IrNodeVisitor {
 
 	@Override
 	public void visit(IrType node) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void visit(IrReturnType node) {
 		// TODO Auto-generated method stub
 
 	}

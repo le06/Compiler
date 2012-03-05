@@ -12,4 +12,10 @@ public class IrType extends Ir {
     public enum Type {
         VOID, BOOLEAN, INT;
     }
+
+	@Override
+	public void accept(IrNodeVisitor v) {
+		// TODO Auto-generated method stub
+		// do nothing! v never accepts this class.
+	}
 }

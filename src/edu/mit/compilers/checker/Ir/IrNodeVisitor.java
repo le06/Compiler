@@ -1,3 +1,5 @@
+package edu.mit.compilers.checker.Ir;
+
 public interface IrNodeVisitor {
 	public void visit(IrClassDecl node);
 
@@ -58,8 +60,6 @@ public interface IrNodeVisitor {
 	public void visit(IrUnaryOperator node);
 
 	public void visit(IrType node);
-
-	public void visit(IrReturnType node);
 
 	public void visit(IrIdentifier node);
 

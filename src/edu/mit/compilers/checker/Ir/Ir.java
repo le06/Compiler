@@ -1,6 +1,6 @@
 package edu.mit.compilers.checker.Ir;
 
-public abstract class Ir {// implements IrNode {
+public abstract class Ir implements IrNode {
     private int line_num, col_num;
     
     public void addLocInfo(int line, int col) {
@@ -16,5 +16,4 @@ public abstract class Ir {// implements IrNode {
         return col_num;
     }
     
-    // abstract walk()
 }
