@@ -147,8 +147,12 @@ public class IrGenerator {
         
 
         case DecafParserTokenTypes.MINUS:
+            if (ast.getNumberOfChildren() == 1) {
             outIr = new IrUnopExpr(IrUnaryOperator.MINUS,
                     (IrExpression)fromAST(ast.getFirstChild()));
+            } else {
+                outIr = parseBinOp(ast, IrBinOperator.MINUS);
+            }
             break;
         
 
@@ -214,8 +218,18 @@ public class IrGenerator {
 
         case DecafParserTokenTypes.ASSIGN:
             next = ast.getFirstChild();
-            outIr = new IrAssignStmt((IrLocation)fromAST(next),
-                                     (IrExpression)fromAST(next.getNextSibling()));
+            Ir target = fromAST(next);
+            if (target instanceof IrIdentifier) {
+                outIr = new IrAssignStmt(new IrVarLocation((IrIdentifier)target),
+                        (IrExpression)fromAST(next.getNextSibling()));
+            } else if (target instanceof IrArrayLocation) {
+                outIr = new IrAssignStmt((IrArrayLocation)target,
+                        (IrExpression)fromAST(next.getNextSibling()));
+            } else {
+                throw new RuntimeException("Assignment to non-location");
+            }
+            
+            
             break;
         
         case DecafParserTokenTypes.INC_ASSIGN:
@@ -257,7 +271,7 @@ public class IrGenerator {
         case DecafParserTokenTypes.ARRAY_ACCESS:
             next = ast.getFirstChild();
             outIr = new IrArrayLocation((IrIdentifier)fromAST(next),
-                                        (IrExpression)fromAST(next.getFirstChild()));
+                                        (IrExpression)fromAST(next.getNextSibling()));
             break;
             
         case DecafParserTokenTypes.FN_CALL:

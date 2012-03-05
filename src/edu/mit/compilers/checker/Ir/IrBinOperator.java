@@ -4,6 +4,7 @@ public enum IrBinOperator{
     MUL,
     DIV,
     MOD,
+    MINUS,
     LT,
     GT,
     LEQ,

@@ -1,0 +1,8 @@
+class Program {
+  int j, i[10];
+
+  int a(int b, boolean c) {
+    int z;
+    return b + c;
+  }
+}
