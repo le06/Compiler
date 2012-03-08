@@ -1,2 +1,65 @@
 Unoptomized Code Generation Design
 ----------------------------------
+
+We have designed our low level intermediate representation to be close
+enough to machine code to make code generation possible by a single depth-first 
+walk of the tree, generating code sequentially to append to the file.
+
+The major design issues focus around control flow and expression evaluation:
+
+Expression evaluation is accomplished using a stack based evaluation system.
+We leave the expression tree essentially as is from the high level IR. We give
+each subclass of expression an eval() method that operates recursively. Every
+eval() method ends by pushing its return value onto the stack. 
+	-Binary operators pop the top two values off the stack, evaluate them, and 
+	push the return value back onto the stack. 
+	-Literals and variables just push a value onto the stack.
+	-Methods evaluate all their arguments recursively in reverse order, pushing
+	them onto the stack, then move the first six arguments into registers. When
+	they return, they pop the rest of the arguments off the stack and push their
+	return value onto the stack.
+
+Control flow is handled by reducing control flow statements like if, while, etc. 
+into three different types of nodes: labels, jumps, and blocks. An 
+block is just a subtree that can be made up of any normal calls. The labels
+and jump statements structure the control flow of the program. For example, an if
+statement turns into a block with the following nodes:
+
+	Block (containing test), Jump (to label .true), Block (containing false body),
+	Jump (to label .end), Label (.true), Block (containing true body), Label (.end)
+
+
+Here are some other design points we came up with while hashing out
+the design:
+
+- Boolean expression trees are left as is -- we create short circuited
+  code during the code generation phase
+
+- We use a separate walk of the low level IR to convert all 
+  variables to relative addresses
+
+- We transform all -= and += operators to = by altering the expression
+  tree on the right side of the expressions
+
+
+
+Low Level Ir Class Hierarchy *TODO
+-----------------------------
+
+llLabel
+llJump
+
+llReturn
+
+llAssign
+
+llEnvironment
+
+
+llExpression
+
+llFunctionCall
+  llCallout
+  llMethodCall
+ 
+ 
