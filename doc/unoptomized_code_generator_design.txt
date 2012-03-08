@@ -40,6 +40,49 @@ the design:
 
 - We transform all -= and += operators to = by altering the expression
   tree on the right side of the expressions
+  
+- Char literals are converted to int literals in this stage
+  
+  
+Low Level Ir Class Hierarchy 
+----------------------------
+
+llFile
+
+llArrayDec
+llGlobalDec
+
+llVarDec
+
+llLabel
+llJump
+llPush
+llPop
+
+
+llReturn
+
+llAssign
+
+llEnvironment
+
+llExpression
+  llBinOp
+  llMethodCall
+  llBoolLiteral
+  llIntLiteral
+  llVarAccess
+  llArrayAccess
+  llUnaryNeg
+  llUnaryNot
+
+llStringLiteral
+
+llFunctionCall
+  llCallout
+  llMethodCall
+  
+
 
 Conversion from Low-Level IR to Assembly Code
 ---------------------------------------------
@@ -177,22 +220,6 @@ Literal
     push value of literal onto stack
     push result onto stack
 
-Low Level Ir Class Hierarchy *TODO
------------------------------
 
-llLabel
-llJump
-
-llReturn
-
-llAssign
-
-llEnvironment
-
-llExpression
-
-llFunctionCall
-  llCallout
-  llMethodCall
  
  
