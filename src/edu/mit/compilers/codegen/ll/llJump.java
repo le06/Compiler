@@ -3,7 +3,7 @@ package edu.mit.compilers.codegen.ll;
 import java.io.IOException;
 import java.io.Writer;
 
-public class llJump extends llNode {
+public class llJump implements llNode {
     private JumpType type;
     private llLabel label;
     
@@ -32,7 +32,12 @@ public class llJump extends llNode {
     }
 
     @Override
+    public void accept(llNodeVisitor v) {
+        v.visit(this);
+    }
+
+/*    @Override
     public void writeASM(Writer outputStream) throws IOException {
         outputStream.write(getOpcode() + "\t" + label.getName());
-    }
+    }*/
 }

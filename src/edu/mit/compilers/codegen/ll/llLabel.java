@@ -3,7 +3,7 @@ package edu.mit.compilers.codegen.ll;
 import java.io.IOException;
 import java.io.Writer;
 
-public class llLabel extends llNode {
+public class llLabel implements llNode {
     private String name;
     private boolean initialized = false;
     
@@ -24,13 +24,22 @@ public class llLabel extends llNode {
     public String getName() {
         return name;
     }
+    
+    public String getASMLabel() {
+        return ".".concat(name).concat(":");
+    }
 
     @Override
+    public void accept(llNodeVisitor v) {
+        v.visit(this);
+    }
+
+/*    @Override
     public void writeASM(Writer outputStream) throws IOException {
         if (!initialized) {
             throw new RuntimeException("Label has no name assigned!");
         }
         
         outputStream.write(name + ":\n");
-    }
+    }*/
 }

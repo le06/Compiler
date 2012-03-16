@@ -1,5 +1,5 @@
 package edu.mit.compilers.codegen.ll;
 
-public class llExpression {
+public interface llExpression extends llNode {
 
 }

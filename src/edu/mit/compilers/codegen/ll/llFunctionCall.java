@@ -1,5 +1,5 @@
 package edu.mit.compilers.codegen.ll;
 
-public class llFunctionCall {
+public interface llFunctionCall extends llExpression {
 
 }

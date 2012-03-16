@@ -3,7 +3,7 @@ package edu.mit.compilers.codegen.ll;
 import java.io.IOException;
 import java.io.Writer;
 
-public class llAssign extends llNode {
+public class llAssign implements llNode {
     private String literal;     // Location like "a" or "length" (from code)
     private String asmLocation; // Location like "%rax" or "-8(%rbp)"
     private String valueLocation; // Normally "0(%rsp)"
@@ -32,11 +32,16 @@ public class llAssign extends llNode {
         return literal;
     }
     
-    @Override
+/*    @Override
     public void writeASM(Writer outputStream) throws IOException {
         outputStream.write(ASM_INSTR + "\t" +
                            valueLocation + ", " +
                            asmLocation + "\n"
                           );
+    }*/
+
+    @Override
+    public void accept(llNodeVisitor v) {
+        v.visit(this);
     }
 }

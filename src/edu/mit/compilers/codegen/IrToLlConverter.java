@@ -1,8 +1,14 @@
 package edu.mit.compilers.codegen;
 
 import edu.mit.compilers.checker.Ir.*;
+import edu.mit.compilers.codegen.ll.*;
 
 public class IrToLlConverter implements IrNodeVisitor {
+    llFile output;
+    
+    public IrToLlConverter() {
+        output = new llFile();
+    }
 
     @Override
     public void visit(IrClassDecl node) {
