@@ -1,6 +1,6 @@
 package edu.mit.compilers.codegen.ll;
 
-public class llStringLiteral implements llNode {
+public class llStringLiteral implements llExpression {
     llLabel label;
     String literal;
     

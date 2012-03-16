@@ -46,6 +46,10 @@ public class CodeGenerator implements llNodeVisitor {
             System.exit(-1);
         }
     }
+    
+    private void writeLine(String text) {
+        writeText("\t".concat(text).concat("\n"));
+    }
 
     @Override
     public void visit(llArrayAccess node) {
@@ -133,8 +137,9 @@ public class CodeGenerator implements llNodeVisitor {
 
     @Override
     public void visit(llMethodCall node) {
-        // TODO Auto-generated method stub
-        
+        // Assumes all parameters are in their proper locations
+        writeLine("call " + node.getMethodName());
+        writeLine("push %rax");
     }
 
     @Override
@@ -169,7 +174,7 @@ public class CodeGenerator implements llNodeVisitor {
     @Override
     public void visit(llStringLiteral node) {
         writeText(node.getLabelASM() + "\n\t.string " +
-                  node.getText());
+                  node.getText() + "\n");
     }
 
     @Override
