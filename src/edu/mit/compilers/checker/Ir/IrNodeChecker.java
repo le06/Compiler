@@ -235,7 +235,8 @@ public class IrNodeChecker implements IrNodeVisitor {
 			long array_size;
 			IrIntLiteral literal_node = node.getArraySize();
 			try {
-				array_size = parseIntLiteral(literal_node);
+				//array_size = parseIntLiteral(literal_node);
+			    array_size = literal_node.getIntRep();
 				if (array_size <= 0) {
 					error_flag = true;
 					int line = literal_node.getLineNumber();
@@ -899,7 +900,7 @@ public class IrNodeChecker implements IrNodeVisitor {
 	@Override
 	public void visit(IrIntLiteral node) {
 		try {
-			parseIntLiteral(node);
+			node.getIntRep();
 		} catch (NumberFormatException e) {
 			error_flag = true;
 			int line = node.getLineNumber();
@@ -923,37 +924,7 @@ public class IrNodeChecker implements IrNodeVisitor {
 	
 	// if x < -9223372036854775808L or > 9223372036854775807L,
 	// this method should throw an exception.
-	private long parseIntLiteral(IrIntLiteral literal) 
-		throws NumberFormatException {
-
-		IrIntLiteral.NumType num_type = literal.getNumType();
-		String representation = literal.getRepresentation();
-
-		BigInteger result;
-		
-		if (num_type == IrIntLiteral.NumType.DECIMAL) { // #####
-			result = new BigInteger(representation);
-		}
-		else if (num_type == IrIntLiteral.NumType.HEX) { // 0x####
-			result = new BigInteger(representation.substring(2), 16);
-		}
-		else { // 0b####
-			result = new BigInteger(representation.substring(2), 2);
-		}
-		
-		if (literal.isNegative()) {
-			result = result.negate();
-		}
-		
-		Long truncated_result = result.longValue();
-		BigInteger comparison = new BigInteger(truncated_result.toString());
-		
-		if (!result.equals(comparison)) {
-			throw new NumberFormatException();
-		}
-		
-		return truncated_result;
-	}
+	
 	
 	private Type determineType(IrType type) {
 		if (type == null) {

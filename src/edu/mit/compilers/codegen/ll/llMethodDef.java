@@ -13,6 +13,10 @@ public class llMethodDef implements llNode {
         methodCode = code;
     }
     
+    public String getName() {
+        return methodName;
+    }
+    
     @Override
     public void accept(llNodeVisitor v) {
         v.visit(this);

@@ -5,6 +5,10 @@ import java.io.Writer;
 
 public class llUnaryNeg implements llNode {
     llExpression negatedThing;
+    
+    public llUnaryNeg(llExpression expr) {
+        negatedThing = expr;
+    }
 
 /*    @Override
     public void writeASM(Writer outputStream) throws IOException {

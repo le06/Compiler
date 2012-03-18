@@ -2,6 +2,12 @@ package edu.mit.compilers.checker.Ir;
 
 import java.util.ArrayList;
 
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
+import edu.mit.compilers.codegen.ll.llFile;
+import edu.mit.compilers.codegen.ll.llMethodDef;
+import edu.mit.compilers.codegen.ll.llNode;
+
 // since Program is a token, a generated Ir should have a IrClassDecl node
 // as its root.
 public class IrClassDecl extends Ir {
@@ -22,6 +28,27 @@ public class IrClassDecl extends Ir {
 			m.accept(v);
 		}
 		v.visit(this);
+	}
+	
+	@Override
+	public llNode getllRep() {
+	    llFile out = new llFile();
+	    llMethodDef nextMethod;
+	    
+	    for (IrMemberDecl m : members) {
+	        if (m instanceof IrMethodDecl) {
+	            nextMethod = (llMethodDef)m.getllRep();
+	            if (nextMethod.getName().equals("main")) {
+	                out.setMain(nextMethod);
+	            } else {
+	                out.addMethod(nextMethod);
+	            }
+	        } else {
+	            throw new NotImplementedException();
+	        }
+	    }
+	    
+	    return out;
 	}
 	
 	public String toString(int s) {

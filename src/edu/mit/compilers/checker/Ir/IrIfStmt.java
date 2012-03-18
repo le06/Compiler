@@ -1,5 +1,10 @@
 package edu.mit.compilers.checker.Ir;
 
+import edu.mit.compilers.codegen.ll.llEnvironment;
+import edu.mit.compilers.codegen.ll.llJump;
+import edu.mit.compilers.codegen.ll.llLabel;
+import edu.mit.compilers.codegen.ll.llNode;
+
 public class IrIfStmt extends IrStatement {
     public IrIfStmt(IrExpression test, IrBlock if_block, IrBlock else_block) {
         condition = test;
@@ -41,5 +46,30 @@ public class IrIfStmt extends IrStatement {
         }
 
         return out.toString();
+    }
+
+    @Override
+    public llNode getllRep() {
+        llEnvironment currentEnvironment = new llEnvironment();
+        
+        llLabel true_label = new llLabel();
+        llLabel if_end = new llLabel();
+        
+        llJump jump_true = new llJump(llJump.JumpType.NOT_EQUAL, true_label);
+        llJump end_false = new llJump(llJump.JumpType.UNCONDITIONAL, if_end);
+        
+        llEnvironment eval_cond_env = (llEnvironment)condition.getllRep();
+        llEnvironment true_env = (llEnvironment)true_block.getllRep();
+        llEnvironment false_env = (llEnvironment)false_block.getllRep();
+        
+        currentEnvironment.addNode(eval_cond_env);
+        currentEnvironment.addNode(jump_true);
+        currentEnvironment.addNode(false_env);
+        currentEnvironment.addNode(end_false);
+        currentEnvironment.addNode(true_label);
+        currentEnvironment.addNode(true_env);
+        currentEnvironment.addNode(if_end);
+        
+        return currentEnvironment;
     }
 }

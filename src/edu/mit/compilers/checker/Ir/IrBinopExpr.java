@@ -1,6 +1,9 @@
 package edu.mit.compilers.checker.Ir;
 
 import edu.mit.compilers.checker.Ir.IrNodeChecker.Type;
+import edu.mit.compilers.codegen.ll.llBinOp;
+import edu.mit.compilers.codegen.ll.llExpression;
+import edu.mit.compilers.codegen.ll.llNode;
 
 public class IrBinopExpr extends Ir implements IrExpression {
     public IrBinopExpr(IrBinOperator op, IrExpression left, IrExpression right) {
@@ -81,4 +84,12 @@ public class IrBinopExpr extends Ir implements IrExpression {
 	        
 	        return out.toString();
 	    }
+
+    @Override
+    public llNode getllRep() {
+        llExpression l = (llExpression)lhs.getllRep();
+        llExpression r = (llExpression)rhs.getllRep();
+        
+        return new llBinOp(l, r, operator);
+    }
 }

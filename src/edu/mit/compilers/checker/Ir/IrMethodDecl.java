@@ -2,6 +2,10 @@ package edu.mit.compilers.checker.Ir;
 
 import java.util.ArrayList;
 
+import edu.mit.compilers.codegen.ll.llEnvironment;
+import edu.mit.compilers.codegen.ll.llMethodDef;
+import edu.mit.compilers.codegen.ll.llNode;
+
 public class IrMethodDecl extends IrMemberDecl {
 	private IrType return_type;
 	private IrIdentifier id;
@@ -58,5 +62,11 @@ public class IrMethodDecl extends IrMemberDecl {
         
         out.append(block.toString(s+1).concat("\n"));
         return out.toString();
+    }
+
+    @Override
+    public llNode getllRep() {
+        llEnvironment code = (llEnvironment)block.getllRep();
+        return new llMethodDef(id.getId(), code);
     }
 }

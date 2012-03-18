@@ -1,5 +1,11 @@
 package edu.mit.compilers.checker.Ir;
 
+import edu.mit.compilers.codegen.ll.llEnvironment;
+import edu.mit.compilers.codegen.ll.llJump;
+import edu.mit.compilers.codegen.ll.llJump.JumpType;
+import edu.mit.compilers.codegen.ll.llLabel;
+import edu.mit.compilers.codegen.ll.llNode;
+
 public class IrWhileStmt extends IrStatement {
     public IrWhileStmt(IrExpression test, IrBlock true_block) {
         condition = test;
@@ -36,5 +42,28 @@ public class IrWhileStmt extends IrStatement {
         out.append(block.toString(s+1).concat("\n"));
 
         return out.toString();
+    }
+
+    @Override
+    public llNode getllRep() {
+        llEnvironment out = new llEnvironment();
+        
+        llLabel w_start = new llLabel();
+        llLabel w_end = new llLabel();
+        
+        llJump jump_end = new llJump(JumpType.NOT_EQUAL, w_end);
+        llJump jump_start = new llJump(JumpType.UNCONDITIONAL, w_start);
+        
+        llEnvironment cond = (llEnvironment)condition.getllRep();
+        llEnvironment code = (llEnvironment)block.getllRep();
+        
+        out.addNode(w_start);
+        out.addNode(cond);
+        out.addNode(jump_end);
+        out.addNode(code);
+        out.addNode(jump_start);
+        out.addNode(w_end);
+        
+        return out;
     }
 }

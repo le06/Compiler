@@ -1,10 +1,18 @@
 package edu.mit.compilers.checker.Ir;
 
+import javax.management.RuntimeErrorException;
+
+import edu.mit.compilers.codegen.ll.llArrayDec;
+import edu.mit.compilers.codegen.ll.llNode;
+
 public class IrArrayDecl extends IrGlobalDecl {
 	private IrIdentifier id;
 	private IrIntLiteral array_size;
 	
 	public IrArrayDecl(IrIdentifier name, IrIntLiteral size) {
+	    if (size.isNegative()) {
+	        throw new RuntimeException("Array cannot have negative size");
+	    }
 	    id = name;
 	    array_size = size;
 	}
@@ -34,5 +42,16 @@ public class IrArrayDecl extends IrGlobalDecl {
         }
         out.append(this.toString());
         return out.toString();
+    }
+
+    @Override
+    public llNode getllRep() {
+        try {
+            return new llArrayDec(id.toString(), array_size.getIntRep());
+        } catch (NumberFormatException e) {
+            System.err.println("IrIntRep array size check failed");
+            System.exit(-1);
+            return null;
+        }
     }
 }

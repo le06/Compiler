@@ -2,6 +2,9 @@ package edu.mit.compilers.checker.Ir;
 
 import java.util.ArrayList;
 
+import edu.mit.compilers.codegen.ll.llEnvironment;
+import edu.mit.compilers.codegen.ll.llNode;
+
 public class IrBlock extends Ir {
 	// ordering between vars and stmts enforced at parse-time.
 	private ArrayList<IrVarDecl> var_decls = new ArrayList<IrVarDecl>();
@@ -49,4 +52,17 @@ public class IrBlock extends Ir {
 	    
 	    return out.toString();
 	}
+
+    @Override
+    public llNode getllRep() {
+        llEnvironment out = new llEnvironment();
+        for (IrVarDecl d : var_decls) {
+            out.addNode(d.getllRep());
+        }
+        for (IrStatement s : statements) {
+            out.addNode(s.getllRep());
+        }
+        
+        return out;
+    }
 }
