@@ -1,11 +1,14 @@
 package edu.mit.compilers.checker.Ir;
 
+import edu.mit.compilers.codegen.ll.llNode;
+import edu.mit.compilers.codegen.ll.llStringLiteral;
+
 public class IrStringLiteral extends Ir {
     public IrStringLiteral(String text) {
         literal = text;
     }
     
-	String literal;
+	private String literal;
 
 	@Override
 	public void accept(IrNodeVisitor v) {
@@ -24,5 +27,11 @@ public class IrStringLiteral extends Ir {
         }
         out.append(this.toString());
         return out.toString();
+    }
+
+    @Override
+    public llNode getllRep() {
+        
+        return null;
     }
 }

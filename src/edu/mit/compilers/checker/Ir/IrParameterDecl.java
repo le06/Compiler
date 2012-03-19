@@ -1,5 +1,7 @@
 package edu.mit.compilers.checker.Ir;
 
+import edu.mit.compilers.codegen.ll.llNode;
+
 public class IrParameterDecl extends Ir {
 	private IrType type;
 	private IrIdentifier id;
@@ -33,5 +35,10 @@ public class IrParameterDecl extends Ir {
         }
         out.append(this.toString());
         return out.toString();
+    }
+
+    @Override
+    public llNode getllRep() {
+        return null;
     }
 }

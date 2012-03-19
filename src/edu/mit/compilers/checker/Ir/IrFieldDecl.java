@@ -2,6 +2,8 @@ package edu.mit.compilers.checker.Ir;
 
 import java.util.ArrayList;
 
+import edu.mit.compilers.codegen.ll.llNode;
+
 public class IrFieldDecl extends IrMemberDecl {
     IrType type;
     ArrayList<IrGlobalDecl> globals = new ArrayList<IrGlobalDecl>();
@@ -43,4 +45,9 @@ public class IrFieldDecl extends IrMemberDecl {
 	     
 	    return out.toString();
 	}
+
+    @Override
+    public llNode getllRep() {
+        return null;
+    }
 }

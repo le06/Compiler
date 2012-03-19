@@ -4,7 +4,9 @@ import java.util.ArrayList;
 
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
+import edu.mit.compilers.codegen.ll.llArrayDec;
 import edu.mit.compilers.codegen.ll.llFile;
+import edu.mit.compilers.codegen.ll.llGlobalDec;
 import edu.mit.compilers.codegen.ll.llMethodDef;
 import edu.mit.compilers.codegen.ll.llNode;
 
@@ -42,6 +44,16 @@ public class IrClassDecl extends Ir {
 	                out.setMain(nextMethod);
 	            } else {
 	                out.addMethod(nextMethod);
+	            }
+	        } else if (m instanceof IrFieldDecl) {
+	            for (IrGlobalDecl g : ((IrFieldDecl)m).getGlobals()) {
+	                if (g instanceof IrArrayDecl) {
+	                    out.addArrayDec((llArrayDec)g.getllRep());
+	                } else if (g instanceof IrBaseDecl) {
+	                    out.addGlobalDec((llGlobalDec)g.getllRep());
+	                } else {
+	                    throw new NotImplementedException();
+	                }
 	            }
 	        } else {
 	            throw new NotImplementedException();

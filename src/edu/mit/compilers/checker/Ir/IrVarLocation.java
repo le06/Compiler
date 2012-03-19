@@ -1,5 +1,8 @@
 package edu.mit.compilers.checker.Ir;
 
+import edu.mit.compilers.codegen.ll.llNode;
+import edu.mit.compilers.codegen.ll.llVarAccess;
+
 public class IrVarLocation extends IrLocation {
     public IrVarLocation(IrIdentifier var) {
         id = var;
@@ -32,5 +35,10 @@ public class IrVarLocation extends IrLocation {
         }
         out.append(this.toString());
         return out.toString();
+    }
+
+    @Override
+    public llNode getllRep() {
+        return new llVarAccess(id.getId());
     }
 }

@@ -2,6 +2,10 @@ package edu.mit.compilers.checker.Ir;
 
 import java.util.ArrayList;
 
+import edu.mit.compilers.codegen.ll.llEnvironment;
+import edu.mit.compilers.codegen.ll.llNode;
+import edu.mit.compilers.codegen.ll.llVarDec;
+
 public class IrVarDecl extends Ir {
 
 	IrType type;
@@ -45,4 +49,15 @@ public class IrVarDecl extends Ir {
 	    out.append(this.toString());
 	    return out.toString();
 	}
+
+    @Override
+    public llNode getllRep() {
+        llEnvironment out = new llEnvironment();
+        
+        for (IrLocalDecl dec : locals) {
+            out.addNode(new llVarDec(dec.getId().getId()));
+        }
+        
+        return out;
+    }
 }

@@ -4,6 +4,15 @@ public class llReturn implements llNode {
     private llExpression retVal;
     private boolean hasReturnValue;
     
+    public llReturn() {
+        hasReturnValue = false;
+    }
+    
+    public llReturn(llExpression expr) {
+        hasReturnValue = true;
+        retVal = expr;
+    }
+    
     public boolean hasReturn() {
         return hasReturnValue;
     }

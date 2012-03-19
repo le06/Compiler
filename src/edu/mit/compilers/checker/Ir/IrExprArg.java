@@ -1,5 +1,8 @@
 package edu.mit.compilers.checker.Ir;
 
+import edu.mit.compilers.codegen.ll.llExpression;
+import edu.mit.compilers.codegen.ll.llNode;
+
 public class IrExprArg extends IrCalloutArg {
     public IrExprArg(IrExpression argument) {
         arg = argument;
@@ -18,5 +21,10 @@ public class IrExprArg extends IrCalloutArg {
 	
 	public String toString(int s) {
         return arg.toString(s);
+    }
+
+    @Override
+    public llNode getllRep() {
+        return (llNode)((llExpression)arg.getllRep());
     }
 }

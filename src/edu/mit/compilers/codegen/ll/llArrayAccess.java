@@ -5,6 +5,14 @@ public class llArrayAccess implements llNode, llLocation {
     private int arraySize;
     private String baseLocation;
     
+    private String var_name;
+    private llExpression index;
+    
+    public llArrayAccess(String id, llExpression expr) {
+        var_name = id;
+        index = expr;
+    }
+    
     public String getAccessLocation(int i) {
         return (baseOffset + i) + "(" + baseLocation + ")";
     }

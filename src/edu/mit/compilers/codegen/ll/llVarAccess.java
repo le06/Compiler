@@ -13,6 +13,10 @@ public class llVarAccess implements llExpression, llLocation {
         // want to put it on the stack
         
     }*/
+    
+    public llVarAccess(String var_name) {
+        id = var_name;
+    }
 
     @Override
     public void accept(llNodeVisitor v) {
@@ -21,8 +25,7 @@ public class llVarAccess implements llExpression, llLocation {
 
     @Override
     public String getLocationStr() {
-        // TODO Auto-generated method stub
-        return null;
+        return location;
     }
 
 }

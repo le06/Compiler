@@ -1,5 +1,7 @@
 package edu.mit.compilers.checker.Ir;
 
+import edu.mit.compilers.codegen.ll.llNode;
+
 public class IrStringArg extends IrCalloutArg {
     public IrStringArg(IrStringLiteral argument) {
         arg = argument;
@@ -23,5 +25,11 @@ public class IrStringArg extends IrCalloutArg {
         }
         out.append(this.toString());
         return out.toString();
+    }
+
+    @Override
+    public llNode getllRep() {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

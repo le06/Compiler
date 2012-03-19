@@ -2,6 +2,9 @@ package edu.mit.compilers.checker.Ir;
 
 import java.math.BigInteger;
 
+import edu.mit.compilers.codegen.ll.llIntLiteral;
+import edu.mit.compilers.codegen.ll.llNode;
+
 public class IrIntLiteral extends Ir implements IrExpression {
     private String representation;
     private NumType num_type;
@@ -93,5 +96,10 @@ public class IrIntLiteral extends Ir implements IrExpression {
         }
         out.append(this.toString());
         return out.toString();
+    }
+
+    @Override
+    public llNode getllRep() {
+        return new llIntLiteral(getIntRep());
     }
 }

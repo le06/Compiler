@@ -1,5 +1,8 @@
 package edu.mit.compilers.checker.Ir;
 
+import edu.mit.compilers.codegen.ll.llBoolLiteral;
+import edu.mit.compilers.codegen.ll.llNode;
+
 public class IrBoolLiteral extends Ir implements IrExpression {
     public IrBoolLiteral(boolean val) {
         literal = val;
@@ -29,5 +32,10 @@ public class IrBoolLiteral extends Ir implements IrExpression {
         }
         out.append(this.toString());
         return out.toString();
+    }
+
+    @Override
+    public llNode getllRep() {
+        return (llNode)(new llBoolLiteral(literal));
     }
 }

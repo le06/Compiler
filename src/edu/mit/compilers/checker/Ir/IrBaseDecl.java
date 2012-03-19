@@ -1,5 +1,8 @@
 package edu.mit.compilers.checker.Ir;
 
+import edu.mit.compilers.codegen.ll.llGlobalDec;
+import edu.mit.compilers.codegen.ll.llNode;
+
 public class IrBaseDecl extends IrGlobalDecl {
     public IrBaseDecl(IrIdentifier name) {
         id =  name;
@@ -27,5 +30,9 @@ public class IrBaseDecl extends IrGlobalDecl {
         }
         out.append(this.toString());
         return out.toString();
+    }
+    @Override
+    public llNode getllRep() {
+        return (llNode)(new llGlobalDec(id.getId()));
     }
 }

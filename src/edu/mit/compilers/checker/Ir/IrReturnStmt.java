@@ -1,5 +1,9 @@
 package edu.mit.compilers.checker.Ir;
 
+import edu.mit.compilers.codegen.ll.llExpression;
+import edu.mit.compilers.codegen.ll.llNode;
+import edu.mit.compilers.codegen.ll.llReturn;
+
 public class IrReturnStmt extends IrStatement {
     public IrReturnStmt(IrExpression expr) {
         return_expr = expr;
@@ -30,5 +34,14 @@ public class IrReturnStmt extends IrStatement {
             out.append(return_expr.toString(s+1));
         }
         return out.toString();
+    }
+
+    @Override
+    public llNode getllRep() {
+        if (return_expr == null) {
+            return new llReturn();
+        } else {
+            return new llReturn((llExpression)return_expr.getllRep());
+        }
     }
 }

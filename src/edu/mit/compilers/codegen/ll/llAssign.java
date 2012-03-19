@@ -3,33 +3,22 @@ package edu.mit.compilers.codegen.ll;
 import java.io.IOException;
 import java.io.Writer;
 
+import edu.mit.compilers.checker.Ir.llExpression;
+import edu.mit.compilers.checker.Ir.llLocation;
+
 public class llAssign implements llNode {
-    private String literal;     // Location like "a" or "length" (from code)
-    private String asmLocation; // Location like "%rax" or "-8(%rbp)"
-    private String valueLocation; // Normally "0(%rsp)"
-    
-    private final String ASM_INSTR = "mov";
-    private final String DEFAULT_LOC = "0(%rsp)";
+    //private String literal;     // Location like "a" or "length" (from code)
+    private llLocation target;
+    private llExpression rhs;
     
     /**
      * Creates llAssign w/ default value location being the stack pointer
      * @param target
+     *          Location (id)
      */
-    public llAssign(String target) {
-        literal = target;
-        valueLocation = DEFAULT_LOC;
-    }
-    
-    public void setValueLocation(String loc) {
-        valueLocation = loc;
-    }
-    
-    public void setTargetLocation(String loc) {
-        asmLocation = loc;
-    }
-    
-    public String getLiteralName() {
-        return literal;
+    public llAssign(llLocation location, llExpression expr) {
+        target = location;
+        rhs = expr;
     }
     
 /*    @Override

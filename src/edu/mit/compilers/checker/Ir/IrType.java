@@ -1,5 +1,7 @@
 package edu.mit.compilers.checker.Ir;
 
+import edu.mit.compilers.codegen.ll.llNode;
+
 // same question.
 public class IrType extends Ir {
     
@@ -30,5 +32,10 @@ public class IrType extends Ir {
         }
         out.append(this.toString());
         return out.toString();
+    }
+
+    @Override
+    public llNode getllRep() {
+        return null;
     }
 }

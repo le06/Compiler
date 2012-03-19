@@ -1,5 +1,8 @@
 package edu.mit.compilers.checker.Ir;
 
+import edu.mit.compilers.codegen.ll.llIntLiteral;
+import edu.mit.compilers.codegen.ll.llNode;
+
 public class IrCharLiteral extends Ir implements IrExpression {
     public IrCharLiteral(char value) {
         literal = value;
@@ -53,5 +56,10 @@ public class IrCharLiteral extends Ir implements IrExpression {
         }
         out.append(this.toString());
         return out.toString();
+    }
+
+    @Override
+    public llNode getllRep() {
+        return new llIntLiteral((long)literal);
     }
 }

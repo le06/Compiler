@@ -1,5 +1,7 @@
 package edu.mit.compilers.checker.Ir;
 
+import edu.mit.compilers.codegen.ll.llNode;
+
 public class IrIdentifier extends Ir implements IrExpression {
     public IrIdentifier(String name) {
         id = name;
@@ -32,5 +34,10 @@ public class IrIdentifier extends Ir implements IrExpression {
         }
         out.append(this.toString());
         return out.toString();
+    }
+
+    @Override
+    public llNode getllRep() {
+        return null;
     }
 }

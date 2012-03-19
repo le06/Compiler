@@ -2,6 +2,10 @@ package edu.mit.compilers.checker.Ir;
 
 import java.util.ArrayList;
 
+import edu.mit.compilers.codegen.ll.llCallout;
+import edu.mit.compilers.codegen.ll.llExpression;
+import edu.mit.compilers.codegen.ll.llNode;
+
 public class IrCalloutStmt extends IrInvokeStmt {
     private IrStringLiteral function_name;
     private ArrayList<IrCalloutArg> args = new ArrayList<IrCalloutArg>();
@@ -45,5 +49,14 @@ public class IrCalloutStmt extends IrInvokeStmt {
         }
         
         return out.toString();
+    }
+
+    @Override
+    public llNode getllRep() {
+        llCallout c = new llCallout(function_name.toString());
+        for (IrCalloutArg arg : args) {
+            c.addParam((llExpression)arg.getllRep());
+        }
+        return c;
     }
 }

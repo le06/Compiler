@@ -1,5 +1,7 @@
 package edu.mit.compilers.checker.Ir;
 
+import edu.mit.compilers.codegen.ll.llNode;
+
 public class IrBlockStmt extends IrStatement {
 	private IrBlock block;
 
@@ -20,5 +22,10 @@ public class IrBlockStmt extends IrStatement {
         }
         out.append(this.toString());
         return out.toString();
+    }
+
+    @Override
+    public llNode getllRep() {
+        return block.getllRep();
     }
 }

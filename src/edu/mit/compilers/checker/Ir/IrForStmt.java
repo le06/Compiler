@@ -1,5 +1,18 @@
 package edu.mit.compilers.checker.Ir;
 
+import edu.mit.compilers.codegen.ll.llEnvironment;
+import edu.mit.compilers.codegen.ll.llIntLiteral;
+import edu.mit.compilers.codegen.ll.llJump;
+import edu.mit.compilers.codegen.ll.llJump.JumpType;
+import edu.mit.compilers.codegen.ll.llAssign;
+import edu.mit.compilers.codegen.ll.llBinOp;
+import edu.mit.compilers.codegen.ll.llExpression;
+import edu.mit.compilers.codegen.ll.llLabel;
+import edu.mit.compilers.codegen.ll.llLocation;
+import edu.mit.compilers.codegen.ll.llNode;
+import edu.mit.compilers.codegen.ll.llVarAccess;
+import edu.mit.compilers.codegen.ll.llVarDec;
+
 public class IrForStmt extends IrStatement {
     public IrForStmt(IrIdentifier counter, IrExpression start_value,
             IrExpression stop_value, IrBlock block) {
@@ -47,5 +60,45 @@ public class IrForStmt extends IrStatement {
         out.append(myBlock.toString(s + 1).concat("\n"));
 
         return out.toString();
+    }
+
+    @Override
+    public llNode getllRep() {
+        llLabel for_begin = new llLabel();
+        llLabel for_end = new llLabel();
+        
+        llJump jump_end = new llJump(JumpType.EQUAL, for_end);
+        llJump jump_begin = new llJump(JumpType.UNCONDITIONAL, for_begin);
+        
+        llVarDec dec = new llVarDec(myCounter.getId());
+        llLocation var = (llLocation)(new llVarAccess(myCounter.getId()));
+        
+        llAssign init = new llAssign(var,
+                                    (llExpression)myStart_value.getllRep());
+        
+        llAssign incr = new llAssign(var,
+                               (llExpression)(new llBinOp((llExpression)var,
+                                                          (llExpression)(new llIntLiteral(1)),
+                                                          IrBinOperator.PLUS)));
+        
+        llExpression test = new llBinOp((llExpression)var,
+                                         (llExpression)myStop_value.getllRep(),
+                                         IrBinOperator.LT);
+        
+        llEnvironment block = (llEnvironment)myBlock.getllRep();
+        
+        
+        llEnvironment out = new llEnvironment();
+        out.addNode(dec);
+        out.addNode(init);
+        out.addNode(for_begin);
+        out.addNode(test);
+        out.addNode(jump_end);
+        out.addNode(block);
+        out.addNode(incr);
+        out.addNode(jump_begin);
+        out.addNode(for_end);
+        
+        return out;
     }
 }
