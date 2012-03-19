@@ -1,0 +1,2 @@
+Deviations from/additions to original design doc:
+ - Char literals are converted to int literals in ll rep
