@@ -1,6 +1,7 @@
 package edu.mit.compilers.checker.Ir;
 
 import edu.mit.compilers.codegen.ll.llExpression;
+import edu.mit.compilers.codegen.ll.llLabel;
 import edu.mit.compilers.codegen.ll.llNode;
 
 public class IrExprArg extends IrCalloutArg {
@@ -24,7 +25,7 @@ public class IrExprArg extends IrCalloutArg {
     }
 
     @Override
-    public llNode getllRep() {
-        return (llNode)((llExpression)arg.getllRep());
+    public llNode getllRep(llLabel breakPoint, llLabel continuePoint) {
+        return (llNode)((llExpression)arg.getllRep(null, null));
     }
 }

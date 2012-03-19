@@ -1,6 +1,7 @@
 package edu.mit.compilers.checker.Ir;
 
 import edu.mit.compilers.codegen.ll.llGlobalDec;
+import edu.mit.compilers.codegen.ll.llLabel;
 import edu.mit.compilers.codegen.ll.llNode;
 
 public class IrBaseDecl extends IrGlobalDecl {
@@ -32,7 +33,7 @@ public class IrBaseDecl extends IrGlobalDecl {
         return out.toString();
     }
     @Override
-    public llNode getllRep() {
+    public llNode getllRep(llLabel breakPoint, llLabel continuePoint) {
         return (llNode)(new llGlobalDec(id.getId()));
     }
 }

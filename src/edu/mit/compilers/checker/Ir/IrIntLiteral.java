@@ -3,6 +3,7 @@ package edu.mit.compilers.checker.Ir;
 import java.math.BigInteger;
 
 import edu.mit.compilers.codegen.ll.llIntLiteral;
+import edu.mit.compilers.codegen.ll.llLabel;
 import edu.mit.compilers.codegen.ll.llNode;
 
 public class IrIntLiteral extends Ir implements IrExpression {
@@ -99,7 +100,7 @@ public class IrIntLiteral extends Ir implements IrExpression {
     }
 
     @Override
-    public llNode getllRep() {
+    public llNode getllRep(llLabel breakPoint, llLabel continuePoint) {
         return new llIntLiteral(getIntRep());
     }
 }

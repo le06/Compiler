@@ -49,7 +49,7 @@ public class IrIfStmt extends IrStatement {
     }
 
     @Override
-    public llNode getllRep() {
+    public llNode getllRep(llLabel breakPoint, llLabel continuePoint) {
         llEnvironment currentEnvironment = new llEnvironment();
         
         llLabel true_label = new llLabel();
@@ -58,9 +58,9 @@ public class IrIfStmt extends IrStatement {
         llJump jump_true = new llJump(llJump.JumpType.NOT_EQUAL, true_label);
         llJump end_false = new llJump(llJump.JumpType.UNCONDITIONAL, if_end);
         
-        llEnvironment eval_cond_env = (llEnvironment)condition.getllRep();
-        llEnvironment true_env = (llEnvironment)true_block.getllRep();
-        llEnvironment false_env = (llEnvironment)false_block.getllRep();
+        llEnvironment eval_cond_env = (llEnvironment)condition.getllRep(null, null);
+        llEnvironment true_env = (llEnvironment)true_block.getllRep(breakPoint, continuePoint);
+        llEnvironment false_env = (llEnvironment)false_block.getllRep(breakPoint, continuePoint);
         
         currentEnvironment.addNode(eval_cond_env);
         currentEnvironment.addNode(jump_true);

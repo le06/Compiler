@@ -3,6 +3,7 @@ package edu.mit.compilers.checker.Ir;
 import java.util.ArrayList;
 
 import edu.mit.compilers.codegen.ll.llExpression;
+import edu.mit.compilers.codegen.ll.llLabel;
 import edu.mit.compilers.codegen.ll.llMethodCall;
 import edu.mit.compilers.codegen.ll.llNode;
 
@@ -53,11 +54,11 @@ public class IrMethodCallStmt extends IrInvokeStmt {
     }
 
     @Override
-    public llNode getllRep() {
+    public llNode getllRep(llLabel breakPoint, llLabel continuePoint) {
         llMethodCall out = new llMethodCall(method_name.getId());
         
         for (IrExpression arg : args) {
-            out.addParam((llExpression)arg.getllRep());
+            out.addParam((llExpression)arg.getllRep(null, null));
         }
         
         return out;

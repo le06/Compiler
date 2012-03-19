@@ -7,6 +7,7 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import edu.mit.compilers.codegen.ll.llArrayDec;
 import edu.mit.compilers.codegen.ll.llFile;
 import edu.mit.compilers.codegen.ll.llGlobalDec;
+import edu.mit.compilers.codegen.ll.llLabel;
 import edu.mit.compilers.codegen.ll.llMethodDef;
 import edu.mit.compilers.codegen.ll.llNode;
 
@@ -33,13 +34,13 @@ public class IrClassDecl extends Ir {
 	}
 	
 	@Override
-	public llNode getllRep() {
+	public llNode getllRep(llLabel breakPoint, llLabel continuePoint) {
 	    llFile out = new llFile();
 	    llMethodDef nextMethod;
 	    
 	    for (IrMemberDecl m : members) {
 	        if (m instanceof IrMethodDecl) {
-	            nextMethod = (llMethodDef)m.getllRep();
+	            nextMethod = (llMethodDef)m.getllRep(null, null);
 	            if (nextMethod.getName().equals("main")) {
 	                out.setMain(nextMethod);
 	            } else {
@@ -48,9 +49,9 @@ public class IrClassDecl extends Ir {
 	        } else if (m instanceof IrFieldDecl) {
 	            for (IrGlobalDecl g : ((IrFieldDecl)m).getGlobals()) {
 	                if (g instanceof IrArrayDecl) {
-	                    out.addArrayDec((llArrayDec)g.getllRep());
+	                    out.addArrayDec((llArrayDec)g.getllRep(null, null));
 	                } else if (g instanceof IrBaseDecl) {
-	                    out.addGlobalDec((llGlobalDec)g.getllRep());
+	                    out.addGlobalDec((llGlobalDec)g.getllRep(null, null));
 	                } else {
 	                    throw new NotImplementedException();
 	                }

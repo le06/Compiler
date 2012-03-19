@@ -1,5 +1,8 @@
 package edu.mit.compilers.checker.Ir;
 
+import edu.mit.compilers.codegen.ll.llLabel;
+import edu.mit.compilers.codegen.ll.llNode;
+
 public class IrBreakStmt extends IrStatement {
 
     @Override
@@ -15,6 +18,11 @@ public class IrBreakStmt extends IrStatement {
         }
         out.append("break");
         return out.toString();
+    }
+
+    @Override
+    public llNode getllRep(llLabel breakPoint, llLabel continuePoint) {
+        return null;
     }
 
 }

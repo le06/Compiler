@@ -63,7 +63,7 @@ public class IrForStmt extends IrStatement {
     }
 
     @Override
-    public llNode getllRep() {
+    public llNode getllRep(llLabel breakPoint, llLabel continuePoint) {
         llLabel for_begin = new llLabel();
         llLabel for_end = new llLabel();
         
@@ -74,7 +74,7 @@ public class IrForStmt extends IrStatement {
         llLocation var = (llLocation)(new llVarAccess(myCounter.getId()));
         
         llAssign init = new llAssign(var,
-                                    (llExpression)myStart_value.getllRep());
+                                    (llExpression)myStart_value.getllRep(null, null));
         
         llAssign incr = new llAssign(var,
                                (llExpression)(new llBinOp((llExpression)var,
@@ -82,10 +82,10 @@ public class IrForStmt extends IrStatement {
                                                           IrBinOperator.PLUS)));
         
         llExpression test = new llBinOp((llExpression)var,
-                                         (llExpression)myStop_value.getllRep(),
+                                         (llExpression)myStop_value.getllRep(null, null),
                                          IrBinOperator.LT);
         
-        llEnvironment block = (llEnvironment)myBlock.getllRep();
+        llEnvironment block = (llEnvironment)myBlock.getllRep(for_end, for_begin);
         
         
         llEnvironment out = new llEnvironment();

@@ -1,5 +1,6 @@
 package edu.mit.compilers.checker.Ir;
 
+import edu.mit.compilers.codegen.ll.llLabel;
 import edu.mit.compilers.codegen.ll.llNode;
 
 public class IrParameterDecl extends Ir {
@@ -38,7 +39,7 @@ public class IrParameterDecl extends Ir {
     }
 
     @Override
-    public llNode getllRep() {
+    public llNode getllRep(llLabel breakPoint, llLabel continuePoint) {
         return null;
     }
 }

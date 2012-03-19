@@ -1,5 +1,6 @@
 package edu.mit.compilers.checker.Ir;
 
+import edu.mit.compilers.codegen.ll.llLabel;
 import edu.mit.compilers.codegen.ll.llNode;
 
 public class IrIdentifier extends Ir implements IrExpression {
@@ -37,7 +38,7 @@ public class IrIdentifier extends Ir implements IrExpression {
     }
 
     @Override
-    public llNode getllRep() {
+    public llNode getllRep(llLabel breakPoint, llLabel continuePoint) {
         return null;
     }
 }

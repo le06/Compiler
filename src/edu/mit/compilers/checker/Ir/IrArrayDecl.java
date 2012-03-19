@@ -3,6 +3,7 @@ package edu.mit.compilers.checker.Ir;
 import javax.management.RuntimeErrorException;
 
 import edu.mit.compilers.codegen.ll.llArrayDec;
+import edu.mit.compilers.codegen.ll.llLabel;
 import edu.mit.compilers.codegen.ll.llNode;
 
 public class IrArrayDecl extends IrGlobalDecl {
@@ -45,7 +46,7 @@ public class IrArrayDecl extends IrGlobalDecl {
     }
 
     @Override
-    public llNode getllRep() {
+    public llNode getllRep(llLabel breakPoint, llLabel continuePoint) {
         try {
             return new llArrayDec(id.toString(), array_size.getIntRep());
         } catch (NumberFormatException e) {

@@ -3,6 +3,7 @@ package edu.mit.compilers.checker.Ir;
 import edu.mit.compilers.codegen.ll.llAssign;
 import edu.mit.compilers.codegen.ll.llBinOp;
 import edu.mit.compilers.codegen.ll.llExpression;
+import edu.mit.compilers.codegen.ll.llLabel;
 import edu.mit.compilers.codegen.ll.llLocation;
 import edu.mit.compilers.codegen.ll.llNode;
 import edu.mit.compilers.codegen.ll.llVarAccess;
@@ -46,9 +47,9 @@ public class IrMinusAssignStmt extends IrStatement {
     }
     
     @Override
-    public llNode getllRep() {
-        llLocation expr_lhs = (llLocation)lhs.getllRep(); 
-        llBinOp new_expr = new llBinOp((llExpression) expr_lhs, (llExpression)rhs.getllRep(), IrBinOperator.MINUS);
+    public llNode getllRep(llLabel breakPoint, llLabel continuePoint) {
+        llLocation expr_lhs = (llLocation)lhs.getllRep(null, null); 
+        llBinOp new_expr = new llBinOp((llExpression) expr_lhs, (llExpression)rhs.getllRep(null, null), IrBinOperator.MINUS);
         llAssign out = new llAssign(expr_lhs, (llExpression)new_expr);
         return out;
     }

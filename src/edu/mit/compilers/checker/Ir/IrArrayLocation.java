@@ -2,6 +2,7 @@ package edu.mit.compilers.checker.Ir;
 
 import edu.mit.compilers.codegen.ll.llArrayAccess;
 import edu.mit.compilers.codegen.ll.llExpression;
+import edu.mit.compilers.codegen.ll.llLabel;
 import edu.mit.compilers.codegen.ll.llLocation;
 import edu.mit.compilers.codegen.ll.llNode;
 
@@ -44,8 +45,8 @@ public class IrArrayLocation extends IrLocation {
         return out.toString();
     }
     @Override
-    public llNode getllRep() {
-        return (llNode)(new llArrayAccess(id.getId(), (llExpression)index.getllRep()));
+    public llNode getllRep(llLabel breakPoint, llLabel continuePoint) {
+        return (llNode)(new llArrayAccess(id.getId(), (llExpression)index.getllRep(null, null)));
     }
 
 }

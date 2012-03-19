@@ -3,6 +3,7 @@ package edu.mit.compilers.checker.Ir;
 import java.util.ArrayList;
 
 import edu.mit.compilers.codegen.ll.llEnvironment;
+import edu.mit.compilers.codegen.ll.llLabel;
 import edu.mit.compilers.codegen.ll.llMethodDef;
 import edu.mit.compilers.codegen.ll.llNode;
 
@@ -65,8 +66,8 @@ public class IrMethodDecl extends IrMemberDecl {
     }
 
     @Override
-    public llNode getllRep() {
-        llEnvironment code = (llEnvironment)block.getllRep();
+    public llNode getllRep(llLabel breakPoint, llLabel continuePoint) {
+        llEnvironment code = (llEnvironment)block.getllRep(null, null);
         return new llMethodDef(id.getId(), code);
     }
 }

@@ -3,6 +3,7 @@ package edu.mit.compilers.checker.Ir;
 import java.util.ArrayList;
 
 import edu.mit.compilers.codegen.ll.llEnvironment;
+import edu.mit.compilers.codegen.ll.llLabel;
 import edu.mit.compilers.codegen.ll.llNode;
 import edu.mit.compilers.codegen.ll.llVarDec;
 
@@ -51,7 +52,7 @@ public class IrVarDecl extends Ir {
 	}
 
     @Override
-    public llNode getllRep() {
+    public llNode getllRep(llLabel breakPoint, llLabel continuePoint) {
         llEnvironment out = new llEnvironment();
         
         for (IrLocalDecl dec : locals) {

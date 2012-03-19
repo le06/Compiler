@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import edu.mit.compilers.codegen.ll.llCallout;
 import edu.mit.compilers.codegen.ll.llExpression;
+import edu.mit.compilers.codegen.ll.llLabel;
 import edu.mit.compilers.codegen.ll.llNode;
 
 public class IrCalloutStmt extends IrInvokeStmt {
@@ -52,10 +53,10 @@ public class IrCalloutStmt extends IrInvokeStmt {
     }
 
     @Override
-    public llNode getllRep() {
+    public llNode getllRep(llLabel breakPoint, llLabel continuePoint) {
         llCallout c = new llCallout(function_name.toString());
         for (IrCalloutArg arg : args) {
-            c.addParam((llExpression)arg.getllRep());
+            c.addParam((llExpression)arg.getllRep(null, null));
         }
         return c;
     }

@@ -1,5 +1,6 @@
 package edu.mit.compilers.checker.Ir;
 
+import edu.mit.compilers.codegen.ll.llLabel;
 import edu.mit.compilers.codegen.ll.llNode;
 
 public class IrBlockStmt extends IrStatement {
@@ -25,7 +26,7 @@ public class IrBlockStmt extends IrStatement {
     }
 
     @Override
-    public llNode getllRep() {
-        return block.getllRep();
+    public llNode getllRep(llLabel breakPoint, llLabel continuePoint) {
+        return block.getllRep(breakPoint, continuePoint);
     }
 }

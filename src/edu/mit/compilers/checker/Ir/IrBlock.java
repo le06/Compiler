@@ -3,7 +3,10 @@ package edu.mit.compilers.checker.Ir;
 import java.util.ArrayList;
 
 import edu.mit.compilers.codegen.ll.llEnvironment;
+import edu.mit.compilers.codegen.ll.llJump;
+import edu.mit.compilers.codegen.ll.llLabel;
 import edu.mit.compilers.codegen.ll.llNode;
+import edu.mit.compilers.codegen.ll.llJump.JumpType;
 
 public class IrBlock extends Ir {
 	// ordering between vars and stmts enforced at parse-time.
@@ -52,15 +55,21 @@ public class IrBlock extends Ir {
 	    
 	    return out.toString();
 	}
-
+	
     @Override
-    public llNode getllRep() {
+    public llNode getllRep(llLabel breakPoint, llLabel continuePoint) {
         llEnvironment out = new llEnvironment();
         for (IrVarDecl d : var_decls) {
-            out.addNode(d.getllRep());
+            out.addNode(d.getllRep(null, null));
         }
         for (IrStatement s : statements) {
-            out.addNode(s.getllRep());
+            if (s instanceof IrBreakStmt) {
+                out.addNode(new llJump(JumpType.UNCONDITIONAL, breakPoint));
+            } else if (s instanceof IrContinueStmt) {
+                out.addNode(new llJump(JumpType.UNCONDITIONAL, continuePoint));
+            } else {
+                out.addNode(s.getllRep(breakPoint, continuePoint));
+            }
         }
         
         return out;

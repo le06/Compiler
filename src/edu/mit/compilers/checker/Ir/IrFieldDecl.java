@@ -2,6 +2,7 @@ package edu.mit.compilers.checker.Ir;
 
 import java.util.ArrayList;
 
+import edu.mit.compilers.codegen.ll.llLabel;
 import edu.mit.compilers.codegen.ll.llNode;
 
 public class IrFieldDecl extends IrMemberDecl {
@@ -47,7 +48,7 @@ public class IrFieldDecl extends IrMemberDecl {
 	}
 
     @Override
-    public llNode getllRep() {
+    public llNode getllRep(llLabel breakPoint, llLabel continuePoint) {
         return null;
     }
 }

@@ -1,5 +1,6 @@
 package edu.mit.compilers.checker.Ir;
 
+import edu.mit.compilers.codegen.ll.llLabel;
 import edu.mit.compilers.codegen.ll.llNode;
 
 public class IrStringArg extends IrCalloutArg {
@@ -28,7 +29,7 @@ public class IrStringArg extends IrCalloutArg {
     }
 
     @Override
-    public llNode getllRep() {
+    public llNode getllRep(llLabel breakPoint, llLabel continuePoint) {
         // TODO Auto-generated method stub
         return null;
     }
