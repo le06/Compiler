@@ -423,7 +423,7 @@ public class CodeGenerator implements LLNodeVisitor {
     	mov_lower_bound.accept(this);
     	cmp_line = formatLine(cmp_inst, R10, R11);
     	writeLine(cmp_line);
-    	LLJump jmp_if_less = new LLJump(LLJump.JumpType.LESS_THAN,
+    	LLJump jmp_if_less = new LLJump(LLJump.JumpType.LT,
     									array_oob_label);
     	jmp_if_less.accept(this);
     	
@@ -434,7 +434,7 @@ public class CodeGenerator implements LLNodeVisitor {
     	mov_upper_bound.accept(this);
     	cmp_line = formatLine(cmp_inst, R10, R11);
     	writeLine(cmp_line);
-    	LLJump jmp_if_more = new LLJump(LLJump.JumpType.MORE_THAN,
+    	LLJump jmp_if_more = new LLJump(LLJump.JumpType.GT,
     									array_oob_label);
     	jmp_if_more.accept(this);
     	
@@ -775,13 +775,43 @@ public class CodeGenerator implements LLNodeVisitor {
     
     @Override
     public void visit(LLJump node) {
-    	LLLabel loc = node.getLabel();    	
-    	String jmp_inst = node.getOpcode();
-    	if (jmp_inst != null) {
-    		String label = "." + loc.getName();
-    		String jmp_line = formatLine(jmp_inst, label);
-    		writeLine(jmp_line);
-    	}    	
+    	LLExpression cond = node.getCond();
+    	
+    	// for backwards compatibility with previous code.
+    	// this assumes the cmp flags have already been set!
+    	if (cond == null) {
+        	LLLabel loc = node.getLabel();    	
+        	String jmp_inst = node.getOpcode();
+        	if (jmp_inst != null) { // should never be null.
+        		String label = "." + loc.getName();
+        		String jmp_line = formatLine(jmp_inst, label);
+        		writeLine(jmp_line);
+        	}    
+    		
+    	} else { // else, eval the expr and check its truth value
+    		String expr_addr = cond.addressOfResult();
+    		// load value of cond into reg
+    		LLMov mov_cond = new LLMov(expr_addr, R10);
+    		LLMov mov_true = new LLMov("$1", R11);
+    		
+    		// write to ASM.
+    		mov_cond.accept(this);
+    		mov_true.accept(this);
+    		
+    		// check if true.
+        	String inst = "cmp";
+        	String inst_line = formatLine(inst, R10, R11);
+        	writeLine(inst_line);
+        	
+        	LLJump jmp;
+        	if (node.getJumpValue() == true) {
+        		jmp = new LLJump(LLJump.JumpType.EQUAL, node.getLabel());
+        	} else {
+        		jmp = new LLJump(LLJump.JumpType.NOT_EQUAL, node.getLabel());
+        	}
+    		jmp.accept(this);
+        	
+    	}
     }
 
     @Override

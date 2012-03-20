@@ -62,7 +62,7 @@ public class IrIfStmt extends IrStatement {
         LLEnvironment true_env = (LLEnvironment)true_block.getllRep(breakPoint, continuePoint);
         LLEnvironment false_env = (LLEnvironment)false_block.getllRep(breakPoint, continuePoint);
         
-        LLJump jump_true = new LLJump(eval_cond_env, true_label);
+        LLJump jump_true = new LLJump(eval_cond_env, true, true_label);
         LLJump end_false = new LLJump(LLJump.JumpType.UNCONDITIONAL, if_end);
         
         //currentEnvironment.addNode(eval_cond_env);

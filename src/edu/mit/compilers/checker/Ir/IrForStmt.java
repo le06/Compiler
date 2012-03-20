@@ -93,7 +93,7 @@ public class IrForStmt extends IrStatement {
         
         LLEnvironment block = (LLEnvironment)myBlock.getllRep(for_end, for_begin);
         
-        LLJump jump_end = new LLJump(test, for_end);
+        LLJump jump_end = new LLJump(test, false, for_end);
         LLJump jump_begin = new LLJump(JumpType.UNCONDITIONAL, for_begin);
         
         

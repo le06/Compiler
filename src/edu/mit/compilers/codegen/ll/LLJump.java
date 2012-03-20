@@ -6,15 +6,17 @@ import java.io.Writer;
 public class LLJump implements LLNode {
     private JumpType type;
     private LLLabel label;
-    private LLExpression cond;
+    private LLExpression cond = null;
+    private boolean jmp_when = false;
     
     public LLJump(JumpType t, LLLabel loc) {
         type = t;
         label = loc;
     }
     
-    public LLJump(LLExpression expr, LLLabel loc) {
+    public LLJump(LLExpression expr, boolean bool, LLLabel loc) {
         cond = expr;
+        jmp_when = bool;
         label = loc;
     }
     
@@ -26,6 +28,14 @@ public class LLJump implements LLNode {
         GT,
         LEQ,
         GEQ;
+    }
+    
+    public LLExpression getCond() {
+    	return cond;
+    }
+    
+    public boolean getJumpValue() {
+    	return jmp_when;
     }
     
     public String getOpcode() {
