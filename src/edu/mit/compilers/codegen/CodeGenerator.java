@@ -96,15 +96,34 @@ public class CodeGenerator implements LLNodeVisitor {
     private Writer outputStream;
     private int tab_level;
     
+    private LLLabel array_oob_label;
+    private LLLabel missing_return_label;
+    
     public CodeGenerator() {
-    	tab_level = 0;
+
     }
     
     // entry point for LL tree walker.
     public void outputASM(Writer output, LLFile decafFile) {
+    	tab_level = 0;
+    	array_oob_label = decafFile.getArrayOobLabel();
+    	missing_return_label = decafFile.getMissingReturnLabel();
+    	
         outputStream = output;
         decafFile.accept(this);
     }
+    
+    /*
+     * ASM run-time error methods.
+     */
+    private void error_array_oob() {
+    	// TODO: fill in ASM
+    }
+    
+    private void error_missing_return() {
+    	// TODO: fill in ASM
+    }
+    
     
     /*
      * Low-level node visitor methods.
@@ -132,8 +151,8 @@ public class CodeGenerator implements LLNodeVisitor {
         	l.accept(this);
         }
         
-    	// TODO: array oob function
-    	// TODO: missing return statement function
+        error_array_oob();
+        error_missing_return();
     }
     
     @Override
@@ -190,6 +209,12 @@ public class CodeGenerator implements LLNodeVisitor {
         for (LLNode n : node.getSubnodes()) {
             n.accept(this);
         }
+        
+        // TODO: LLMethodDecl need information about return type!
+        
+        //LLJump error = new LLJump(LLJump.JumpType.UNCONDITIONAL,
+        //						  missing_return_label);
+        //error.accept(this);
 		tab_level--;
     }    
     
@@ -342,7 +367,31 @@ public class CodeGenerator implements LLNodeVisitor {
     	LLExpression index = node.getIndexExpr();
     	index.accept(this);
     	
-    	// TODO: auto-gen bounds checking ASM.
+		String index_val = index.addressOfResult();		// calculate value of index.
+		LLMov mov_index = new LLMov(index_val, R10);	// move index to register.
+		mov_index.accept(this);							// write this in ASM.
+
+		String cmp_inst = "cmp";
+		String cmp_line;
+		// check lower bounds.
+    	LLMov mov_lower_bound = new LLMov("$0", R11);
+    	mov_lower_bound.accept(this);
+    	cmp_line = formatLine(cmp_inst, R10, R11);
+    	writeLine(cmp_line);
+    	LLJump jmp_if_less = new LLJump(LLJump.JumpType.LESS_THAN,
+    									array_oob_label);
+    	jmp_if_less.accept(this);
+    	
+    	// check upper bounds.
+    	long upper_bound = node.getSize()-1;
+    	String upper_bound_operand = "$" + String.valueOf(upper_bound);
+    	LLMov mov_upper_bound = new LLMov(upper_bound_operand, R11);
+    	mov_upper_bound.accept(this);
+    	cmp_line = formatLine(cmp_inst, R10, R11);
+    	writeLine(cmp_line);
+    	LLJump jmp_if_more = new LLJump(LLJump.JumpType.MORE_THAN,
+    									array_oob_label);
+    	jmp_if_more.accept(this);
     	
     	boolean is_expr = false;
     	if (node.addressOfResult() != null) {
@@ -350,10 +399,6 @@ public class CodeGenerator implements LLNodeVisitor {
     	}
     	
     	if (is_expr) {
-    		String index_val = index.addressOfResult();		// calculate value of index.
-    		LLMov mov_index = new LLMov(index_val, R10);	// move index to register.
-    		mov_index.accept(this);							// write this in ASM.
-    		
     		String mul_inst = "mul"; // change index into address offset.
     		String mul_val = "$8";	 // quadword size.
     		String mul_line = formatLine(mul_inst, mul_val, R10);

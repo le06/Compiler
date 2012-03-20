@@ -10,12 +10,18 @@ public class LLFile implements LLNode {
     private ArrayList<LLStringLiteral> strings;
     private LLMethodDecl main;
 
+    private LLLabel array_oob_label;
+    private LLLabel missing_return_label;
+    
     public LLFile(LLMethodDecl mainMethod) {
         global_decls = new ArrayList<LLGlobalDecl>();
         array_decls = new ArrayList<LLArrayDecl>();
         methods = new ArrayList<LLMethodDecl>();
         strings = new ArrayList<LLStringLiteral>();
         main = mainMethod;
+        
+        array_oob_label = new LLLabel("ARRAY_OUT_OF_BOUNDS");
+        missing_return_label = new LLLabel("MISSING_RETURN");
     }
     
     public LLFile() {
@@ -23,6 +29,9 @@ public class LLFile implements LLNode {
         array_decls = new ArrayList<LLArrayDecl>();
         methods = new ArrayList<LLMethodDecl>();
         strings = new ArrayList<LLStringLiteral>();
+        
+        array_oob_label = new LLLabel("ARRAY_OUT_OF_BOUNDS");
+        missing_return_label = new LLLabel("MISSING_RETURN");
     }
     
     public void addGlobalDec(LLGlobalDecl decl) {
@@ -37,7 +46,23 @@ public class LLFile implements LLNode {
         methods.add(method);
     }
     
-    public void setMain(LLMethodDecl main_method) {
+    public LLLabel getArrayOobLabel() {
+		return array_oob_label;
+	}
+
+	public void setArrayOobLabel(LLLabel arrayOobLabel) {
+		array_oob_label = arrayOobLabel;
+	}
+
+	public LLLabel getMissingReturnLabel() {
+		return missing_return_label;
+	}
+
+	public void setMissingReturnLabel(LLLabel missingReturnLabel) {
+		missing_return_label = missingReturnLabel;
+	}
+
+	public void setMain(LLMethodDecl main_method) {
         main = main_method;
     }
     

@@ -15,7 +15,9 @@ public class LLJump implements LLNode {
     public static enum JumpType {
         UNCONDITIONAL,
         EQUAL,
-        NOT_EQUAL;
+        NOT_EQUAL,
+        LESS_THAN,
+        MORE_THAN;
     }
     
     public String getOpcode() {
@@ -26,6 +28,10 @@ public class LLJump implements LLNode {
             return "je";
         case NOT_EQUAL:
             return "jne";
+        case LESS_THAN:
+        	return "jl";
+        case MORE_THAN:
+        	return "jg";
         default:
             return null;
         }
