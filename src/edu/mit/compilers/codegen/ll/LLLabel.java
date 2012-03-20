@@ -5,7 +5,7 @@ import java.io.Writer;
 
 public class LLLabel implements LLNode {
 	
-	String label;
+	private String label;
 	
 	public LLLabel(String label) {
 		this.label = label;

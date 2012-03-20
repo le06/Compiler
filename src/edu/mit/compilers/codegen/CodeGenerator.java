@@ -29,13 +29,10 @@ import edu.mit.compilers.codegen.ll.LLUnaryNot;
 import edu.mit.compilers.codegen.ll.LLVarLocation;
 
 public class CodeGenerator implements LLNodeVisitor {
-	
-    private Writer outputStream;
     
-    public void outputASM(Writer output, LLFile decafFile) {
-        outputStream = output;
-        decafFile.accept(this);
-    }
+    /*
+     * Printing functions.
+     */
     
     private void writeText(String text) {
         try {
@@ -47,15 +44,117 @@ public class CodeGenerator implements LLNodeVisitor {
     }
     
     private void writeLine(String text) {
-        writeText("\t".concat(text).concat("\n"));
+    	for (int i = 0; i < tab_level; i++) {
+    		writeText("\t");
+    	}
+    	writeText(text);
+    	writeText("\n");
     }
-
-    public CodeGenerator() {
-    	
+    
+    private Writer outputStream;
+    private int tab_level;
+    private LLNode root;
+    
+    public CodeGenerator(LLNode root) {
+    	tab_level = 0;
     }
+    
+    // entry point for LL tree walker.
+    public void outputASM(Writer output, LLFile decafFile) {
+        outputStream = output;
+        decafFile.accept(this);
+    }
+    
+    /*
+     * Low-level node visitor methods.
+     * These are responsible for generating the actual ASM.
+     */
     
     @Override
     public void visit(LLFile node) {
+    	// check these in order...
+        for (LLGlobalDecl g : node.getGlobalDecls()) {
+        	g.accept(this);
+        }
+        for (LLArrayDecl a : node.getArrayDecls()) {
+        	a.accept(this);
+        }
+        for (LLMethodDecl m : node.getMethods()) {
+        	m.accept(this);
+        }
+        // finally the main method.
+        node.getMain().accept(this);
+        
+    	// TODO: array oob function
+    	// TODO: missing return statement function
+    }
+    
+    @Override
+    public void visit(LLGlobalDecl node) {
+        node.getLabel().accept(this);;
+        
+        tab_level++;
+        node.getMalloc().accept(this);
+        tab_level--;
+    }
+    
+    @Override
+    public void visit(LLArrayDecl node) {
+        // TODO Auto-generated method stub
+        
+    }    
+    
+	@Override
+	public void visit(LLMalloc node) {
+		// TODO Auto-generated method stub
+		
+	}
+    
+///////////////////////////////////////////////////////////////////////////////
+	
+	@Override
+	public void visit(LLMethodDecl node) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+    @Override
+    public void visit(LLEnvironment node) {
+        // TODO Auto-gegetName()nerated method stub
+        
+    }    
+    
+///////////////////////////////////////////////////////////////////////////////
+    
+    @Override
+    public void visit(LLAssign node) {
+        // TODO Auto-generated method stub
+        
+    }    
+    
+    @Override
+    public void visit(LLMethodCall node) {
+        // Assumes all parameters are in their proper locations
+        writeLine("call " + node.getMethodName());
+        writeLine("push %rax");
+    }
+    
+    @Override
+    public void visit(LLCallout node) {
+        // TODO Auto-generated method stub
+
+    }    
+    
+    @Override
+    public void visit(LLStringLiteral node) {
+        writeText(node.getLabelASM() + "\n\t.string " +
+                  node.getText() + "\n");
+    }
+
+///////////////////////////////////////////////////////////////////////////////    
+    
+    @Override
+    public void visit(LLVarLocation node) {
         // TODO Auto-generated method stub
         
     }
@@ -66,94 +165,12 @@ public class CodeGenerator implements LLNodeVisitor {
         
     }
 
-    @Override
-    public void visit(LLArrayDecl node) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public void visit(LLAssign node) {
-        // TODO Auto-generated method stub
-        
-    }
+///////////////////////////////////////////////////////////////////////////////
 
     @Override
     public void visit(LLBinaryOp node) {
         // TODO Auto-generated method stub
         
-    }
-
-    @Override
-    public void visit(LLBoolLiteral node) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public void visit(LLCallout node) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void visit(LLEnvironment node) {
-        // TODO Auto-gegetName()nerated method stub
-        
-    }
-
-    @Override
-    public void visit(LLExpression node) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public void visit(LLGlobalDecl node) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public void visit(LLIntLiteral node) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public void visit(LLJump node) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public void visit(LLLabel node) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public void visit(LLMethodCall node) {
-        // Assumes all parameters are in their proper locations
-        writeLine("call " + node.getMethodName());
-        writeLine("push %rax");
-    }
-
-    @Override
-    public void visit(LLReturn node) {
-        // TODO Auto-generated method stub
-        
-        if (node.hasReturn()) {
-            // mov %rsp, rax
-        }
-        
-        // Write ret
-    }
-
-    @Override
-    public void visit(LLStringLiteral node) {
-        writeText(node.getLabelASM() + "\n\t.string " +
-                  node.getText() + "\n");
     }
 
     @Override
@@ -167,29 +184,48 @@ public class CodeGenerator implements LLNodeVisitor {
         // TODO Auto-generated method stub
         
     }
+    
+    @Override
+    public void visit(LLBoolLiteral node) {
+        // TODO Auto-generated method stub
+        
+    }
 
     @Override
-    public void visit(LLVarLocation node) {
+    public void visit(LLIntLiteral node) {
+        // TODO Auto-generated method stub
+        
+    }
+
+///////////////////////////////////////////////////////////////////////////////
+    
+    @Override
+    public void visit(LLJump node) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void visit(LLLabel node) {
         // TODO Auto-generated method stub
         
     }
 
 	@Override
-	public void visit(LLMethodDecl llMethodDecl) {
+	public void visit(LLMov node) {
 		// TODO Auto-generated method stub
 		
-	}
-
-	@Override
-	public void visit(LLMalloc llMalloc) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void visit(LLMov llMov) {
-		// TODO Auto-generated method stub
-		
-	}
+	}    
+    
+    @Override
+    public void visit(LLReturn node) {
+        // TODO Auto-generated method stub
+        
+        if (node.hasReturn()) {
+            // mov %rsp, rax
+        }
+        
+        // Write ret
+    }
 
 }
