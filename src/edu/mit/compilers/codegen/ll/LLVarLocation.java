@@ -4,19 +4,19 @@ import java.io.IOException;
 import java.io.Writer;
 
 public class LLVarLocation implements LLExpression, LLLocation {
-    private String location;
+    private String label;
     private Type type;
     private String temp_location;
     
     // can be used as a location or an expression.
-    public LLVarLocation(String location, Type type) {
-    	this.location = location;
+    public LLVarLocation(String label, Type type) {
+    	this.label = label;
     	this.type = type;
     	this.temp_location = null;
     }
     
-    public LLVarLocation(String location, Type type, String temp_location) {
-    	this.location = location;
+    public LLVarLocation(String label, Type type, String temp_location) {
+    	this.label = label;
     	this.type = type;
     	this.temp_location = temp_location;
     }
@@ -27,8 +27,8 @@ public class LLVarLocation implements LLExpression, LLLocation {
     }
 
 	@Override
-	public String getLocation() {
-		return location;
+	public String getLabel() {
+		return label;
 	}
     
 	@Override

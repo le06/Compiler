@@ -1,5 +1,5 @@
 package edu.mit.compilers.codegen.ll;
 
-public interface LLLocation {
-    public String getLocation();
+public interface LLLocation extends LLNode {
+    public String getLabel();
 }

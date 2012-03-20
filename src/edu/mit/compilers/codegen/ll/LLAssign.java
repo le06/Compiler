@@ -8,9 +8,18 @@ import java.io.Writer;
 
 public class LLAssign implements LLNode {
     //private String literal;     // Location like "a" or "length" (from code)
+								  // Can implement later for debugging.
     private LLLocation loc;
-    private LLExpression expr;
+	private LLExpression expr;
     
+    public LLLocation getLoc() {
+		return loc;
+	}
+
+	public LLExpression getExpr() {
+		return expr;
+	}
+	
     public LLAssign(LLLocation loc, LLExpression expr) {
         this.loc = loc;
         this.expr = expr;

@@ -3,6 +3,7 @@ package edu.mit.compilers.codegen;
 import java.io.IOException;
 import java.io.Writer;
 
+import edu.mit.compilers.codegen.ll.LLLocation;
 import edu.mit.compilers.codegen.ll.LLMalloc;
 import edu.mit.compilers.codegen.ll.LLArrayLocation;
 import edu.mit.compilers.codegen.ll.LLArrayDecl;
@@ -30,6 +31,18 @@ import edu.mit.compilers.codegen.ll.LLVarLocation;
 
 public class CodeGenerator implements LLNodeVisitor {
     
+	/*
+	 * Constant values.
+	 */
+	private final String RDI = "%rdi";
+	private final String RSI = "%rsi";
+	private final String RDX = "%rdx";
+	private final String RCX = "%rcx";
+	private final String R8 = "%r8";
+	private final String R9 = "%r9";
+	private final String R10 = "%r10";
+	private final String R11 = "%r11";
+	
     /*
      * Printing functions.
      */
@@ -180,9 +193,34 @@ public class CodeGenerator implements LLNodeVisitor {
     
     @Override
     public void visit(LLAssign node) {
-        // TODO Auto-generated method stub
-
+    	LLLocation loc = node.getLoc();
+    	LLExpression expr = node.getExpr();
         
+    	loc.accept(this);						// if array loc, need to check!
+    	expr.accept(this);						// next, walk the expr.
+    	String arg1 = expr.addressOfResult();	// temp memory location for evaluated expr.
+    	String arg2 = loc.getLabel();
+    	
+    	if (loc instanceof LLArrayLocation) {
+    		LLExpression index = ((LLArrayLocation)loc).getIndexExpr();
+    		String index_val = index.addressOfResult();		// calculate index offset.
+    		LLMov mov_index = new LLMov(index_val, R10);	// move offset to register.
+    		mov_index.accept(this);							// write this in ASM.
+    		
+    		String mul_inst = "mul"; // change index into address offset.
+    		String mul_val = "$8";	 // quadword size.
+    		String mul_line = formatLine(mul_inst, mul_val, R10);
+    		writeLine(mul_line);	 // write this in ASM.
+    		
+    		arg2 = arg2 + "(" + R10 + ")";	// i.e. array_label(%r10).
+    	}
+    	
+		LLMov mov_to_reg = new LLMov(arg1, R10);	// move expr to register.
+		mov_to_reg.accept(this);
+    	
+    	// move the result of the expr evaluation to loc!
+    	LLMov mov_to_mem = new LLMov(R10, arg2);
+    	mov_to_mem.accept(this);
     }    
     
     @Override
@@ -208,18 +246,58 @@ public class CodeGenerator implements LLNodeVisitor {
     
     @Override
     public void visit(LLVarLocation node) {
-        // TODO Auto-generated method stub
-        
+    	boolean is_expr = false;
+    	if (node.addressOfResult() != null) {
+    		is_expr = true;
+    	}
+    	
+    	if (is_expr) {
+    		String src = node.getLabel();
+    		String dest = node.addressOfResult();
+    		LLMov mov1 = new LLMov(src, R10);	// memory > address > memory.
+    		mov1.accept(this);
+    		LLMov mov2 = new LLMov(R10, dest);
+    		mov2.accept(this);
+    	}
     }
     
     @Override
     public void visit(LLArrayLocation node) {
-        // TODO Auto-generated method stub
-        
+    	// check bounds!
+    	LLExpression index = node.getIndexExpr();
+    	index.accept(this);
+    	
+    	// TODO: auto-gen bounds checking ASM.
+    	
+    	boolean is_expr = false;
+    	if (node.addressOfResult() != null) {
+    		is_expr = true;
+    	}
+    	
+    	if (is_expr) {
+    		String index_val = index.addressOfResult();		// calculate value of index.
+    		LLMov mov_index = new LLMov(index_val, R10);	// move index to register.
+    		mov_index.accept(this);							// write this in ASM.
+    		
+    		String mul_inst = "mul"; // change index into address offset.
+    		String mul_val = "$8";	 // quadword size.
+    		String mul_line = formatLine(mul_inst, mul_val, R10);
+    		writeLine(mul_line);	 // write this in ASM.
+    		
+    		String src = node.getLabel();
+    		src += "(" + R10 + ")"; // i.e. array_label(%r10).
+    		
+    		// move the array-offset contents to the dest address.
+    		String dest = node.addressOfResult();
+    		LLMov mov1 = new LLMov(src, R11);	// memory > address > memory.
+    		mov1.accept(this);
+    		LLMov mov2 = new LLMov(R11, dest);
+    		mov2.accept(this);
+    	}
+    	
     }
 
-///////////////////////////////////////////////////////////////////////// TODO Auto-generated method stub
-    ////////
+///////////////////////////////////////////////////////////////////////////////
 
     @Override
     public void visit(LLBinaryOp node) {
@@ -256,7 +334,6 @@ public class CodeGenerator implements LLNodeVisitor {
     @Override
     public void visit(LLJump node) {
         // TODO Auto-generated method stub
-        // finally the main method.
     }
 
     @Override
@@ -267,8 +344,12 @@ public class CodeGenerator implements LLNodeVisitor {
 
 	@Override
 	public void visit(LLMov node) {
-		// TODO Auto-generated method stub
+		String inst = "mov";
+		String src = node.getSrc();
+		String dest = node.getDest();
 		
+		String line = formatLine(inst, src, dest);
+		writeLine(line);
 	}    
     
     @Override
