@@ -17,6 +17,7 @@ import edu.mit.compilers.codegen.ll.LLMov;
 import edu.mit.compilers.codegen.ll.LLCallout;
 import edu.mit.compilers.codegen.ll.LLEnvironment;
 import edu.mit.compilers.codegen.ll.LLExpression;
+import edu.mit.compilers.codegen.ll.LLExpression.Type;
 import edu.mit.compilers.codegen.ll.LLFile;
 import edu.mit.compilers.codegen.ll.LLGlobalDecl;
 import edu.mit.compilers.codegen.ll.LLIntLiteral;
@@ -214,11 +215,17 @@ public class CodeGenerator implements LLNodeVisitor {
 		// check the method code.
 		node.getEnv().accept(this);
 		
-        // TODO: LLMethodDecl need information about return type!
-        
-        //LLJump error = new LLJump(LLJump.JumpType.UNCONDITIONAL,
-        //						  missing_return_label);
-        //error.accept(this);
+		Type type = node.getType();
+		if (type == Type.VOID) {
+			LLReturn default_return = new LLReturn();
+			default_return.accept(this);			
+		} else {
+			// if a return statement is not encountered on a non-void
+			// method, generate a run-time exception and terminate.
+	        LLJump error = new LLJump(LLJump.JumpType.UNCONDITIONAL,
+	        						  missing_return_label);
+	        error.accept(this);
+		}
 		
 		tab_level--;
 	}
@@ -747,12 +754,12 @@ public class CodeGenerator implements LLNodeVisitor {
         	LLExpression expr = node.getExpr();
         	String addr = expr.addressOfResult();
         	mov = new LLMov(addr, RAX);
+        } else {
+        	mov = new LLMov("$0", RAX);
         }
         
-        if (mov != null) {
-        	mov.accept(this);
-        }
-        writeLine("leave");
+        mov.accept(this); // push stuff to RAX.
+        writeLine("leave"); // and return!
         writeLine("ret");
     }
 

@@ -36,6 +36,10 @@ public class LLMethodDecl implements LLNode {
     	return method_code;
     }
     
+    public Type getType() {
+    	return type;
+    }
+    
     @Override
     public void accept(LLNodeVisitor v) {
         v.visit(this);
