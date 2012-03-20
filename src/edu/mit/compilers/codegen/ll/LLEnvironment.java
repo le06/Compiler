@@ -5,7 +5,7 @@ import java.io.Writer;
 import java.util.ArrayList;
 
 public class LLEnvironment implements LLNode {
-    ArrayList<LLNode> subnodes;
+    private ArrayList<LLNode> subnodes;
     
     public LLEnvironment() {
         subnodes = new ArrayList<LLNode>();
@@ -15,13 +15,13 @@ public class LLEnvironment implements LLNode {
         subnodes.add(node);
     }
 
+    public ArrayList<LLNode> getSubnodes() {
+    	return subnodes;
+    }
+    
     @Override
     public void accept(LLNodeVisitor v) {
         v.visit(this);
-        
-        for (LLNode node : subnodes) {
-            node.accept(v);
-        }
     }
     
 /*    @Override
