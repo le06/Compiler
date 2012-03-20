@@ -22,7 +22,12 @@ public class LLStringLiteral implements LLExpression {
     }
     
     @Override
+<<<<<<< HEAD:src/edu/mit/compilers/codegen/ll/llStringLiteral.java
+    public void accept(llNodeVisitor v) {
+        label.accept(v);
+=======
     public void accept(LLNodeVisitor v) {
+>>>>>>> 5c223d490eac039adfa26ffb308b8d6aa47fa082:src/edu/mit/compilers/codegen/ll/LLStringLiteral.java
         v.visit(this);
     }
 

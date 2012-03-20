@@ -4,15 +4,17 @@ import java.util.ArrayList;
 
 public class LLFile implements LLNode {
 
-	private ArrayList<LLGlobalDecl> global_decls;
-    private ArrayList<LLArrayDecl> array_decls;
-    private ArrayList<LLMethodDecl> methods;
-    private LLMethodDecl main;
-    
+    ArrayList<LLGlobalDecl> global_decls;
+    ArrayList<LLArrayDecl> array_decls;
+    ArrayList<LLMethodDecl> methods;
+    ArrayList<LLStringLiteral> strings;
+    LLMethodDecl main;
+
     public LLFile(LLMethodDecl mainMethod) {
         global_decls = new ArrayList<LLGlobalDecl>();
         array_decls = new ArrayList<LLArrayDecl>();
         methods = new ArrayList<LLMethodDecl>();
+        strings = new ArrayList<LLStringLiteral>();
         main = mainMethod;
     }
     
@@ -20,6 +22,7 @@ public class LLFile implements LLNode {
         global_decls = new ArrayList<LLGlobalDecl>();
         array_decls = new ArrayList<LLArrayDecl>();
         methods = new ArrayList<LLMethodDecl>();
+        strings = new ArrayList<LLStringLiteral>();
     }
     
     public void addGlobalDec(LLGlobalDecl decl) {
@@ -36,6 +39,10 @@ public class LLFile implements LLNode {
     
     public void setMain(LLMethodDecl main_method) {
         main = main_method;
+    }
+    
+    public void addString(LLStringLiteral str) {
+        strings.add(str);
     }
 
     

@@ -23,6 +23,10 @@ public class LLLabel implements LLNode {
     public String getASMLabel() {
         return ".".concat(label).concat(":");
     }
+
+    public void setName(String newName) {
+        label = newName;
+    }
     
 /*    @Override
     public void writeASM(Writer outputStream) throws IOException {
