@@ -73,11 +73,6 @@ public class IrMethodDecl extends IrMemberDecl {
     public LLNode getllRep(LLLabel breakPoint, LLLabel continuePoint) {
         LLEnvironment code = (LLEnvironment)block.getllRep(null, null);
         
-        if (return_type.myType == Type.VOID) {
-            LLReturn ret = new LLReturn(new LLIntLiteral(0));
-            code.addNode(ret);
-        }
-        
         switch (return_type.myType) {
         case BOOLEAN:
             return new LLMethodDecl(id.getId(), LLExpression.Type.BOOLEAN, code);
