@@ -158,7 +158,7 @@ public class CodeGenerator implements LLNodeVisitor {
         node.getMain().accept(this);
         
         printString = true;
-        
+
         for (LLStringLiteral l : node.getStringLiterals()) {
         	l.accept(this);
         }
@@ -370,6 +370,7 @@ public class CodeGenerator implements LLNodeVisitor {
     	
     	String call_inst = "call";
     	String call_arg = node.getFnName();
+    	call_arg = call_arg.substring(1, call_arg.length()-1);
     	String call_line = formatLine(call_inst, call_arg);
     	writeLine(call_line);
     	

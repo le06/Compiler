@@ -1,5 +1,6 @@
 package edu.mit.compilers.codegen;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import edu.mit.compilers.codegen.ll.*;
@@ -20,6 +21,12 @@ public class LabelNamer implements LLNodeVisitor {
 
     @Override
     public void visit(LLFile node) {
+        for (LLGlobalDecl g : node.getGlobalDecls()) {
+            g.accept(this);
+        }
+        for (LLArrayDecl a : node.getArrayDecls()) {
+            a.accept(this);
+        }
         for (LLMethodDecl m : node.getMethods()) {
             m.accept(this);
         }
@@ -30,62 +37,96 @@ public class LabelNamer implements LLNodeVisitor {
     @Override
     public void visit(LLGlobalDecl node) {
         // Do Nothing
-        
     }
 
     @Override
     public void visit(LLArrayDecl node) {
         // Do Nothing
-        
     }
 
     @Override
-    public void visit(LLArrayLocation node) {
+    public void visit(LLMalloc llMalloc) {
         // Do Nothing
-        
     }
-
+    
     @Override
-    public void visit(LLAssign node) {
-        // Do Nothing
-        
+    public void visit(LLMethodDecl llMethodDecl) {
+        llMethodDecl.getEnv().accept(this);
     }
-
-    @Override
-    public void visit(LLBinaryOp node) {
-        // Do Nothing
-        
-    }
-
-    @Override
-    public void visit(LLBoolLiteral node) {
-        // Do Nothing
-        
-    }
-
-    @Override
-    public void visit(LLCallout node) {
-        // Do Nothing
-        
-    }
-
+    
     @Override
     public void visit(LLEnvironment node) {
         for (LLNode n : node.getSubnodes()) {
             n.accept(this);
         }
     }
+    
+    @Override
+    public void visit(LLAssign node) {
+        // Do Nothing
+    }
+    
+    @Override
+    public void visit(LLMethodCall node) {
+    	ArrayList<LLExpression> params = node.getParams();
+        for (LLExpression p : params) {
+            p.accept(this);
+        }
+    }
+    
+    @Override
+    public void visit(LLCallout node) {
+    	ArrayList<LLExpression> params = node.getParams();
+        for (LLExpression p : params) {
+            p.accept(this);
+        }
+    }
+    
+    @Override
+    public void visit(LLStringLiteral node) {
+        currentFile.addString(node);
+        node.getLabel().accept(this);
+    }
+    
+    @Override
+    public void visit(LLVarLocation node) {
+        // Do Nothing
+    }
+    
+    @Override
+    public void visit(LLArrayLocation node) {
+        // Do Nothing
+    }
+
+    @Override
+    public void visit(LLBinaryOp node) {
+        // Do Nothing
+    }
+
+    @Override
+    public void visit(LLUnaryNeg node) {
+        // Do Nothing
+    }
+
+    @Override
+    public void visit(LLUnaryNot node) {
+        // Do Nothing
+    }
+    
+    @Override
+    public void visit(LLBoolLiteral node) {
+        // Do Nothing
+    }
 
     @Override
     public void visit(LLIntLiteral node) {
         // Do Nothing
-        
     }
 
     @Override
     public void visit(LLJump node) {
         // Do Nothing
-        
+    	// TODO: jumps have labels. is it fine to gloss over?
     }
 
     @Override
@@ -111,57 +152,13 @@ public class LabelNamer implements LLNodeVisitor {
     }
 
     @Override
-    public void visit(LLMethodCall node) {
-        // Do Nothing
-        
-    }
-
-    @Override
     public void visit(LLReturn node) {
         // Do Nothing
-        
-    }
-
-    @Override
-    public void visit(LLStringLiteral node) {
-        currentFile.addString(node);
-        node.getLabel().accept(this);
-    }
-
-    @Override
-    public void visit(LLUnaryNeg node) {
-        // Do Nothing
-        
-    }
-
-    @Override
-    public void visit(LLUnaryNot node) {
-        // Do Nothing
-        
-    }
-
-    @Override
-    public void visit(LLVarLocation node) {
-        // Do Nothing
-        
-    }
-
-    @Override
-    public void visit(LLMethodDecl llMethodDecl) {
-        // Do Nothing
-        llMethodDecl.getEnv().accept(this);
-    }
-
-    @Override
-    public void visit(LLMalloc llMalloc) {
-        // Do Nothing
-        
     }
 
     @Override
     public void visit(LLMov llMov) {
         // Do Nothing
-        
     }
 
     @Override
