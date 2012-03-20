@@ -200,22 +200,35 @@ public class CodeGenerator implements LLNodeVisitor {
 		// generate function label.
 		String label = node.getName() + ":";
 		writeLine(label);
-		// node accept function goes to node environment next.
-	}
-	
-    @Override
-    public void visit(LLEnvironment node) {
 		tab_level++;
-        for (LLNode n : node.getSubnodes()) {
-            n.accept(this);
-        }
-        
+		
+		// calling convention: need to add an enter instruction.
+		String enter_inst = "enter";
+		int num_temps = node.getNumTemps();
+		String enter_arg1 = "$(8 * " + String.valueOf(num_temps) + ")";
+		String enter_arg2 = "$0";
+		String enter_line = formatLine(enter_inst, enter_arg1, enter_arg2);
+		writeLine(enter_line);
+		
+		// check the method code.
+		node.getEnv().accept(this);
+		
         // TODO: LLMethodDecl need information about return type!
         
         //LLJump error = new LLJump(LLJump.JumpType.UNCONDITIONAL,
         //						  missing_return_label);
         //error.accept(this);
+		
 		tab_level--;
+	}
+	
+    @Override
+    public void visit(LLEnvironment node) {
+		
+        for (LLNode n : node.getSubnodes()) {
+            n.accept(this);
+        }
+
     }    
     
 ///////////////////////////////////////////////////////////////////////////////
@@ -312,7 +325,7 @@ public class CodeGenerator implements LLNodeVisitor {
     public void visit(LLCallout node) {
     	// arg exprs are evaluated in accept(). read those values into regs!
     	ArrayList<LLExpression> params = node.getParams();
-    	for (int i = params.size()-1; i >= 0; i--) {
+    	for (int i = params.size()-1; i >= 1; i--) {
     		pushArgument(i, params.get(i)); // push from RIGHT-TO-LEFT.
     	}
     	
