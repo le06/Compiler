@@ -284,21 +284,27 @@ public class CodeGenerator implements LLNodeVisitor {
     	case 0:
     		mov = new LLMov(addr, RDI);
     		mov.accept(this);
+    		break;
     	case 1:
     		mov = new LLMov(addr, RSI);
     		mov.accept(this);
+    		break;
     	case 2:
     		mov = new LLMov(addr, RDX);
     		mov.accept(this);
+    		break;
     	case 3:
     		mov = new LLMov(addr, RCX);
     		mov.accept(this);
+    		break;
     	case 4:
     		mov = new LLMov(addr, R8);
     		mov.accept(this);
+    		break;
     	case 5:
     		mov = new LLMov(addr, R9);
     		mov.accept(this);
+    		break;
     	default:
     		mov = new LLMov(addr, R10);
     		mov.accept(this);
@@ -306,6 +312,7 @@ public class CodeGenerator implements LLNodeVisitor {
     		String src = R10;
     		String push_line = formatLine(inst, src);
     		writeLine(push_line);
+    		break;
     	}
     }
     
@@ -313,6 +320,7 @@ public class CodeGenerator implements LLNodeVisitor {
     public void visit(LLMethodCall node) {
     	// arg exprs are evaluated in accept(). read those values into regs!
     	ArrayList<LLExpression> params = node.getParams();
+    	
     	for (int i = params.size()-1; i >= 0; i--) {
     		pushArgument(i, params.get(i)); // push from RIGHT-TO-LEFT.
     	}
