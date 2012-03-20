@@ -4,8 +4,6 @@ import java.util.HashMap;
 
 import edu.mit.compilers.codegen.ll.*;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
 
 public class LabelNamer implements LLNodeVisitor {
     private HashMap<String, Integer> table;

@@ -1,6 +1,5 @@
 package edu.mit.compilers.checker.Ir;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import edu.mit.compilers.codegen.ll.LLLabel;
 import edu.mit.compilers.codegen.ll.LLNode;
 
@@ -26,6 +25,6 @@ public class IrContinueStmt extends IrStatement {
 
     @Override
     public LLNode getllRep(LLLabel breakPoint, LLLabel continuePoint) {
-        throw new NotImplementedException();
+        return null;
     }
 }
