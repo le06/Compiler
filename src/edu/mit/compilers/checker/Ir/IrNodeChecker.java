@@ -95,7 +95,14 @@ public class IrNodeChecker implements IrNodeVisitor {
 	
 	// necessary for allocating locals during the codegen phase!
 	private int local_count = 0;
-	private int local_offset = 0;
+
+	// count number of locals per method.
+	private HashMap<String, Integer> locals_in_method =
+		new HashMap<String, Integer>();
+	
+	public HashMap<String, Integer> getLocalCounts() {
+		return locals_in_method;
+	}
 	
 	private Env getCurrentEnv() { return env_stack.peek(); }
 	
@@ -126,15 +133,7 @@ public class IrNodeChecker implements IrNodeVisitor {
 		Env current_env = getCurrentEnv();
 		while (current_env != null) {
 			Type type = current_env.getFieldTable().get(name);
-			if (type != null && type != Type.VOID) {
-				HashMap<String, Integer> offset_table =
-					current_env.getOffsetTable();
-				
-				// if this var is a local, set the offset.
-				if (offset_table != null) {
-					local_offset = offset_table.get(name);
-				} // otherwise, 0 by default (i.e. var is a global).
-				
+			if (type != null && type != Type.VOID) {				
 				if (type == Type.INT) {
 					return new IrType(IrType.Type.INT);
 				} else {
@@ -146,6 +145,24 @@ public class IrNodeChecker implements IrNodeVisitor {
 		return null; // var undefined.
 	}
 
+	public int lookupOffset(String id) {
+		Env current_env = getCurrentEnv();
+		while (current_env != null) {
+			Type type = current_env.getFieldTable().get(id);
+			if (type != null && type != Type.VOID) {
+				HashMap<String, Integer> offset_table =
+					current_env.getOffsetTable();
+
+				Integer offset = offset_table.get(id);
+				if (offset != null) {
+					return offset;
+				}
+			}
+			current_env = current_env.getPreviousEnv();
+		}
+		return 0; // var undefined.
+	}
+	
 	public IrType lookupMethodType(IrIdentifier id) {
 		String name = id.getId();
 		IrMethodDecl signature = method_table.get(name);
@@ -301,6 +318,7 @@ public class IrNodeChecker implements IrNodeVisitor {
 		// variable calls and method calls are unambiguous.
 		// hence, variable decls and method decls are also unambiguous.
 		if (method_table.containsKey(id)) {
+			error_flag = true;
 			int line = id_node.getLineNumber();
 			int column = id_node.getColumnNumber();
 			String message = "Duplicate method identifier: " + id;
@@ -344,6 +362,9 @@ public class IrNodeChecker implements IrNodeVisitor {
 		env_stack.push(method_env); // new env for each method.
 		node.getBlock().accept(this);
 		env_stack.pop();	// on exit, destroy the env.
+		
+		// record number of locals in this method.
+		locals_in_method.put(id, local_count);
 	}
 	
 	/*
@@ -786,8 +807,8 @@ public class IrNodeChecker implements IrNodeVisitor {
 			System.out.println(errorPosMessage(line, column) + message);
 		} else {
 			// var is defined, set node's bp offset!
-			node.setBpOffset(local_offset);
-			local_offset = 0;
+			int offset = lookupOffset(id_node.getId());
+			node.setBpOffset(offset);
 		}
 	}
 
@@ -943,6 +964,22 @@ public class IrNodeChecker implements IrNodeVisitor {
 			String message = "IntLiteral out of bounds";
 			System.out.println(errorPosMessage(line, column) + message);
 		}	
+	}
+	
+	@Override
+	public void visit(IrIdentifier node) {
+		String id = node.getId();
+		if (!varIsDefined(id)) {
+			error_flag = true;
+			int line = node.getLineNumber();
+			int column = node.getColumnNumber();
+			String message = "Variable identifier is undefined: " + node.getId();
+			System.out.println(errorPosMessage(line, column) + message);
+		} else {
+			// var is defined, set node's bp offset!
+			int offset = lookupOffset(id);
+			node.setBpOffset(offset);
+		}
 	}
 	
 	/*

@@ -16,17 +16,12 @@ public class LLBinaryOp implements LLExpression {
         this.rhs = rhs;
         this.op = op;
         this.type = type;
-        
     }
 
     @Override
     public void accept(LLNodeVisitor v) {
-        lhs.accept(v);
-        rhs.accept(v);
         v.visit(this);
     }
-    
-    
     
 	public LLExpression getLhs() {
 		return lhs;

@@ -44,9 +44,6 @@ public class LLMethodCall implements LLExpression {
     
     @Override
     public void accept(LLNodeVisitor v) {
-        for (LLExpression p : params) {
-            p.accept(v);
-        }
         v.visit(this);
     }
 

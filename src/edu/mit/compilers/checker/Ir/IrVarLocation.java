@@ -45,6 +45,6 @@ public class IrVarLocation extends IrLocation {
 
     @Override
     public LLNode getllRep(LLLabel breakPoint, LLLabel continuePoint) {
-        return new LLVarLocation(id.getId());
+        return new LLVarLocation(bp_offset, id.getId());
     }
 }

@@ -260,7 +260,7 @@ public class CodeGenerator implements LLNodeVisitor {
     	loc.accept(this);						// if array loc, need to check!
     	expr.accept(this);						// next, walk the expr.
     	String arg1 = expr.addressOfResult();	// temp memory location for evaluated expr.
-    	String arg2 = loc.getLabel();
+    	String arg2 = loc.getLocation();
     	
     	if (loc instanceof LLArrayLocation) {
     		LLExpression index = ((LLArrayLocation)loc).getIndexExpr();
@@ -329,8 +329,11 @@ public class CodeGenerator implements LLNodeVisitor {
     
     @Override
     public void visit(LLMethodCall node) {
-    	// arg exprs are evaluated in accept(). read those values into regs!
+    	// visit each of the params in this expression.
     	ArrayList<LLExpression> params = node.getParams();
+        for (LLExpression p : params) {
+            p.accept(this);
+        }
     	
     	for (int i = params.size()-1; i >= 0; i--) {
     		pushArgument(i, params.get(i)); // push from RIGHT-TO-LEFT.
@@ -350,8 +353,11 @@ public class CodeGenerator implements LLNodeVisitor {
     
     @Override
     public void visit(LLCallout node) {
-    	// arg exprs are evaluated in accept(). read those values into regs!
+    	// visit each of the params in this expression.
     	ArrayList<LLExpression> params = node.getParams();
+        for (LLExpression p : params) {
+            p.accept(this);
+        }
 
     	// note the name of the callout function is NOT considered a param!
     	for (int i = params.size()-1; i >= 0; i--) {
@@ -397,7 +403,7 @@ public class CodeGenerator implements LLNodeVisitor {
     	}
     	
     	if (is_expr) {
-    		String src = node.getLabel();
+    		String src = node.getLocation();
     		String dest = node.addressOfResult();
     		LLMov mov1 = new LLMov(src, R10);	// memory > address > memory.
     		mov1.accept(this);
@@ -449,7 +455,7 @@ public class CodeGenerator implements LLNodeVisitor {
     		String mul_line = formatLine(mul_inst, mul_val, R10);
     		writeLine(mul_line);	 // write this in ASM.
     		
-    		String src = node.getLabel();
+    		String src = node.getLocation(); // same as label.
     		src += "(" + R10 + ")"; // i.e. array_label(%r10).
     		
     		// move the array-offset contents to the dest address.
@@ -466,9 +472,13 @@ public class CodeGenerator implements LLNodeVisitor {
 
     @Override
     public void visit(LLBinaryOp node) {
-        // load the lhs and rhs into registers.
+    	
+        // walk both the lhs and rhs expressions.
     	LLExpression left = node.getLhs();
     	LLExpression right = node.getRhs();
+    	left.accept(this);
+    	right.accept(this);
+    	
     	LLMov mov_left, mov_right;
         
     	LLMov mov_divisor, mov_zero;
@@ -709,6 +719,9 @@ public class CodeGenerator implements LLNodeVisitor {
 
     @Override
     public void visit(LLUnaryNeg node) {
+    	// walk the negated expression.
+        node.getExpr().accept(this);
+    	
         // move value of expr to register.
         LLExpression expr = node.getExpr();
         String expr_addr = expr.addressOfResult();
@@ -727,6 +740,9 @@ public class CodeGenerator implements LLNodeVisitor {
 
     @Override
     public void visit(LLUnaryNot node) {
+    	// walk the negated expression.
+        node.getExpr().accept(this);
+    	
         // move value of expr to register.
         LLExpression expr = node.getExpr();
         String expr_addr = expr.addressOfResult();
@@ -779,6 +795,9 @@ public class CodeGenerator implements LLNodeVisitor {
     	
     	// for backwards compatibility with previous code.
     	// this assumes the cmp flags have already been set!
+    	//
+    	// LLJumps generated in this class should ignore cond, otherwise
+    	// R10 and R11 get modified!
     	if (cond == null) {
         	LLLabel loc = node.getLabel();    	
         	String jmp_inst = node.getOpcode();

@@ -3,6 +3,7 @@ package edu.mit.compilers.checker.Ir;
 import edu.mit.compilers.codegen.ll.LLLabel;
 import edu.mit.compilers.codegen.ll.LLNode;
 import edu.mit.compilers.codegen.ll.LLNop;
+import edu.mit.compilers.codegen.ll.LLVarLocation;
 
 public class IrIdentifier extends Ir implements IrExpression {
     public IrIdentifier(String name) {
@@ -10,6 +11,7 @@ public class IrIdentifier extends Ir implements IrExpression {
     }
     
     private String id;
+    private int bp_offset;
 
 	public String getId() {
 		return id;
@@ -22,9 +24,13 @@ public class IrIdentifier extends Ir implements IrExpression {
 	
 	@Override
 	public void accept(IrNodeVisitor v) {
-		// do nothing! scanner enforces correctness.
+		v.visit(this);
 	}
 
+	public void setBpOffset(int offset) {
+		bp_offset = offset;
+	}
+	
 	public String toString() {
 	    return id;
 	}
@@ -40,6 +46,6 @@ public class IrIdentifier extends Ir implements IrExpression {
 
     @Override
     public LLNode getllRep(LLLabel breakPoint, LLLabel continuePoint) {
-        return new LLNop();
+    	return new LLVarLocation(bp_offset, id);
     }
 }

@@ -1,5 +1,8 @@
 package edu.mit.compilers.codegen;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import edu.mit.compilers.codegen.ll.LLArrayDecl;
 import edu.mit.compilers.codegen.ll.LLArrayLocation;
 import edu.mit.compilers.codegen.ll.LLAssign;
@@ -7,6 +10,7 @@ import edu.mit.compilers.codegen.ll.LLBinaryOp;
 import edu.mit.compilers.codegen.ll.LLBoolLiteral;
 import edu.mit.compilers.codegen.ll.LLCallout;
 import edu.mit.compilers.codegen.ll.LLEnvironment;
+import edu.mit.compilers.codegen.ll.LLExpression;
 import edu.mit.compilers.codegen.ll.LLFile;
 import edu.mit.compilers.codegen.ll.LLGlobalDecl;
 import edu.mit.compilers.codegen.ll.LLIntLiteral;
@@ -30,69 +34,79 @@ public class AddressAssigner implements LLNodeVisitor {
     private final String RBP = "(%rbp)";
     private int currentOffset = OFFSET;
     
-    private LLMethodDecl currentMethod;
+    private HashMap<String, Integer> local_counts;
     
     private String getNextAddress() {
-        String out = "-" + currentOffset + RBP;
+        String output = "-" + currentOffset + RBP;
         currentOffset += OFFSET;
-        return out;
+        return output;
+    }
+    
+    // offset = num of quadwords from base pointer: 1,2,3...
+    private String generateAddress(int offset) {
+    	String inst_offset = String.valueOf(offset * OFFSET);
+    	String output = "-" + inst_offset + RBP;
+    	return output;
     }
     
     private void resetAddress() {
         currentOffset = OFFSET;
     }
     
+
+	public void setLocalCounts(HashMap<String, Integer> localCounts) {
+		local_counts = localCounts;
+	}
+    
     public void assign(LLFile file) {
         file.accept(this);
-        if (currentMethod != null) {
-            currentMethod.setNumTemps(currentOffset / OFFSET);
-        }
     }
 
     @Override
     public void visit(LLFile node) {
         resetAddress();
-        
         for (LLGlobalDecl g : node.getGlobalDecls()) {
             g.accept(this);
         }
-        
         for (LLArrayDecl a : node.getArrayDecls()) {
             a.accept(this);
         }
-        
         for (LLMethodDecl m : node.getMethods()) {
             m.accept(this);
         }
-        
         node.getMain().accept(this);
     }
 
+    // maintain a table of labels for global identifiers.
+    
+    
     @Override
     public void visit(LLGlobalDecl node) {
-        // Do nothing
+        // TODO
     }
 
     @Override
     public void visit(LLArrayDecl node) {
-     // Do nothing
-        
+    	// TODO
     }
 
     @Override
     public void visit(LLMalloc node) {
-     // Do nothing
-        
+    	// Do nothing
     }
 
     @Override
     public void visit(LLMethodDecl node) {
-        if (currentMethod != null) {
-            currentMethod.setNumTemps(currentOffset / OFFSET);
-        }
         resetAddress();
-        
+
+        String id = node.getName();
+        int num_locals = local_counts.get(id);
+        currentOffset += (num_locals * OFFSET);
+        //System.out.println(id + ", " + num_locals);
         node.getEnv().accept(this);
+        
+        int num_temps = currentOffset / OFFSET;
+        node.setNumTemps(num_temps);
     }
 
     @Override
@@ -100,7 +114,6 @@ public class AddressAssigner implements LLNodeVisitor {
         for (LLNode n : node.getSubnodes()) {
             n.accept(this);
         }
-        
     }
 
     @Override
@@ -111,85 +124,98 @@ public class AddressAssigner implements LLNodeVisitor {
 
     @Override
     public void visit(LLMethodCall node) {
+    	ArrayList<LLExpression> params = node.getParams();
+        for (LLExpression p : params) {
+            p.accept(this);
+        }
         node.setAddress(getNextAddress());
-        
     }
 
     @Override
     public void visit(LLCallout node) {
+    	ArrayList<LLExpression> params = node.getParams();
+        for (LLExpression p : params) {
+            p.accept(this);
+        }
         node.setAddress(getNextAddress());
-        
     }
 
     @Override
     public void visit(LLStringLiteral node) {
-        node.setAddress(getNextAddress());
-        
+        // do nothing. never evaluated as part of expr.
     }
 
     @Override
     public void visit(LLVarLocation node) {
-        node.setAddress(getNextAddress());
+        int offset = node.getBpOffset();
         
+        if (offset > 0) { // local
+        	String address = generateAddress(offset);
+        	node.setLocation(address);
+        } else { // global
+        	// TODO
+        }
+        node.setAddress(getNextAddress());
     }
 
     @Override
     public void visit(LLArrayLocation node) {
+    	LLExpression index = node.getIndexExpr();
+    	index.accept(this);
+    	
+    	// TODO
         node.setAddress(getNextAddress());
-        
     }
 
     @Override
     public void visit(LLBinaryOp node) {
-        node.setAddress(getNextAddress());
-        
+    	LLExpression left = node.getLhs();
+    	LLExpression right = node.getRhs();
+    	left.accept(this);
+    	right.accept(this);
+        node.setAddress(getNextAddress());        
     }
 
     @Override
     public void visit(LLUnaryNeg node) {
+    	node.getExpr().accept(this);
         node.setAddress(getNextAddress());
     }
 
     @Override
     public void visit(LLUnaryNot node) {
+    	node.getExpr().accept(this);
         node.setAddress(getNextAddress());
-        
     }
 
     @Override
     public void visit(LLBoolLiteral node) {
         node.setAddress(getNextAddress());
-        
     }
 
     @Override
     public void visit(LLIntLiteral node) {
-        node.setAddress(getNextAddress());
-        
+        node.setAddress(getNextAddress());        
     }
 
     @Override
     public void visit(LLJump node) {
-     // Do nothing
-        
+    	// Do nothing
     }
 
     @Override
     public void visit(LLLabel node) {
-     // Do nothing
-        
+    	// Do nothing
     }
 
     @Override
     public void visit(LLMov node) {
-     // Do nothing
-        
+    	// Do nothing
     }
 
     @Override
     public void visit(LLReturn node) {
-     // Do nothing
-        
+    	// Do nothing
     }
 
     @Override

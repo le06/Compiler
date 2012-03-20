@@ -1,5 +1,7 @@
 package edu.mit.compilers.checker;
 
+import java.util.HashMap;
+
 import antlr.ASTFactory;
 import antlr.RecognitionException;
 import antlr.TokenStreamException;
@@ -13,6 +15,8 @@ public class DecafChecker {
     private boolean wasError;
     private boolean debug;
     private Ir ir;
+    
+    private HashMap<String, Integer> local_counts;
     
     public DecafChecker (DecafParser decaf_parser) {
         // Save the line/column numbers so we get meaningful parse data.
@@ -32,6 +36,7 @@ public class DecafChecker {
         IrNodeChecker checker = new IrNodeChecker();
         ir.accept(checker);
         wasError |= checker.getError();
+        local_counts = checker.getLocalCounts();
     }
     
     public Ir getIr() {
@@ -40,6 +45,10 @@ public class DecafChecker {
     
     public boolean getError() {
         return wasError;
+    }
+    
+    public HashMap<String, Integer> getLocalCounts() {
+    	return local_counts;
     }
     
     public void setTrace(boolean do_debug) {

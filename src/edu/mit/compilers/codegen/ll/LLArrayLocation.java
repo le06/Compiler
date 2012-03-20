@@ -64,7 +64,17 @@ public class LLArrayLocation implements LLExpression, LLLocation {
 
     @Override
     public void setAddress(String addr) {
-        label = addr;
+        temp_location = addr;
     }
+
+	@Override
+	public String getLocation() {
+		return label;
+	}
+
+	@Override
+	public void setLocation(String address) {
+		label = address;
+	}
 
 }

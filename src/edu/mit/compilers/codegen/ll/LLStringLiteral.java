@@ -27,7 +27,6 @@ public class LLStringLiteral implements LLExpression {
     
     @Override
     public void accept(LLNodeVisitor v) {
-        //label.accept(v);
         v.visit(this);
     }
 

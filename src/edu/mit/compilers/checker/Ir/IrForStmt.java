@@ -74,7 +74,8 @@ public class IrForStmt extends IrStatement {
         
         
         //LLVarDecl dec = new LLVarDecl(myCounter.getId());
-        LLLocation var = (LLLocation)(new LLVarLocation(myCounter.getId(),
+        LLLocation var = (LLLocation)(new LLVarLocation(counter_bp_offset,
+                                                        myCounter.getId(),
                                                         LLExpression.Type.INT));
         
         LLAssign init = new LLAssign(var,

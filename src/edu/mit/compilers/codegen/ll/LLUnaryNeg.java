@@ -13,7 +13,6 @@ public class LLUnaryNeg implements LLExpression {
 
     @Override
     public void accept(LLNodeVisitor v) {
-        negated_expr.accept(v);
         v.visit(this);
     }
 

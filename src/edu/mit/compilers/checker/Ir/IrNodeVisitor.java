@@ -48,4 +48,6 @@ public interface IrNodeVisitor {
 	public void visit(IrUnopExpr node);
 
 	public void visit(IrIntLiteral node);
+
+	public void visit(IrIdentifier node);
 }
