@@ -26,6 +26,7 @@ import edu.mit.compilers.codegen.ll.LLMethodCall;
 import edu.mit.compilers.codegen.ll.LLNode;
 import edu.mit.compilers.codegen.ll.LLNodeVisitor;
 import edu.mit.compilers.codegen.ll.LLMethodDecl;
+import edu.mit.compilers.codegen.ll.LLNop;
 import edu.mit.compilers.codegen.ll.LLReturn;
 import edu.mit.compilers.codegen.ll.LLStringLiteral;
 import edu.mit.compilers.codegen.ll.LLUnaryNeg;
@@ -325,7 +326,9 @@ public class CodeGenerator implements LLNodeVisitor {
     public void visit(LLCallout node) {
     	// arg exprs are evaluated in accept(). read those values into regs!
     	ArrayList<LLExpression> params = node.getParams();
-    	for (int i = params.size()-1; i >= 1; i--) {
+
+    	// note the name of the callout function is NOT considered a param!
+    	for (int i = params.size()-1; i >= 0; i--) {
     		pushArgument(i, params.get(i)); // push from RIGHT-TO-LEFT.
     	}
     	
@@ -751,6 +754,12 @@ public class CodeGenerator implements LLNodeVisitor {
         }
         writeLine("leave");
         writeLine("ret");
+    }
+
+    @Override
+    public void visit(LLNop node) {
+        // TODO Auto-generated method stub
+        
     }
 
 

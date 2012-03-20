@@ -2,6 +2,7 @@ package edu.mit.compilers.checker.Ir;
 
 import edu.mit.compilers.codegen.ll.LLLabel;
 import edu.mit.compilers.codegen.ll.LLNode;
+import edu.mit.compilers.codegen.ll.LLNop;
 
 // same question.
 public class IrType extends Ir {
@@ -37,6 +38,6 @@ public class IrType extends Ir {
 
     @Override
     public LLNode getllRep(LLLabel breakPoint, LLLabel continuePoint) {
-        return null;
+        return new LLNop();
     }
 }

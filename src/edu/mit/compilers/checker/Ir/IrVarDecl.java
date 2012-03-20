@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import edu.mit.compilers.codegen.ll.LLEnvironment;
 import edu.mit.compilers.codegen.ll.LLLabel;
 import edu.mit.compilers.codegen.ll.LLNode;
+import edu.mit.compilers.codegen.ll.LLNop;
 
 public class IrVarDecl extends Ir {
 
@@ -59,6 +60,6 @@ public class IrVarDecl extends Ir {
         }
         
         return out;*/
-        return null;
+        return new LLNop();
     }
 }

@@ -3,6 +3,7 @@ package edu.mit.compilers.checker.Ir;
 import java.util.ArrayList;
 
 import edu.mit.compilers.codegen.ll.LLEnvironment;
+import edu.mit.compilers.codegen.ll.LLExpression;
 import edu.mit.compilers.codegen.ll.LLLabel;
 import edu.mit.compilers.codegen.ll.LLMethodDecl;
 import edu.mit.compilers.codegen.ll.LLNode;
@@ -68,6 +69,16 @@ public class IrMethodDecl extends IrMemberDecl {
     @Override
     public LLNode getllRep(LLLabel breakPoint, LLLabel continuePoint) {
         LLEnvironment code = (LLEnvironment)block.getllRep(null, null);
-        return new LLMethodDecl(id.getId(), code);
+        switch (return_type.myType) {
+        case BOOLEAN:
+            return new LLMethodDecl(id.getId(), LLExpression.Type.BOOLEAN, code);
+        case INT:
+            return new LLMethodDecl(id.getId(), LLExpression.Type.INT, code);
+        case VOID:
+            return new LLMethodDecl(id.getId(), LLExpression.Type.VOID, code);
+        default:
+            throw new RuntimeException("Cannot have a method with mixed type");
+        }
+        
     }
 }
