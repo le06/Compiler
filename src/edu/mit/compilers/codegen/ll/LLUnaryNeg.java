@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.io.Writer;
 
 public class LLUnaryNeg implements LLExpression {
-    LLExpression negated_expr;
-    String address_of_result;
+    private LLExpression negated_expr;
+    private String address_of_result;
     
     public LLUnaryNeg(LLExpression expr) {
         negated_expr = expr;
@@ -17,6 +17,10 @@ public class LLUnaryNeg implements LLExpression {
         v.visit(this);
     }
 
+    public LLExpression getExpr() {
+    	return negated_expr;
+    }
+    
 	@Override
 	public String addressOfResult() {
 		return address_of_result;

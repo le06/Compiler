@@ -3,10 +3,10 @@ package edu.mit.compilers.codegen.ll;
 import edu.mit.compilers.checker.Ir.IrBinOperator;
 
 public class LLBinaryOp implements LLExpression {
-    LLExpression lhs;
-    LLExpression rhs;
-    IrBinOperator op;
-    Type type;
+    private LLExpression lhs;
+    private LLExpression rhs;
+    private IrBinOperator op;
+    private Type type;
     
     String address_of_result;
     
@@ -26,6 +26,20 @@ public class LLBinaryOp implements LLExpression {
         v.visit(this);
     }
     
+    
+    
+	public LLExpression getLhs() {
+		return lhs;
+	}
+
+	public LLExpression getRhs() {
+		return rhs;
+	}
+
+	public IrBinOperator getOp() {
+		return op;
+	}
+
 	@Override
 	public String addressOfResult() {
 		return address_of_result;

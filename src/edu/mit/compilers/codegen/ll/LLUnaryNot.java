@@ -1,8 +1,8 @@
 package edu.mit.compilers.codegen.ll;
 
 public class LLUnaryNot implements LLExpression {
-    LLExpression negated_expr;
-    String address_of_result;
+    private LLExpression negated_expr;
+    private String address_of_result;
     
     public LLUnaryNot(LLExpression expr) {
         negated_expr = expr;
@@ -13,7 +13,11 @@ public class LLUnaryNot implements LLExpression {
         negated_expr.accept(v);
         v.visit(this);
     }
-
+    
+    public LLExpression getExpr() {
+    	return negated_expr;
+    }
+    
 	@Override
 	public String addressOfResult() {
 		return address_of_result;
