@@ -2,11 +2,14 @@ package edu.mit.compilers.checker.Ir;
 
 import java.util.ArrayList;
 
+import edu.mit.compilers.checker.Ir.IrType.Type;
 import edu.mit.compilers.codegen.ll.LLEnvironment;
 import edu.mit.compilers.codegen.ll.LLExpression;
+import edu.mit.compilers.codegen.ll.LLIntLiteral;
 import edu.mit.compilers.codegen.ll.LLLabel;
 import edu.mit.compilers.codegen.ll.LLMethodDecl;
 import edu.mit.compilers.codegen.ll.LLNode;
+import edu.mit.compilers.codegen.ll.LLReturn;
 
 public class IrMethodDecl extends IrMemberDecl {
 	private IrType return_type;
@@ -69,6 +72,12 @@ public class IrMethodDecl extends IrMemberDecl {
     @Override
     public LLNode getllRep(LLLabel breakPoint, LLLabel continuePoint) {
         LLEnvironment code = (LLEnvironment)block.getllRep(null, null);
+        
+        if (return_type.myType == Type.VOID) {
+            LLReturn ret = new LLReturn(new LLIntLiteral(0));
+            code.addNode(ret);
+        }
+        
         switch (return_type.myType) {
         case BOOLEAN:
             return new LLMethodDecl(id.getId(), LLExpression.Type.BOOLEAN, code);
