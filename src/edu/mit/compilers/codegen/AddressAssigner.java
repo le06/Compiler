@@ -16,6 +16,7 @@ import edu.mit.compilers.codegen.ll.LLMalloc;
 import edu.mit.compilers.codegen.ll.LLMethodCall;
 import edu.mit.compilers.codegen.ll.LLMethodDecl;
 import edu.mit.compilers.codegen.ll.LLMov;
+import edu.mit.compilers.codegen.ll.LLNode;
 import edu.mit.compilers.codegen.ll.LLNodeVisitor;
 import edu.mit.compilers.codegen.ll.LLNop;
 import edu.mit.compilers.codegen.ll.LLReturn;
@@ -51,6 +52,20 @@ public class AddressAssigner implements LLNodeVisitor {
     @Override
     public void visit(LLFile node) {
         resetAddress();
+        
+        for (LLGlobalDecl g : node.getGlobalDecls()) {
+            g.accept(this);
+        }
+        
+        for (LLArrayDecl a : node.getArrayDecls()) {
+            a.accept(this);
+        }
+        
+        for (LLMethodDecl m : node.getMethods()) {
+            m.accept(this);
+        }
+        
+        node.getMain().accept(this);
     }
 
     @Override
@@ -76,18 +91,22 @@ public class AddressAssigner implements LLNodeVisitor {
             currentMethod.setNumTemps(currentOffset / OFFSET);
         }
         resetAddress();
+        
+        node.getEnv().accept(this);
     }
 
     @Override
     public void visit(LLEnvironment node) {
-     // Do nothing
+        for (LLNode n : node.getSubnodes()) {
+            n.accept(this);
+        }
         
     }
 
     @Override
     public void visit(LLAssign node) {
-     // Do nothing
-        
+        node.getExpr().accept(this);
+        node.getLoc().accept(this);
     }
 
     @Override
