@@ -12,6 +12,7 @@ public class DecafChecker {
     private DecafParser parser;
     private boolean wasError;
     private boolean debug;
+    private Ir ir;
     
     public DecafChecker (DecafParser decaf_parser) {
         // Save the line/column numbers so we get meaningful parse data.
@@ -22,7 +23,7 @@ public class DecafChecker {
     }
     
     public void check() throws RecognitionException, TokenStreamException {
-        Ir ir = generateIr();
+        ir = generateIr();
         
         if (debug) {
             System.out.println(ir.toString(0));
@@ -31,6 +32,10 @@ public class DecafChecker {
         IrNodeChecker checker = new IrNodeChecker();
         ir.accept(checker);
         wasError |= checker.getError();
+    }
+    
+    public Ir getIr() {
+        return ir;
     }
     
     public boolean getError() {

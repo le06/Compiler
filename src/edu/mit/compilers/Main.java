@@ -96,9 +96,14 @@ class Main {
                   new DecafScanner(new DataInputStream(inputStream));
           DecafParser parser = new DecafParser(scanner);
           DecafChecker checker = new DecafChecker(parser);
-          DecafUnoptomizedCodeGenerator gen = new DecafUnoptomizedCodeGenerator(checker, null);
+          DecafUnoptomizedCodeGenerator gen = new DecafUnoptomizedCodeGenerator(checker);
           gen.setTrace(CLI.debug);
-          gen.gen();
+          
+          BufferedWriter out = new BufferedWriter(
+                                    new FileWriter(
+                                           new File(CLI.outfile)));
+          
+          gen.gen(out);
           if (gen.getError()) {
               System.exit(-1);
           }
