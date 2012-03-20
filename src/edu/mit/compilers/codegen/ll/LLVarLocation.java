@@ -9,6 +9,12 @@ public class LLVarLocation implements LLExpression, LLLocation {
     private String temp_location;
     
     // can be used as a location or an expression.
+    public LLVarLocation(String label) {
+    	this.label = label;
+    	this.type = null;
+    	this.temp_location = null;
+    }
+    
     public LLVarLocation(String label, Type type) {
     	this.label = label;
     	this.type = type;

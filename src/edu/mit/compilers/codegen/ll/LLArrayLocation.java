@@ -1,7 +1,7 @@
 package edu.mit.compilers.codegen.ll;
 
 public class LLArrayLocation implements LLExpression, LLLocation {
-	private String location;
+	private String label;
 	private Type type;
 	private String temp_location;
 
@@ -9,19 +9,25 @@ public class LLArrayLocation implements LLExpression, LLLocation {
 	private LLExpression index;
     
 	// can be used as a location or an expression.
-
-	public LLArrayLocation(Type type,
+	public LLArrayLocation(String label, LLExpression index) {
+		this.label = label;
+		this.type = null;
+		this.temp_location = null;
+		this.index = index;
+	}
+	
+	public LLArrayLocation(String label, Type type,
 						   long size, LLExpression index) {
-		//this.location = location;
+		this.label = label;
 		this.type = type;
 		this.temp_location = null;
 		this.size = size;
 		this.index = index;
 	}
 	
-	public LLArrayLocation(Type type, String temp_location,
+	public LLArrayLocation(String label, Type type, String temp_location,
 						   long size, LLExpression index) {
-		//this.location = location;
+		this.label = label;
 		this.type = type;
 		this.temp_location = temp_location;
 		this.size = size;
@@ -58,7 +64,7 @@ public class LLArrayLocation implements LLExpression, LLLocation {
 
     @Override
     public void setAddress(String addr) {
-        location = addr;
+        label = addr;
     }
 
 }
