@@ -101,6 +101,7 @@ public class CodeGenerator implements LLNodeVisitor {
     
     private LLLabel array_oob_label;
     private LLLabel missing_return_label;
+    private LLLabel div_by_zero_label;
     
     private boolean printString = false;
     
@@ -113,6 +114,7 @@ public class CodeGenerator implements LLNodeVisitor {
     	tab_level = 0;
     	array_oob_label = decafFile.getArrayOobLabel();
     	missing_return_label = decafFile.getMissingReturnLabel();
+    	div_by_zero_label = decafFile.getDivByZeroLabel();
     	
         outputStream = output;
         decafFile.accept(this);
@@ -129,6 +131,9 @@ public class CodeGenerator implements LLNodeVisitor {
     	// TODO: fill in ASM
     }
     
+    private void error_div_by_zero() {
+    	// TODO: fill in ASM
+    }
     
     /*
      * Low-level node visitor methods.
@@ -465,6 +470,9 @@ public class CodeGenerator implements LLNodeVisitor {
     	LLExpression right = node.getRhs();
     	LLMov mov_left, mov_right;
         
+    	LLMov mov_divisor, mov_zero;
+    	LLJump div_error;
+    	
     	IrBinOperator op = node.getOp();
     	String inst, inst_line;
     	LLMov mov_false, mov_true;
@@ -501,6 +509,20 @@ public class CodeGenerator implements LLNodeVisitor {
     		writeLine(inst_line);
     		break;
     	case DIV:
+    		// are we dividing by zero? check the divisor.
+    		mov_divisor = new LLMov(right.addressOfResult(), R10);
+    		mov_zero = new LLMov("$0", R11);
+    		mov_divisor.accept(this);
+    		mov_zero.accept(this);
+    		
+        	inst = "cmp";
+        	inst_line = formatLine(inst, R10, R11);
+        	writeLine(inst_line);
+        	
+        	div_error = new LLJump(LLJump.JumpType.EQUAL, div_by_zero_label);
+        	div_error.accept(this);
+    		
+    		// do the actual division.
         	mov_left = new LLMov(left.addressOfResult(), RDX);
         	mov_right = new LLMov(right.addressOfResult(), RAX);
         	mov_left.accept(this);
@@ -515,6 +537,20 @@ public class CodeGenerator implements LLNodeVisitor {
     		mov_quotient.accept(this);
     		break;
     	case MOD:
+    		// are we dividing by zero? check the divisor.
+    		mov_divisor = new LLMov(right.addressOfResult(), R10);
+    		mov_zero = new LLMov("$0", R11);
+    		mov_divisor.accept(this);
+    		mov_zero.accept(this);
+    		
+        	inst = "cmp";
+        	inst_line = formatLine(inst, R10, R11);
+        	writeLine(inst_line);
+        	
+        	div_error = new LLJump(LLJump.JumpType.EQUAL, div_by_zero_label);
+        	div_error.accept(this);
+    		
+    		// do the actual division.
         	mov_left = new LLMov(left.addressOfResult(), RDX);
         	mov_right = new LLMov(right.addressOfResult(), RAX);
         	mov_left.accept(this);

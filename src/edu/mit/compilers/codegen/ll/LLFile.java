@@ -12,6 +12,7 @@ public class LLFile implements LLNode {
 
     private LLLabel array_oob_label;
     private LLLabel missing_return_label;
+    private LLLabel div_by_zero_label;
     
     public LLFile(LLMethodDecl mainMethod) {
         global_decls = new ArrayList<LLGlobalDecl>();
@@ -22,6 +23,7 @@ public class LLFile implements LLNode {
         
         array_oob_label = new LLLabel("ARRAY_OUT_OF_BOUNDS");
         missing_return_label = new LLLabel("MISSING_RETURN");
+        div_by_zero_label = new LLLabel("DIVIDE_BY_ZERO");
     }
     
     public LLFile() {
@@ -32,6 +34,7 @@ public class LLFile implements LLNode {
         
         array_oob_label = new LLLabel("ARRAY_OUT_OF_BOUNDS");
         missing_return_label = new LLLabel("MISSING_RETURN");
+        div_by_zero_label = new LLLabel("DIVIDE_BY_ZERO");
     }
     
     public void addGlobalDec(LLGlobalDecl decl) {
@@ -62,6 +65,14 @@ public class LLFile implements LLNode {
 		missing_return_label = missingReturnLabel;
 	}
 
+	public LLLabel getDivByZeroLabel() {
+		return div_by_zero_label;
+	}
+
+	public void setDivByZeroLabel(LLLabel divByZeroLabel) {
+		div_by_zero_label = divByZeroLabel;
+	}
+	
 	public void setMain(LLMethodDecl main_method) {
         main = main_method;
     }
