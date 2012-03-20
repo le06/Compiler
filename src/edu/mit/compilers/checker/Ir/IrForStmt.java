@@ -11,7 +11,6 @@ import edu.mit.compilers.codegen.ll.LLLabel;
 import edu.mit.compilers.codegen.ll.LLLocation;
 import edu.mit.compilers.codegen.ll.LLNode;
 import edu.mit.compilers.codegen.ll.LLVarLocation;
-import edu.mit.compilers.codegen.ll.LLVarDecl;
 
 public class IrForStmt extends IrStatement {
     public IrForStmt(IrIdentifier counter, IrExpression start_value,
@@ -70,7 +69,7 @@ public class IrForStmt extends IrStatement {
         LLJump jump_end = new LLJump(JumpType.EQUAL, for_end);
         LLJump jump_begin = new LLJump(JumpType.UNCONDITIONAL, for_begin);
         
-        LLVarDecl dec = new LLVarDecl(myCounter.getId());
+        //LLVarDecl dec = new LLVarDecl(myCounter.getId());
         LLLocation var = (LLLocation)(new LLVarLocation(myCounter.getId()));
         
         LLAssign init = new LLAssign(var,
@@ -89,7 +88,7 @@ public class IrForStmt extends IrStatement {
         
         
         LLEnvironment out = new LLEnvironment();
-        out.addNode(dec);
+        //out.addNode(dec);
         out.addNode(init);
         out.addNode(for_begin);
         out.addNode(test);

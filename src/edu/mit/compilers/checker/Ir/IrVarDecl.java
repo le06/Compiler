@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import edu.mit.compilers.codegen.ll.LLEnvironment;
 import edu.mit.compilers.codegen.ll.LLLabel;
 import edu.mit.compilers.codegen.ll.LLNode;
-import edu.mit.compilers.codegen.ll.LLVarDecl;
 
 public class IrVarDecl extends Ir {
 
@@ -53,12 +52,13 @@ public class IrVarDecl extends Ir {
 
     @Override
     public LLNode getllRep(LLLabel breakPoint, LLLabel continuePoint) {
-        LLEnvironment out = new LLEnvironment();
+        /*LLEnvironment out = new LLEnvironment();
         
         for (IrLocalDecl dec : locals) {
             out.addNode(new LLVarDecl(dec.getId().getId()));
         }
         
-        return out;
+        return out;*/
+        return null;
     }
 }

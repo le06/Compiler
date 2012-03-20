@@ -2,7 +2,6 @@ package edu.mit.compilers.checker.Ir;
 
 import edu.mit.compilers.codegen.ll.LLLabel;
 import edu.mit.compilers.codegen.ll.LLNode;
-import edu.mit.compilers.codegen.ll.LLVarDecl;
 
 public class IrLocalDecl extends Ir {
     public IrLocalDecl(IrIdentifier name) {

@@ -34,6 +34,7 @@ public class IrBaseDecl extends IrGlobalDecl {
     }
     @Override
     public LLNode getllRep(LLLabel breakPoint, LLLabel continuePoint) {
-        return (LLNode)(new LLGlobalDecl(id.getId()));
+        LLLabel g = new LLLabel(id.getId());
+        return (LLNode)(new LLGlobalDecl(g));
     }
 }
