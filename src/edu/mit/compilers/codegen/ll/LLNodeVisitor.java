@@ -28,4 +28,5 @@ public interface LLNodeVisitor {
     public void visit(LLMov node);
     public void visit(LLReturn node);
     
+    public void visit(LLNop node);
 }

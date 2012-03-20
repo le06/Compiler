@@ -2,6 +2,7 @@ package edu.mit.compilers.checker.Ir;
 
 import edu.mit.compilers.codegen.ll.LLLabel;
 import edu.mit.compilers.codegen.ll.LLNode;
+import edu.mit.compilers.codegen.ll.LLNop;
 
 public class IrContinueStmt extends IrStatement {
 
@@ -25,6 +26,6 @@ public class IrContinueStmt extends IrStatement {
 
     @Override
     public LLNode getllRep(LLLabel breakPoint, LLLabel continuePoint) {
-        return null;
+        return new LLNop();
     }
 }

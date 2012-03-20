@@ -2,6 +2,7 @@ package edu.mit.compilers.checker.Ir;
 
 import edu.mit.compilers.codegen.ll.LLLabel;
 import edu.mit.compilers.codegen.ll.LLNode;
+import edu.mit.compilers.codegen.ll.LLNop;
 
 public class IrIdentifier extends Ir implements IrExpression {
     public IrIdentifier(String name) {
@@ -39,6 +40,6 @@ public class IrIdentifier extends Ir implements IrExpression {
 
     @Override
     public LLNode getllRep(LLLabel breakPoint, LLLabel continuePoint) {
-        return null;
+        return new LLNop();
     }
 }

@@ -2,6 +2,7 @@ package edu.mit.compilers.checker.Ir;
 
 import edu.mit.compilers.codegen.ll.LLLabel;
 import edu.mit.compilers.codegen.ll.LLNode;
+import edu.mit.compilers.codegen.ll.LLNop;
 import edu.mit.compilers.codegen.ll.LLStringLiteral;
 
 public class IrStringLiteral extends Ir {
@@ -32,7 +33,6 @@ public class IrStringLiteral extends Ir {
 
     @Override
     public LLNode getllRep(LLLabel breakPoint, LLLabel continuePoint) {
-        
-        return null;
+        return new LLNop();
     }
 }

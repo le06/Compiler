@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import edu.mit.compilers.codegen.ll.LLLabel;
 import edu.mit.compilers.codegen.ll.LLNode;
+import edu.mit.compilers.codegen.ll.LLNop;
 
 public class IrFieldDecl extends IrMemberDecl {
     IrType type;
@@ -49,6 +50,6 @@ public class IrFieldDecl extends IrMemberDecl {
 
     @Override
     public LLNode getllRep(LLLabel breakPoint, LLLabel continuePoint) {
-        return null;
+        return new LLNop();
     }
 }

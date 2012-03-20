@@ -26,6 +26,7 @@ import edu.mit.compilers.codegen.ll.LLMethodCall;
 import edu.mit.compilers.codegen.ll.LLNode;
 import edu.mit.compilers.codegen.ll.LLNodeVisitor;
 import edu.mit.compilers.codegen.ll.LLMethodDecl;
+import edu.mit.compilers.codegen.ll.LLNop;
 import edu.mit.compilers.codegen.ll.LLReturn;
 import edu.mit.compilers.codegen.ll.LLStringLiteral;
 import edu.mit.compilers.codegen.ll.LLUnaryNeg;
@@ -738,6 +739,12 @@ public class CodeGenerator implements LLNodeVisitor {
         }
         writeLine("leave");
         writeLine("ret");
+    }
+
+    @Override
+    public void visit(LLNop node) {
+        // TODO Auto-generated method stub
+        
     }
 
 

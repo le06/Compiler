@@ -5,6 +5,7 @@ import edu.mit.compilers.codegen.ll.LLBinaryOp;
 import edu.mit.compilers.codegen.ll.LLExpression;
 import edu.mit.compilers.codegen.ll.LLLabel;
 import edu.mit.compilers.codegen.ll.LLNode;
+import edu.mit.compilers.codegen.ll.LLNop;
 
 public class IrBinopExpr extends Ir implements IrExpression {
     public IrBinopExpr(IrBinOperator op, IrExpression left, IrExpression right) {
@@ -102,7 +103,7 @@ public class IrBinopExpr extends Ir implements IrExpression {
         case VOID:
             return new LLBinaryOp(l, r, operator, LLExpression.Type.VOID);
         default:
-            return null;    
+            return new LLNop();    
         }
     }
 }

@@ -5,6 +5,7 @@ import javax.management.RuntimeErrorException;
 import edu.mit.compilers.codegen.ll.LLArrayDecl;
 import edu.mit.compilers.codegen.ll.LLLabel;
 import edu.mit.compilers.codegen.ll.LLNode;
+import edu.mit.compilers.codegen.ll.LLNop;
 
 public class IrArrayDecl extends IrGlobalDecl {
 	private IrIdentifier id;
@@ -54,6 +55,6 @@ public class IrArrayDecl extends IrGlobalDecl {
             System.exit(-1);
             return null;
         }*/
-        return null;
+        return new LLNop();
     }
 }

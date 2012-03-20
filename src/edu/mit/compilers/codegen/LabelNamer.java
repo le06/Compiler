@@ -159,4 +159,10 @@ public class LabelNamer implements LLNodeVisitor {
         
     }
 
+    @Override
+    public void visit(LLNop node) {
+        // Do Nothing
+        
+    }
+
 }
