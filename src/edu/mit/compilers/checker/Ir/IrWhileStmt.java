@@ -52,14 +52,17 @@ public class IrWhileStmt extends IrStatement {
         LLLabel w_start = new LLLabel("w_start");
         LLLabel w_end = new LLLabel("w_end");
         
-        LLJump jump_end = new LLJump(JumpType.NOT_EQUAL, w_end);
-        LLJump jump_start = new LLJump(JumpType.UNCONDITIONAL, w_start);
+        //LLJump jump_end = new LLJump(JumpType.NOT_EQUAL, w_end);
+        
         
         LLExpression cond = (LLExpression)condition.getllRep(null, null);
         LLEnvironment code = (LLEnvironment)block.getllRep(w_end, w_start);
         
+        LLJump jump_end = new LLJump(cond, w_end);
+        LLJump jump_start = new LLJump(JumpType.UNCONDITIONAL, w_start);
+        
         out.addNode(w_start);
-        out.addNode(cond);
+        //out.addNode(cond);
         out.addNode(jump_end);
         out.addNode(code);
         out.addNode(jump_start);
