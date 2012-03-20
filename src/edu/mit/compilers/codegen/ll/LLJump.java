@@ -3,22 +3,22 @@ package edu.mit.compilers.codegen.ll;
 import java.io.IOException;
 import java.io.Writer;
 
-public class llJump implements llNode {
+public class LLJump implements LLNode {
     private JumpType type;
-    private llLabel label;
+    private LLLabel label;
     
-    public llJump(JumpType t, llLabel loc) {
+    public LLJump(JumpType t, LLLabel loc) {
         type = t;
         label = loc;
     }
     
-    public static enum JumpType {
+    public static enum JumpType { // TODO: add more types!
         UNCONDITIONAL,
         EQUAL,
         NOT_EQUAL;
     }
     
-    private String getOpcode() {
+    public String getOpcode() {
         switch (this.type) {
         case UNCONDITIONAL:
             return "jmp";
@@ -31,8 +31,12 @@ public class llJump implements llNode {
         }
     }
 
+    public LLLabel getLabel() {
+    	return label;
+    }
+    
     @Override
-    public void accept(llNodeVisitor v) {
+    public void accept(LLNodeVisitor v) {
         v.visit(this);
     }
 

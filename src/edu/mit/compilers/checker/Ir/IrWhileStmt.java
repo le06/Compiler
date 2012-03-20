@@ -1,11 +1,11 @@
 package edu.mit.compilers.checker.Ir;
 
-import edu.mit.compilers.codegen.ll.llEnvironment;
-import edu.mit.compilers.codegen.ll.llExpression;
-import edu.mit.compilers.codegen.ll.llJump;
-import edu.mit.compilers.codegen.ll.llJump.JumpType;
-import edu.mit.compilers.codegen.ll.llLabel;
-import edu.mit.compilers.codegen.ll.llNode;
+import edu.mit.compilers.codegen.ll.LLEnvironment;
+import edu.mit.compilers.codegen.ll.LLExpression;
+import edu.mit.compilers.codegen.ll.LLJump;
+import edu.mit.compilers.codegen.ll.LLJump.JumpType;
+import edu.mit.compilers.codegen.ll.LLLabel;
+import edu.mit.compilers.codegen.ll.LLNode;
 
 public class IrWhileStmt extends IrStatement {
     public IrWhileStmt(IrExpression test, IrBlock true_block) {
@@ -46,17 +46,17 @@ public class IrWhileStmt extends IrStatement {
     }
 
     @Override
-    public llNode getllRep(llLabel breakPoint, llLabel continuePoint) {
-        llEnvironment out = new llEnvironment();
+    public LLNode getllRep(LLLabel breakPoint, LLLabel continuePoint) {
+        LLEnvironment out = new LLEnvironment();
         
-        llLabel w_start = new llLabel("w_start");
-        llLabel w_end = new llLabel("w_end");
+        LLLabel w_start = new LLLabel("w_start");
+        LLLabel w_end = new LLLabel("w_end");
         
-        llJump jump_end = new llJump(JumpType.NOT_EQUAL, w_end);
-        llJump jump_start = new llJump(JumpType.UNCONDITIONAL, w_start);
+        LLJump jump_end = new LLJump(JumpType.NOT_EQUAL, w_end);
+        LLJump jump_start = new LLJump(JumpType.UNCONDITIONAL, w_start);
         
-        llExpression cond = (llExpression)condition.getllRep(null, null);
-        llEnvironment code = (llEnvironment)block.getllRep(w_end, w_start);
+        LLExpression cond = (LLExpression)condition.getllRep(null, null);
+        LLEnvironment code = (LLEnvironment)block.getllRep(w_end, w_start);
         
         out.addNode(w_start);
         out.addNode(cond);

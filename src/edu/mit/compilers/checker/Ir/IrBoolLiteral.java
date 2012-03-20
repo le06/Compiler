@@ -1,8 +1,8 @@
 package edu.mit.compilers.checker.Ir;
 
-import edu.mit.compilers.codegen.ll.llBoolLiteral;
-import edu.mit.compilers.codegen.ll.llLabel;
-import edu.mit.compilers.codegen.ll.llNode;
+import edu.mit.compilers.codegen.ll.LLBoolLiteral;
+import edu.mit.compilers.codegen.ll.LLLabel;
+import edu.mit.compilers.codegen.ll.LLNode;
 
 public class IrBoolLiteral extends Ir implements IrExpression {
     public IrBoolLiteral(boolean val) {
@@ -36,7 +36,7 @@ public class IrBoolLiteral extends Ir implements IrExpression {
     }
 
     @Override
-    public llNode getllRep(llLabel breakPoint, llLabel continuePoint) {
-        return (llNode)(new llBoolLiteral(literal));
+    public LLNode getllRep(LLLabel breakPoint, LLLabel continuePoint) {
+        return (LLNode)(new LLBoolLiteral(literal));
     }
 }

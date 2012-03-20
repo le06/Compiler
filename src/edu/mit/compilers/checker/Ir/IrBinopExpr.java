@@ -1,10 +1,10 @@
 package edu.mit.compilers.checker.Ir;
 
 import edu.mit.compilers.checker.Ir.IrNodeChecker.Type;
-import edu.mit.compilers.codegen.ll.llBinOp;
-import edu.mit.compilers.codegen.ll.llExpression;
-import edu.mit.compilers.codegen.ll.llLabel;
-import edu.mit.compilers.codegen.ll.llNode;
+import edu.mit.compilers.codegen.ll.LLBinaryOp;
+import edu.mit.compilers.codegen.ll.LLExpression;
+import edu.mit.compilers.codegen.ll.LLLabel;
+import edu.mit.compilers.codegen.ll.LLNode;
 
 public class IrBinopExpr extends Ir implements IrExpression {
     public IrBinopExpr(IrBinOperator op, IrExpression left, IrExpression right) {
@@ -87,10 +87,10 @@ public class IrBinopExpr extends Ir implements IrExpression {
 	    }
 
     @Override
-    public llNode getllRep(llLabel breakPoint, llLabel continuePoint) {
-        llExpression l = (llExpression)lhs.getllRep(null, null);
-        llExpression r = (llExpression)rhs.getllRep(null, null);
+    public LLNode getllRep(LLLabel breakPoint, LLLabel continuePoint) {
+        LLExpression l = (LLExpression)lhs.getllRep(null, null);
+        LLExpression r = (LLExpression)rhs.getllRep(null, null);
         
-        return new llBinOp(l, r, operator);
+        return new LLBinaryOp(l, r, operator);
     }
 }

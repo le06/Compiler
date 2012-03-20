@@ -2,11 +2,11 @@ package edu.mit.compilers.checker.Ir;
 
 import java.util.ArrayList;
 
-import edu.mit.compilers.codegen.ll.llEnvironment;
-import edu.mit.compilers.codegen.ll.llJump;
-import edu.mit.compilers.codegen.ll.llLabel;
-import edu.mit.compilers.codegen.ll.llNode;
-import edu.mit.compilers.codegen.ll.llJump.JumpType;
+import edu.mit.compilers.codegen.ll.LLEnvironment;
+import edu.mit.compilers.codegen.ll.LLJump;
+import edu.mit.compilers.codegen.ll.LLLabel;
+import edu.mit.compilers.codegen.ll.LLNode;
+import edu.mit.compilers.codegen.ll.LLJump.JumpType;
 
 public class IrBlock extends Ir {
 	// ordering between vars and stmts enforced at parse-time.
@@ -57,16 +57,16 @@ public class IrBlock extends Ir {
 	}
 	
     @Override
-    public llNode getllRep(llLabel breakPoint, llLabel continuePoint) {
-        llEnvironment out = new llEnvironment();
+    public LLNode getllRep(LLLabel breakPoint, LLLabel continuePoint) {
+        LLEnvironment out = new LLEnvironment();
         for (IrVarDecl d : var_decls) {
             out.addNode(d.getllRep(null, null));
         }
         for (IrStatement s : statements) {
             if (s instanceof IrBreakStmt) {
-                out.addNode(new llJump(JumpType.UNCONDITIONAL, breakPoint));
+                out.addNode(new LLJump(JumpType.UNCONDITIONAL, breakPoint));
             } else if (s instanceof IrContinueStmt) {
-                out.addNode(new llJump(JumpType.UNCONDITIONAL, continuePoint));
+                out.addNode(new LLJump(JumpType.UNCONDITIONAL, continuePoint));
             } else {
                 out.addNode(s.getllRep(breakPoint, continuePoint));
             }

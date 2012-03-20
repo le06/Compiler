@@ -3,47 +3,47 @@ package edu.mit.compilers.codegen;
 import edu.mit.compilers.checker.Ir.*;
 import edu.mit.compilers.codegen.ll.*;
 
-public class IrToLlConverter implements IrNodeVisitor<llNode> {
-    llFile output;
-    llMethodDef currentMethod;
-    llEnvironment currentEnvironment;
+public class IrToLlConverter implements IrNodeVisitor<LLNode> {
+    LLFile output;
+    LLMethodDecl currentMethod;
+    LLEnvironment currentEnvironment;
     
     public IrToLlConverter() {
-        output = new llFile();
+        output = new LLFile();
     }
     
-    public llNode subExprConvert(llNode node) {
+    public LLNode subExprConvert(LLNode node) {
         return null;
     }
 
     @Override
-    public llNode visit(IrClassDecl node) {
+    public LLNode visit(IrClassDecl node) {
         // Don't need to do anything -- visitor will visit 
         // children recursively
     }
 
     @Override
-    public llNode visit(IrFieldDecl node) {
+    public LLNode visit(IrFieldDecl node) {
         // TODO Auto-generated method stub
         
     }
 
     @Override
-    public llNode visit(IrBaseDecl node) {
+    public LLNode visit(IrBaseDecl node) {
         // TODO Auto-generated method stub
         
     }
 
     @Override
-    public llNode visit(IrArrayDecl node) {
+    public LLNode visit(IrArrayDecl node) {
         // TODO Auto-generated method stub
         
     }
 
     @Override
-    public llNode visit(IrMethodDecl node) {
-        currentEnvironment = new llEnvironment();
-        llMethodDef m = new llMethodDef(node.getId().getId(), currentEnvironment);
+    public LLNode visit(IrMethodDecl node) {
+        currentEnvironment = new LLEnvironment();
+        LLMethodDecl m = new LLMethodDecl(node.getId().getId(), currentEnvironment);
         
         if (node.getId().getId().equals("main")) {
             output.setMain(m);
@@ -53,135 +53,135 @@ public class IrToLlConverter implements IrNodeVisitor<llNode> {
     }
 
     @Override
-    public llNode visit(IrVarDecl node) {
+    public LLNode visit(IrVarDecl node) {
         // TODO Auto-generated method stub
         
     }
 
     @Override
-    public llNode visit(IrLocalDecl node) {
+    public LLNode visit(IrLocalDecl node) {
         // TODO Auto-generated method stub
         
     }
 
     @Override
-    public llNode visit(IrBlockStmt node) {
+    public LLNode visit(IrBlockStmt node) {
         // TODO Auto-generated method stub
         
     }
 
     @Override
-    public llNode visit(IrContinueStmt node) {
+    public LLNode visit(IrContinueStmt node) {
         // TODO Auto-generated method stub
         
     }
 
     @Override
-    public llNode visit(IrBreakStmt node) {
+    public LLNode visit(IrBreakStmt node) {
         // TODO Auto-generated method stub
         
     }
 
     @Override
-    public llNode visit(IrReturnStmt node) {
+    public LLNode visit(IrReturnStmt node) {
         // TODO Auto-generated method stub
         
     }
 
     @Override
-    public llNode visit(IrWhileStmt node) {
+    public LLNode visit(IrWhileStmt node) {
         // TODO Auto-generated method stub
         
     }
 
     @Override
-    public llNode visit(IrForStmt node) {
+    public LLNode visit(IrForStmt node) {
         // TODO Auto-generated method stub
         
     }
 
     @Override
-    public llNode visit(IrIfStmt node) {
+    public LLNode visit(IrIfStmt node) {
         //llEnvironment e = new llEnvironment();
         
-        llLabel true_label = new llLabel();
-        llLabel if_end = new llLabel();
+        LLLabel true_label = new LLLabel();
+        LLLabel if_end = new LLLabel();
         
-        llJump jump_true = new llJump(llJump.JumpType.NOT_EQUAL, true_label);
-        llJump end_true = new llJump(llJump.JumpType.UNCONDITIONAL, if_end);
-        llJump end_false = new llJump(llJump.JumpType.UNCONDITIONAL, if_end);
+        LLJump jump_true = new LLJump(LLJump.JumpType.NOT_EQUAL, true_label);
+        LLJump end_true = new LLJump(LLJump.JumpType.UNCONDITIONAL, if_end);
+        LLJump end_false = new LLJump(LLJump.JumpType.UNCONDITIONAL, if_end);
         
-        llEnvironment eval_cond_block = new llEnvironment();
-        llEnvironment true_block = new llEnvironment();
-        llEnvironment false_block = new llEnvironment();
+        LLEnvironment eval_cond_block = new LLEnvironment();
+        LLEnvironment true_block = new LLEnvironment();
+        LLEnvironment false_block = new LLEnvironment();
         
         currentEnvironment.addNode(eval_cond_block);
         currentEnvironment.addNode(jump_true);
         currentEnvironment.addNode(false_block);
         currentEnvironment.addNode(end_false);
         currentEnvironment.addNode(true_label);
-        currentEnvironment.addNode(node)
+        currentEnvironment.addNode(node);
         
         //currentEnvironment.addNode(e);
         
     }
 
     @Override
-    public llNode visit(IrMethodCallStmt node) {
+    public LLNode visit(IrMethodCallStmt node) {
         // TODO Auto-generated method stub
         
     }
 
     @Override
-    public llNode visit(IrCalloutStmt node) {
+    public LLNode visit(IrCalloutStmt node) {
         // TODO Auto-generated method stub
         
     }
 
     @Override
-    public llNode visit(IrAssignStmt node) {
+    public LLNode visit(IrAssignStmt node) {
         // TODO Auto-generated method stub
         
     }
 
     @Override
-    public llNode visit(IrPlusAssignStmt node) {
+    public LLNode visit(IrPlusAssignStmt node) {
         // TODO Auto-generated method stub
         
     }
 
     @Override
-    public llNode visit(IrMinusAssignStmt node) {
+    public LLNode visit(IrMinusAssignStmt node) {
         // TODO Auto-generated method stub
         
     }
 
     @Override
-    public llNode visit(IrVarLocation node) {
+    public LLNode visit(IrVarLocation node) {
         // TODO Auto-generated method stub
         
     }
 
     @Override
-    public llNode visit(IrArrayLocation node) {
+    public LLNode visit(IrArrayLocation node) {
         // TODO Auto-generated method stub
         
     }
 
     @Override
-    public llNode visit(IrBinopExpr node) {
+    public LLNode visit(IrBinopExpr node) {
         // TODO Auto-generated method stub
         
     }
 
     @Override
-    public llNode visit(IrUnopExpr node) {
+    public LLNode visit(IrUnopExpr node) {
         // TODO Auto-generated method stub
         
     }
 
     @Override
-    public llNode visit(IrIntLiteral node) {
+    public LLNode visit(IrIntLiteral node) {
         // TODO Auto-generated method stub
         
     }

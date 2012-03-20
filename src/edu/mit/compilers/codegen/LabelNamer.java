@@ -1,42 +1,19 @@
 package edu.mit.compilers.codegen;
 
-import edu.mit.compilers.codegen.ll.llArrayAccess;
-import edu.mit.compilers.codegen.ll.llArrayDec;
-import edu.mit.compilers.codegen.ll.llAssign;
-import edu.mit.compilers.codegen.ll.llBinOp;
-import edu.mit.compilers.codegen.ll.llBoolLiteral;
-import edu.mit.compilers.codegen.ll.llCallout;
-import edu.mit.compilers.codegen.ll.llEnvironment;
-import edu.mit.compilers.codegen.ll.llExpression;
-import edu.mit.compilers.codegen.ll.llFile;
-import edu.mit.compilers.codegen.ll.llFunctionCall;
-import edu.mit.compilers.codegen.ll.llGlobalDec;
-import edu.mit.compilers.codegen.ll.llIntLiteral;
-import edu.mit.compilers.codegen.ll.llJump;
-import edu.mit.compilers.codegen.ll.llLabel;
-import edu.mit.compilers.codegen.ll.llMethodCall;
-import edu.mit.compilers.codegen.ll.llNode;
-import edu.mit.compilers.codegen.ll.llNodeVisitor;
-import edu.mit.compilers.codegen.ll.llPop;
-import edu.mit.compilers.codegen.ll.llPush;
-import edu.mit.compilers.codegen.ll.llReturn;
-import edu.mit.compilers.codegen.ll.llStringLiteral;
-import edu.mit.compilers.codegen.ll.llUnaryNeg;
-import edu.mit.compilers.codegen.ll.llUnaryNot;
-import edu.mit.compilers.codegen.ll.llVarAccess;
-import edu.mit.compilers.codegen.ll.llVarDec;
 import java.util.HashMap;
+
+import edu.mit.compilers.codegen.ll.*;
 
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 
-public class LabelNamer implements llNodeVisitor {
+public class LabelNamer implements LLNodeVisitor {
     private HashMap<String, Integer> table;
-    private llFile currentFile;
+    private LLFile currentFile;
     private static String DEFAULT_LABEL = "l";
     
     // Makes all label names unique and 
-    public void name(llFile root) {
+    public void name(LLFile root) {
         currentFile = root;
         table = new HashMap<String, Integer>();
         table.put(DEFAULT_LABEL, 0);
@@ -44,72 +21,79 @@ public class LabelNamer implements llNodeVisitor {
     }
 
     @Override
-    public void visit(llArrayAccess node) {
-        // Do nothing
+    public void visit(LLFile node) {
+        // Do Nothing
+        
     }
 
     @Override
-    public void visit(llArrayDec node) {
-     // Do nothing
+    public void visit(LLGlobalDecl node) {
+        // Do Nothing
+        
     }
 
     @Override
-    public void visit(llAssign node) {
-     // Do nothing
+    public void visit(LLArrayDecl node) {
+        // Do Nothing
+        
     }
 
     @Override
-    public void visit(llBinOp node) {
-     // Do nothing
+    public void visit(LLArrayLocation node) {
+        // Do Nothing
+        
     }
 
     @Override
-    public void visit(llBoolLiteral node) {
-     // Do nothing
+    public void visit(LLAssign node) {
+        // Do Nothing
+        
     }
 
     @Override
-    public void visit(llCallout node) {
-     // Do nothing
+    public void visit(LLBinaryOp node) {
+        // Do Nothing
+        
     }
 
     @Override
-    public void visit(llEnvironment node) {
-     // Do nothing
+    public void visit(LLBoolLiteral node) {
+        // Do Nothing
+        
     }
 
     @Override
-    public void visit(llExpression node) {
-     // Do nothing
+    public void visit(LLCallout node) {
+        // Do Nothing
+        
     }
 
     @Override
-    public void visit(llFile node) {
-     // Do nothing
+    public void visit(LLEnvironment node) {
+        // Do Nothing
+        
     }
 
     @Override
-    public void visit(llFunctionCall node) {
-     // Do nothing
+    public void visit(LLExpression node) {
+        // Do Nothing
+        
     }
 
     @Override
-    public void visit(llGlobalDec node) {
-     // Do nothing
+    public void visit(LLIntLiteral node) {
+        // Do Nothing
+        
     }
 
     @Override
-    public void visit(llIntLiteral node) {
-     // Do nothing
+    public void visit(LLJump node) {
+        // Do Nothing
+        
     }
 
     @Override
-    public void visit(llJump node) {
-     // Do nothing
-    }
-
-    @Override
-    public void visit(llLabel node) {
+    public void visit(LLLabel node) {
         int suffix;
         String newName;
         if (node.getName() == null) {
@@ -131,53 +115,56 @@ public class LabelNamer implements llNodeVisitor {
     }
 
     @Override
-    public void visit(llMethodCall node) {
-     // Do nothing
+    public void visit(LLMethodCall node) {
+        // Do Nothing
+        
     }
 
     @Override
-    public void visit(llNode node) {
-     // Do nothing
+    public void visit(LLReturn node) {
+        // Do Nothing
+        
     }
 
     @Override
-    public void visit(llPop node) {
-     // Do nothing
-    }
-
-    @Override
-    public void visit(llPush node) {
-     // Do nothing
-    }
-
-    @Override
-    public void visit(llReturn node) {
-     // Do nothing
-    }
-
-    @Override
-    public void visit(llStringLiteral node) {
+    public void visit(LLStringLiteral node) {
         currentFile.addString(node);
     }
 
     @Override
-    public void visit(llUnaryNeg node) {
-     // Do nothing 
+    public void visit(LLUnaryNeg node) {
+        // Do Nothing
+        
     }
 
     @Override
-    public void visit(llUnaryNot node) {
-     // Do nothing
+    public void visit(LLUnaryNot node) {
+        // Do Nothing
+        
     }
 
     @Override
-    public void visit(llVarAccess node) {
-     // Do nothing
+    public void visit(LLVarLocation node) {
+        // Do Nothing
+        
     }
 
     @Override
-    public void visit(llVarDec node) {
-     // Do nothing
+    public void visit(LLMethodDecl llMethodDecl) {
+        // Do Nothing
+        
+    }
+
+    @Override
+    public void visit(LLMalloc llMalloc) {
+        // Do Nothing
+        
+    }
+
+    @Override
+    public void visit(LLMov llMov) {
+        // Do Nothing
+        
     }
 
 }

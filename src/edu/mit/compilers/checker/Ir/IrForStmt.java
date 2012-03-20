@@ -1,17 +1,17 @@
 package edu.mit.compilers.checker.Ir;
 
-import edu.mit.compilers.codegen.ll.llEnvironment;
-import edu.mit.compilers.codegen.ll.llIntLiteral;
-import edu.mit.compilers.codegen.ll.llJump;
-import edu.mit.compilers.codegen.ll.llJump.JumpType;
-import edu.mit.compilers.codegen.ll.llAssign;
-import edu.mit.compilers.codegen.ll.llBinOp;
-import edu.mit.compilers.codegen.ll.llExpression;
-import edu.mit.compilers.codegen.ll.llLabel;
-import edu.mit.compilers.codegen.ll.llLocation;
-import edu.mit.compilers.codegen.ll.llNode;
-import edu.mit.compilers.codegen.ll.llVarAccess;
-import edu.mit.compilers.codegen.ll.llVarDec;
+import edu.mit.compilers.codegen.ll.LLEnvironment;
+import edu.mit.compilers.codegen.ll.LLIntLiteral;
+import edu.mit.compilers.codegen.ll.LLJump;
+import edu.mit.compilers.codegen.ll.LLJump.JumpType;
+import edu.mit.compilers.codegen.ll.LLAssign;
+import edu.mit.compilers.codegen.ll.LLBinaryOp;
+import edu.mit.compilers.codegen.ll.LLExpression;
+import edu.mit.compilers.codegen.ll.LLLabel;
+import edu.mit.compilers.codegen.ll.LLLocation;
+import edu.mit.compilers.codegen.ll.LLNode;
+import edu.mit.compilers.codegen.ll.LLVarLocation;
+import edu.mit.compilers.codegen.ll.LLVarDecl;
 
 public class IrForStmt extends IrStatement {
     public IrForStmt(IrIdentifier counter, IrExpression start_value,
@@ -63,32 +63,32 @@ public class IrForStmt extends IrStatement {
     }
 
     @Override
-    public llNode getllRep(llLabel breakPoint, llLabel continuePoint) {
-        llLabel for_begin = new llLabel("for_begin");
-        llLabel for_end = new llLabel("for_end");
+    public LLNode getllRep(LLLabel breakPoint, LLLabel continuePoint) {
+        LLLabel for_begin = new LLLabel("for_begin");
+        LLLabel for_end = new LLLabel("for_end");
         
-        llJump jump_end = new llJump(JumpType.EQUAL, for_end);
-        llJump jump_begin = new llJump(JumpType.UNCONDITIONAL, for_begin);
+        LLJump jump_end = new LLJump(JumpType.EQUAL, for_end);
+        LLJump jump_begin = new LLJump(JumpType.UNCONDITIONAL, for_begin);
         
-        llVarDec dec = new llVarDec(myCounter.getId());
-        llLocation var = (llLocation)(new llVarAccess(myCounter.getId()));
+        LLVarDecl dec = new LLVarDecl(myCounter.getId());
+        LLLocation var = (LLLocation)(new LLVarLocation(myCounter.getId()));
         
-        llAssign init = new llAssign(var,
-                                    (llExpression)myStart_value.getllRep(null, null));
+        LLAssign init = new LLAssign(var,
+                                    (LLExpression)myStart_value.getllRep(null, null));
         
-        llAssign incr = new llAssign(var,
-                               (llExpression)(new llBinOp((llExpression)var,
-                                                          (llExpression)(new llIntLiteral(1)),
+        LLAssign incr = new LLAssign(var,
+                               (LLExpression)(new LLBinaryOp((LLExpression)var,
+                                                          (LLExpression)(new LLIntLiteral(1)),
                                                           IrBinOperator.PLUS)));
         
-        llExpression test = new llBinOp((llExpression)var,
-                                         (llExpression)myStop_value.getllRep(null, null),
+        LLExpression test = new LLBinaryOp((LLExpression)var,
+                                         (LLExpression)myStop_value.getllRep(null, null),
                                          IrBinOperator.LT);
         
-        llEnvironment block = (llEnvironment)myBlock.getllRep(for_end, for_begin);
+        LLEnvironment block = (LLEnvironment)myBlock.getllRep(for_end, for_begin);
         
         
-        llEnvironment out = new llEnvironment();
+        LLEnvironment out = new LLEnvironment();
         out.addNode(dec);
         out.addNode(init);
         out.addNode(for_begin);

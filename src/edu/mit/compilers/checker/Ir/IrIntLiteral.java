@@ -2,9 +2,9 @@ package edu.mit.compilers.checker.Ir;
 
 import java.math.BigInteger;
 
-import edu.mit.compilers.codegen.ll.llIntLiteral;
-import edu.mit.compilers.codegen.ll.llLabel;
-import edu.mit.compilers.codegen.ll.llNode;
+import edu.mit.compilers.codegen.ll.LLIntLiteral;
+import edu.mit.compilers.codegen.ll.LLLabel;
+import edu.mit.compilers.codegen.ll.LLNode;
 
 public class IrIntLiteral extends Ir implements IrExpression {
     private String representation;
@@ -100,7 +100,7 @@ public class IrIntLiteral extends Ir implements IrExpression {
     }
 
     @Override
-    public llNode getllRep(llLabel breakPoint, llLabel continuePoint) {
-        return new llIntLiteral(getIntRep());
+    public LLNode getllRep(LLLabel breakPoint, LLLabel continuePoint) {
+        return new LLIntLiteral(getIntRep());
     }
 }

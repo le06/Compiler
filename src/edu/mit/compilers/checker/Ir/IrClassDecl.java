@@ -4,12 +4,12 @@ import java.util.ArrayList;
 
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
-import edu.mit.compilers.codegen.ll.llArrayDec;
-import edu.mit.compilers.codegen.ll.llFile;
-import edu.mit.compilers.codegen.ll.llGlobalDec;
-import edu.mit.compilers.codegen.ll.llLabel;
-import edu.mit.compilers.codegen.ll.llMethodDef;
-import edu.mit.compilers.codegen.ll.llNode;
+import edu.mit.compilers.codegen.ll.LLArrayDecl;
+import edu.mit.compilers.codegen.ll.LLFile;
+import edu.mit.compilers.codegen.ll.LLGlobalDecl;
+import edu.mit.compilers.codegen.ll.LLLabel;
+import edu.mit.compilers.codegen.ll.LLMethodDecl;
+import edu.mit.compilers.codegen.ll.LLNode;
 
 // since Program is a token, a generated Ir should have a IrClassDecl node
 // as its root.
@@ -34,13 +34,13 @@ public class IrClassDecl extends Ir {
 	}
 	
 	@Override
-	public llNode getllRep(llLabel breakPoint, llLabel continuePoint) {
-	    llFile out = new llFile();
-	    llMethodDef nextMethod;
+	public LLNode getllRep(LLLabel breakPoint, LLLabel continuePoint) {
+	    LLFile out = new LLFile();
+	    LLMethodDecl nextMethod;
 	    
 	    for (IrMemberDecl m : members) {
 	        if (m instanceof IrMethodDecl) {
-	            nextMethod = (llMethodDef)m.getllRep(null, null);
+	            nextMethod = (LLMethodDecl)m.getllRep(null, null);
 	            if (nextMethod.getName().equals("main")) {
 	                out.setMain(nextMethod);
 	            } else {
@@ -49,9 +49,9 @@ public class IrClassDecl extends Ir {
 	        } else if (m instanceof IrFieldDecl) {
 	            for (IrGlobalDecl g : ((IrFieldDecl)m).getGlobals()) {
 	                if (g instanceof IrArrayDecl) {
-	                    out.addArrayDec((llArrayDec)g.getllRep(null, null));
+	                    out.addArrayDec((LLArrayDecl)g.getllRep(null, null));
 	                } else if (g instanceof IrBaseDecl) {
-	                    out.addGlobalDec((llGlobalDec)g.getllRep(null, null));
+	                    out.addGlobalDec((LLGlobalDecl)g.getllRep(null, null));
 	                } else {
 	                    throw new NotImplementedException();
 	                }

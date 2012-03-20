@@ -1,9 +1,9 @@
 package edu.mit.compilers.checker.Ir;
 
-import edu.mit.compilers.codegen.ll.llExpression;
-import edu.mit.compilers.codegen.ll.llLabel;
-import edu.mit.compilers.codegen.ll.llNode;
-import edu.mit.compilers.codegen.ll.llReturn;
+import edu.mit.compilers.codegen.ll.LLExpression;
+import edu.mit.compilers.codegen.ll.LLLabel;
+import edu.mit.compilers.codegen.ll.LLNode;
+import edu.mit.compilers.codegen.ll.LLReturn;
 
 public class IrReturnStmt extends IrStatement {
     public IrReturnStmt(IrExpression expr) {
@@ -38,11 +38,11 @@ public class IrReturnStmt extends IrStatement {
     }
 
     @Override
-    public llNode getllRep(llLabel breakPoint, llLabel continuePoint) {
+    public LLNode getllRep(LLLabel breakPoint, LLLabel continuePoint) {
         if (return_expr == null) {
-            return new llReturn();
+            return new LLReturn();
         } else {
-            return new llReturn((llExpression)return_expr.getllRep(null, null));
+            return new LLReturn((LLExpression)return_expr.getllRep(null, null));
         }
     }
 }
