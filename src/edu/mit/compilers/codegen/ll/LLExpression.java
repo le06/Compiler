@@ -10,4 +10,6 @@ public interface LLExpression extends LLNode {
     // note this is only used when evaluating expressions.
     // don't use this to assign to locations!
 	public String addressOfResult();
+	
+	public void setAddress(String addr);
 }

@@ -4,6 +4,7 @@ public class LLMethodDecl implements LLNode {
 	
     private String method_name;
     private LLEnvironment method_code;
+    private int num_temps;
     
     public LLMethodDecl(String name) {
         method_name = name;
@@ -16,6 +17,10 @@ public class LLMethodDecl implements LLNode {
     
     public String getName() {
         return method_name;
+    }
+    
+    public void setNumTemps(int temps) {
+        num_temps = temps;
     }
     
     @Override

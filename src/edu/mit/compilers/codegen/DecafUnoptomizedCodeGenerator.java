@@ -16,12 +16,14 @@ public class DecafUnoptomizedCodeGenerator {
     private boolean debug = false;
     private boolean wasError = false;
     private LabelNamer lNamer;
+    private AddressAssigner aAssign;
     private Ir ir;
     private LLFile file;
     
     public DecafUnoptomizedCodeGenerator(DecafChecker dc) {
         checker = dc;
         lNamer = new LabelNamer();
+        aAssign = new AddressAssigner();
         //generator = new CodeGenerator();
     }
     
@@ -38,6 +40,7 @@ public class DecafUnoptomizedCodeGenerator {
         ir = checker.getIr();                   // Get Ir
         file = (LLFile)ir.getllRep(null, null); // Convert to LL
         lNamer.name(file);                      // Make labels unique
+        aAssign.assign(file);                   // Assign temp var addresses
         generator.outputASM(stream, file);      // Write actual ASM to stream
     }
     

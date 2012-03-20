@@ -9,18 +9,18 @@ public class LLArrayLocation implements LLExpression, LLLocation {
 	private LLExpression index;
     
 	// can be used as a location or an expression.
-	public LLArrayLocation(String location, Type type,
+	public LLArrayLocation(Type type,
 						   long size, LLExpression index) {
-		this.location = location;
+		//this.location = location;
 		this.type = type;
 		this.temp_location = null;
 		this.size = size;
 		this.index = index;
 	}
 	
-	public LLArrayLocation(String location, Type type, String temp_location,
+	public LLArrayLocation(Type type, String temp_location,
 						   long size, LLExpression index) {
-		this.location = location;
+		//this.location = location;
 		this.type = type;
 		this.temp_location = temp_location;
 		this.size = size;
@@ -54,5 +54,10 @@ public class LLArrayLocation implements LLExpression, LLLocation {
 	public Type getType() {
 		return type;
 	}
+
+    @Override
+    public void setAddress(String addr) {
+        location = addr;
+    }
 
 }

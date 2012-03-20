@@ -7,9 +7,8 @@ public class LLUnaryNeg implements LLExpression {
     LLExpression negated_expr;
     String address_of_result;
     
-    public LLUnaryNeg(LLExpression expr, String address) {
+    public LLUnaryNeg(LLExpression expr) {
         negated_expr = expr;
-        address_of_result = address;
     }
 
     @Override
@@ -27,6 +26,11 @@ public class LLUnaryNeg implements LLExpression {
 	public Type getType() {
 		return Type.INT;
 	}
+
+    @Override
+    public void setAddress(String addr) {
+        address_of_result = addr;
+    }
 	
 /*    @Override
     public void writeASM(Writer outputStream) throws IOException {

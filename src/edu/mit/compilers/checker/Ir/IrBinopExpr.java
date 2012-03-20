@@ -16,6 +16,7 @@ public class IrBinopExpr extends Ir implements IrExpression {
     private IrBinOperator operator;
     private IrExpression lhs;
     private IrExpression rhs;
+    private IrType type;
     
     public IrBinOperator getOperator() {
 		return operator;
@@ -37,6 +38,7 @@ public class IrBinopExpr extends Ir implements IrExpression {
 	public IrType getExprType(IrNodeChecker c) {
 		IrType lhs_type = lhs.getExprType(c);
 		IrType rhs_type = rhs.getExprType(c);
+		
 
 		if (lhs_type.myType == rhs_type.myType) {
 			
@@ -47,27 +49,28 @@ public class IrBinopExpr extends Ir implements IrExpression {
 			case MUL:
 			case DIV:
 			case MOD:
-				return new IrType(IrType.Type.INT);
+				type = new IrType(IrType.Type.INT);
 			// rel_op
 			case LT:
 			case GT:
 			case LEQ:
 			case GEQ:
-				return new IrType(IrType.Type.BOOLEAN);
+			    type = new IrType(IrType.Type.BOOLEAN);
 			case EQ:
 			case NEQ:
-				return new IrType(IrType.Type.BOOLEAN);
+			    type = new IrType(IrType.Type.BOOLEAN);
 			case AND:
 			case OR:
-				return new IrType(IrType.Type.BOOLEAN);
+			    type = new IrType(IrType.Type.BOOLEAN);
 			}
 			
 			
-			return new IrType(lhs_type.myType);
+			type = new IrType(lhs_type.myType);
 		} else {
-			return new IrType(IrType.Type.MIXED);
+		    type = new IrType(IrType.Type.MIXED);
 		}
 		
+		return type;
 	}
 	@Override
 	public void accept(IrNodeVisitor v) {
@@ -91,6 +94,15 @@ public class IrBinopExpr extends Ir implements IrExpression {
         LLExpression l = (LLExpression)lhs.getllRep(null, null);
         LLExpression r = (LLExpression)rhs.getllRep(null, null);
         
-        return new LLBinaryOp(l, r, operator);
+        switch (type.myType) {
+        case BOOLEAN:
+            return new LLBinaryOp(l, r, operator, LLExpression.Type.BOOLEAN);
+        case INT:
+            return new LLBinaryOp(l, r, operator, LLExpression.Type.INT);
+        case VOID:
+            return new LLBinaryOp(l, r, operator, LLExpression.Type.VOID);
+        default:
+            return null;    
+        }
     }
 }

@@ -4,9 +4,9 @@ public class LLBoolLiteral implements LLExpression {
     private boolean val;
     String address_of_result;
     
-    public LLBoolLiteral(boolean value, String address) {
+    public LLBoolLiteral(boolean value) {
         val = value;
-        address_of_result = address;
+        //address_of_result = address;
     }
     
     public boolean getValue() {
@@ -27,5 +27,10 @@ public class LLBoolLiteral implements LLExpression {
 	public Type getType() {
 		return Type.BOOLEAN;
 	}
+
+    @Override
+    public void setAddress(String addr) {
+        address_of_result = addr;
+    }
 
 }

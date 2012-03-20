@@ -47,4 +47,9 @@ public class LLCallout implements LLExpression {
 		return Type.INT;
 	}
 
+    @Override
+    public void setAddress(String addr) {
+        temp_location = addr;
+    }
+
 }
