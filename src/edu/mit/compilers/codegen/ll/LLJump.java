@@ -12,7 +12,7 @@ public class LLJump implements LLNode {
         label = loc;
     }
     
-    public static enum JumpType { // TODO: add more types!
+    public static enum JumpType {
         UNCONDITIONAL,
         EQUAL,
         NOT_EQUAL;

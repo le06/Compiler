@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
 
+import edu.mit.compilers.checker.Ir.IrBinOperator;
+
 import edu.mit.compilers.codegen.ll.LLLocation;
 import edu.mit.compilers.codegen.ll.LLMalloc;
 import edu.mit.compilers.codegen.ll.LLArrayLocation;
@@ -41,8 +43,8 @@ public class CodeGenerator implements LLNodeVisitor {
 	private final String RSI = "%rsi";
 	private final String RDX = "%rdx";
 	private final String RCX = "%rcx";
-	private final String R8 = "%r8";
-	private final String R9 = "%r9";
+	private final String R8  = "%r8";
+	private final String R9  = "%r9";
 	private final String R10 = "%r10";
 	private final String R11 = "%r11";
 	
@@ -111,7 +113,6 @@ public class CodeGenerator implements LLNodeVisitor {
     
     @Override
     public void visit(LLFile node) {
-
         for (LLGlobalDecl g : node.getGlobalDecls()) {
         	g.accept(this);
         }
@@ -178,8 +179,8 @@ public class CodeGenerator implements LLNodeVisitor {
 	@Override
 	public void visit(LLMethodDecl node) {
 		// generate function label.
-		LLLabel label = new LLLabel(node.getName());
-		label.accept(this);
+		String label = node.getName() + ":";
+		writeLine(label);
 		// node accept function goes to node environment next.
 	}
 	
@@ -208,7 +209,7 @@ public class CodeGenerator implements LLNodeVisitor {
     		LLExpression index = ((LLArrayLocation)loc).getIndexExpr();
     		String index_val = index.addressOfResult();		// calculate index offset.
     		LLMov mov_index = new LLMov(index_val, R10);	// move offset to register.
-    		mov_index.accept(this);							// write this in ASM.
+    		mov_index.accept(this);							// write this inType ASM.
     		
     		String mul_inst = "mul"; // change index into address offset.
     		String mul_val = "$8";	 // quadword size.
@@ -281,13 +282,17 @@ public class CodeGenerator implements LLNodeVisitor {
     
     @Override
     public void visit(LLCallout node) {
-
-    }    
+        // TODO Auto-generated method stub
+    }
     
     @Override
     public void visit(LLStringLiteral node) {
-        writeText(node.getLabelASM() + "\n\t.string " +
-                  node.getText() + "\n");
+    	tab_level++;
+    	String directive = ".string";
+    	String arg = node.getText();
+    	String line = formatLine(directive, arg);
+    	writeLine(line);
+    	tab_level--;
     }
 
 ///////////////////////////////////////////////////////////////////////////////    
@@ -308,7 +313,7 @@ public class CodeGenerator implements LLNodeVisitor {
     		mov2.accept(this);
     	}
     }
-    
+
     @Override
     public void visit(LLArrayLocation node) {
     	// check bounds!
@@ -349,32 +354,278 @@ public class CodeGenerator implements LLNodeVisitor {
 
     @Override
     public void visit(LLBinaryOp node) {
-        // TODO Auto-generated method stub
+        // load the lhs and rhs into registers.
+    	LLExpression left = node.getLhs();
+    	LLExpression right = node.getRhs();
+    	LLMov mov_left, mov_right;
         
+    	IrBinOperator op = node.getOp();
+    	String inst, inst_line;
+    	LLMov mov_false, mov_true;
+    	switch (op) { // define the result to be stored in %r10 no matter what.
+    	// arithmetic ops.
+    	case PLUS:
+        	mov_left = new LLMov(left.addressOfResult(), R10);
+        	mov_right = new LLMov(right.addressOfResult(), R11);
+        	mov_left.accept(this);
+        	mov_right.accept(this);
+        	
+    		inst = "add";
+    		inst_line = formatLine(inst, R11, R10);
+    		writeLine(inst_line);
+    		break;
+    	case MINUS:
+        	mov_left = new LLMov(left.addressOfResult(), R10);
+        	mov_right = new LLMov(right.addressOfResult(), R11);
+        	mov_left.accept(this);
+        	mov_right.accept(this);
+        	
+    		inst = "sub";
+    		inst_line = formatLine(inst, R11, R10);
+    		writeLine(inst_line);
+    		break;
+    	case MUL:
+        	mov_left = new LLMov(left.addressOfResult(), R10);
+        	mov_right = new LLMov(right.addressOfResult(), R11);
+        	mov_left.accept(this);
+        	mov_right.accept(this);
+        	
+    		inst = "imul";
+    		inst_line = formatLine(inst, R11, R10);
+    		writeLine(inst_line);
+    		break;
+    	case DIV:
+        	mov_left = new LLMov(left.addressOfResult(), RDX);
+        	mov_right = new LLMov(right.addressOfResult(), RAX);
+        	mov_left.accept(this);
+        	mov_right.accept(this);
+        	
+    		inst = "idiv";
+    		inst_line = formatLine(inst, RDX, RAX);
+    		writeLine(inst_line);
+    		
+    		// move quotient from %rax to result register.
+    		LLMov mov_quotient = new LLMov(RAX, R10);
+    		mov_quotient.accept(this);
+    		break;
+    	case MOD:
+        	mov_left = new LLMov(left.addressOfResult(), RDX);
+        	mov_right = new LLMov(right.addressOfResult(), RAX);
+        	mov_left.accept(this);
+        	mov_right.accept(this);
+        	
+    		inst = "idiv";
+    		inst_line = formatLine(inst, RDX, RAX);
+    		writeLine(inst_line);
+    		
+    		// move remainder from %rax to result register.
+    		LLMov mov_remainder = new LLMov(RDX, R10);
+    		mov_remainder.accept(this);
+    		break;
+    		// arithmetic comparison operations.
+    	case LT:
+        	mov_left = new LLMov(left.addressOfResult(), R10);
+        	mov_right = new LLMov(right.addressOfResult(), R11);
+        	mov_left.accept(this);
+        	mov_right.accept(this);
+        	
+        	inst = "cmp";
+        	inst_line = formatLine(inst, R10, R11);
+        	writeLine(inst_line);
+        	
+        	mov_false = new LLMov("$0", R10);
+        	mov_true = new LLMov("$1", R11);
+        	mov_false.accept(this);
+        	mov_true.accept(this);
+        	
+        	inst = "cmovl";
+        	inst_line = formatLine(inst, R11, R10);
+        	writeLine(inst_line);
+        	break;
+    	case LEQ:
+        	mov_left = new LLMov(left.addressOfResult(), R10);
+        	mov_right = new LLMov(right.addressOfResult(), R11);
+        	mov_left.accept(this);
+        	mov_right.accept(this);
+        	
+        	inst = "cmp";
+        	inst_line = formatLine(inst, R10, R11);
+        	writeLine(inst_line);
+        	
+        	mov_false = new LLMov("$0", R10);
+        	mov_true = new LLMov("$1", R11);
+        	mov_false.accept(this);
+        	mov_true.accept(this);
+        	
+        	inst = "cmovle";
+        	inst_line = formatLine(inst, R11, R10);
+        	writeLine(inst_line);
+        	break;
+    	case GEQ:
+        	mov_left = new LLMov(left.addressOfResult(), R10);
+        	mov_right = new LLMov(right.addressOfResult(), R11);
+        	mov_left.accept(this);
+        	mov_right.accept(this);
+        	
+        	inst = "cmp";
+        	inst_line = formatLine(inst, R10, R11);
+        	writeLine(inst_line);
+        	
+        	mov_false = new LLMov("$0", R10);
+        	mov_true = new LLMov("$1", R11);
+        	mov_false.accept(this);
+        	mov_true.accept(this);
+        	
+        	inst = "cmovg";
+        	inst_line = formatLine(inst, R11, R10);
+        	writeLine(inst_line);
+        	break;
+    	case GT:
+        	mov_left = new LLMov(left.addressOfResult(), R10);
+        	mov_right = new LLMov(right.addressOfResult(), R11);
+        	mov_left.accept(this);
+        	mov_right.accept(this);
+        	
+        	inst = "cmp";
+        	inst_line = formatLine(inst, R10, R11);
+        	writeLine(inst_line);
+        	
+        	mov_false = new LLMov("$0", R10);
+        	mov_true = new LLMov("$1", R11);
+        	mov_false.accept(this);
+        	mov_true.accept(this);
+        	
+        	inst = "cmovge";
+        	inst_line = formatLine(inst, R11, R10);
+        	writeLine(inst_line);
+        	break;
+		// cond ops. results get stored in the first operand!
+    	case AND:
+        	mov_left = new LLMov(left.addressOfResult(), R10);
+        	mov_right = new LLMov(right.addressOfResult(), R11);
+        	mov_left.accept(this);
+        	mov_right.accept(this);
+        	
+        	// compare operands.
+        	inst = "and";
+        	inst_line = formatLine(inst, R10, R11);
+        	writeLine(inst_line);
+    	case OR:
+        	mov_left = new LLMov(left.addressOfResult(), R10);
+        	mov_right = new LLMov(right.addressOfResult(), R11);
+        	mov_left.accept(this);
+        	mov_right.accept(this);
+        	
+        	// compare operands.
+        	inst = "or";
+        	inst_line = formatLine(inst, R10, R11);
+        	writeLine(inst_line);
+		// eq ops.
+    	case EQ:
+        	mov_left = new LLMov(left.addressOfResult(), R10);
+        	mov_right = new LLMov(right.addressOfResult(), R11);
+        	mov_left.accept(this);
+        	mov_right.accept(this);
+        	
+        	inst = "cmp";
+        	inst_line = formatLine(inst, R10, R11);
+        	writeLine(inst_line);
+        	
+        	mov_false = new LLMov("$0", R10);
+        	mov_true = new LLMov("$1", R11);
+        	mov_false.accept(this);
+        	mov_true.accept(this);
+        	
+        	inst = "cmove";
+        	inst_line = formatLine(inst, R11, R10);
+        	writeLine(inst_line);
+    	case NEQ:
+        	mov_left = new LLMov(left.addressOfResult(), R10);
+        	mov_right = new LLMov(right.addressOfResult(), R11);
+        	mov_left.accept(this);
+        	mov_right.accept(this);
+        	
+        	inst = "cmp";
+        	inst_line = formatLine(inst, R10, R11);
+        	writeLine(inst_line);
+        	
+        	mov_false = new LLMov("$0", R10);
+        	mov_true = new LLMov("$1", R11);
+        	mov_false.accept(this);
+        	mov_true.accept(this);
+        	
+        	inst = "cmovne";
+        	inst_line = formatLine(inst, R11, R10);
+        	writeLine(inst_line);
+    	}
+    	
+    	String addr = node.addressOfResult();
+    	LLMov mov_result = new LLMov(R10, addr);
+    	mov_result.accept(this);    	
     }
 
     @Override
     public void visit(LLUnaryNeg node) {
-        // TODO Auto-generated method stub
+        // move value of expr to register.
+        LLExpression expr = node.getExpr();
+        String expr_addr = expr.addressOfResult();
+        LLMov mov_expr = new LLMov(expr_addr, R10);
+        mov_expr.accept(this);
         
+        // perform 2s-complement negation.
+        String inst = "neg";
+        String inst_line = formatLine(inst, R10);
+        writeLine(inst_line);
+        
+        String result_addr = node.addressOfResult();
+        LLMov mov_result = new LLMov(R10, result_addr);
+        mov_result.accept(this);
     }
 
     @Override
     public void visit(LLUnaryNot node) {
-        // TODO Auto-generated method stub
+        // move value of expr to register.
+        LLExpression expr = node.getExpr();
+        String expr_addr = expr.addressOfResult();
+        LLMov mov_expr = new LLMov(expr_addr, R10);
+        mov_expr.accept(this);
         
+        // negate only the 1st bit.
+        String inst = "xor";
+        String inst_line = formatLine(inst, R10, "$1");
+        writeLine(inst_line);
+        
+        String result_addr = node.addressOfResult();
+        LLMov mov_result = new LLMov(R10, result_addr);
+        mov_result.accept(this);
     }
     
     @Override
     public void visit(LLBoolLiteral node) {
-        // TODO Auto-generated method stub
+        LLMov mov_literal;
+        if (node.getValue() == true) {
+        	mov_literal = new LLMov("$1", R10);
+        } else {
+        	mov_literal = new LLMov("$0", R10);
+        }
+        mov_literal.accept(this);
         
+        String result_addr = node.addressOfResult();
+        LLMov mov_result = new LLMov(R10, result_addr);
+        mov_result.accept(this);
     }
 
     @Override
     public void visit(LLIntLiteral node) {
-        // TODO Auto-generated method stub
+        // generate immediate operand.
+        long value = node.getValue();
+        String value_operand = "$" + String.valueOf(value);
+        LLMov mov_literal = new LLMov(value_operand, R10);
+        mov_literal.accept(this);
         
+        String result_addr = node.addressOfResult();
+        LLMov mov_result = new LLMov(R10, result_addr);
+        mov_result.accept(this);
     }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -386,8 +637,8 @@ public class CodeGenerator implements LLNodeVisitor {
 
     @Override
     public void visit(LLLabel node) {
-    	String name = node.getName();
-    	writeLine(name + ":");
+    	String name = node.getASMLabel();
+    	writeLine(name);
     }
 
 	@Override
@@ -402,13 +653,18 @@ public class CodeGenerator implements LLNodeVisitor {
     
     @Override
     public void visit(LLReturn node) {
-        // TODO Auto-generated method stub
-        
+    	LLMov mov = null;
         if (node.hasReturn()) {
-            // mov %rsp, rax
+        	LLExpression expr = node.getExpr();
+        	String addr = expr.addressOfResult();
+        	mov = new LLMov(addr, RAX);
         }
         
-        // Write ret
+        if (mov != null) {
+        	mov.accept(this);
+        }
+        writeLine("leave");
+        writeLine("ret");
     }
 
 
