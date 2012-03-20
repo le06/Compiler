@@ -32,6 +32,7 @@ public class IrLocalDecl extends Ir {
     }
     @Override
     public LLNode getllRep(LLLabel breakPoint, LLLabel continuePoint) {
-        return new LLVarDecl(id.getId());
+        //return new LLVarDecl(id.getId());
+        return null;
     }
 }

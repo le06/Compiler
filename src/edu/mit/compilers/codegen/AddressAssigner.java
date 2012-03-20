@@ -42,6 +42,9 @@ public class AddressAssigner implements LLNodeVisitor {
     
     public void assign(LLFile file) {
         file.accept(this);
+        if (currentMethod != null) {
+            currentMethod.setNumTemps(currentOffset / OFFSET);
+        }
     }
 
     @Override

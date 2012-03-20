@@ -70,7 +70,8 @@ public class IrForStmt extends IrStatement {
         LLJump jump_begin = new LLJump(JumpType.UNCONDITIONAL, for_begin);
         
         //LLVarDecl dec = new LLVarDecl(myCounter.getId());
-        LLLocation var = (LLLocation)(new LLVarLocation(myCounter.getId()));
+        LLLocation var = (LLLocation)(new LLVarLocation(myCounter.getId(),
+                                                        LLExpression.Type.INT));
         
         LLAssign init = new LLAssign(var,
                                     (LLExpression)myStart_value.getllRep(null, null));
@@ -78,11 +79,13 @@ public class IrForStmt extends IrStatement {
         LLAssign incr = new LLAssign(var,
                                (LLExpression)(new LLBinaryOp((LLExpression)var,
                                                           (LLExpression)(new LLIntLiteral(1)),
-                                                          IrBinOperator.PLUS)));
+                                                          IrBinOperator.PLUS,
+                                                          LLExpression.Type.INT)));
         
         LLExpression test = new LLBinaryOp((LLExpression)var,
                                          (LLExpression)myStop_value.getllRep(null, null),
-                                         IrBinOperator.LT);
+                                         IrBinOperator.LT,
+                                         LLExpression.Type.INT);
         
         LLEnvironment block = (LLEnvironment)myBlock.getllRep(for_end, for_begin);
         
