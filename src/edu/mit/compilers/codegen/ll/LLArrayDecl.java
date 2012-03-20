@@ -2,12 +2,20 @@ package edu.mit.compilers.codegen.ll;
 
 public class LLArrayDecl implements LLNode {
 
-    LLLabel id;
-    LLMalloc malloc;
+    private LLLabel label;
+    private LLMalloc malloc;
     
-    public LLArrayDecl(LLLabel id, long size) {
-    	this.id = id;
+    public LLArrayDecl(LLLabel label, long size) {
+    	this.label = label;
     	malloc = new LLMalloc(size);
+    }
+    
+    public LLLabel getLabel() {
+    	return label;
+    }
+    
+    public LLMalloc getMalloc() {
+    	return malloc;
     }
     
     @Override

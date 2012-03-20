@@ -2,12 +2,20 @@ package edu.mit.compilers.codegen.ll;
 
 public class LLGlobalDecl implements LLNode {
     
-    LLLabel id;
-    LLMalloc malloc;
+    private LLLabel label;
+    private LLMalloc malloc;
     
     public LLGlobalDecl(LLLabel label) {
-        this.id = label;
+        this.label = label;
         malloc = new LLMalloc(1);
+    }
+
+    public LLLabel getLabel() {
+    	return label;
+    }
+    
+    public LLMalloc getMalloc() {
+    	return malloc;
     }
     
     @Override

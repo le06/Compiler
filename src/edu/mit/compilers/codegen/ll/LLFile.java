@@ -3,15 +3,13 @@ package edu.mit.compilers.codegen.ll;
 import java.util.ArrayList;
 
 public class LLFile implements LLNode {
-	
-    ArrayList<LLGlobalDecl> global_decls;
-    ArrayList<LLArrayDecl> array_decls;
-    ArrayList<LLMethodDecl> methods;
-    ArrayList<LLStringLiteral> strings;
-    LLMethodDecl main;
-    LLMethodDecl array_oob;			// TODO: implement these!
-    LLMethodDecl missing_return;	//
-    
+
+    private ArrayList<LLGlobalDecl> global_decls;
+    private ArrayList<LLArrayDecl> array_decls;
+    private ArrayList<LLMethodDecl> methods;
+    private ArrayList<LLStringLiteral> strings;
+    private LLMethodDecl main;
+
     public LLFile(LLMethodDecl mainMethod) {
         global_decls = new ArrayList<LLGlobalDecl>();
         array_decls = new ArrayList<LLArrayDecl>();
@@ -47,6 +45,27 @@ public class LLFile implements LLNode {
         strings.add(str);
     }
 
+    
+    public ArrayList<LLGlobalDecl> getGlobalDecls() {
+		return global_decls;
+	}
+
+	public ArrayList<LLArrayDecl> getArrayDecls() {
+		return array_decls;
+	}
+
+	public ArrayList<LLMethodDecl> getMethods() {
+		return methods;
+	}
+
+	public LLMethodDecl getMain() {
+		return main;
+	}
+    
+	public ArrayList<LLStringLiteral> getStringLiterals() {
+		return strings;
+	}
+	
     @Override
     public void accept(LLNodeVisitor v) {
         v.visit(this);
