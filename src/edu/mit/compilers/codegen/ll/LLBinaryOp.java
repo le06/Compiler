@@ -11,12 +11,12 @@ public class LLBinaryOp implements LLExpression {
     String address_of_result;
     
     public LLBinaryOp(LLExpression lhs, LLExpression rhs, IrBinOperator op,
-    				  Type type, String address) {
+    				  Type type) {
         this.lhs = lhs;
         this.rhs = rhs;
         this.op = op;
         this.type = type;
-        address_of_result = address;
+        
     }
 
     @Override
@@ -35,5 +35,10 @@ public class LLBinaryOp implements LLExpression {
 	public Type getType() {
 		return type;
 	}
+
+    @Override
+    public void setAddress(String addr) {
+        address_of_result = addr;
+    }
 
 }

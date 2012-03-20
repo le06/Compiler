@@ -99,6 +99,8 @@ class Main {
           DecafUnoptomizedCodeGenerator gen = new DecafUnoptomizedCodeGenerator(checker);
           gen.setTrace(CLI.debug);
           
+          System.out.println(CLI.outfile);
+          
           BufferedWriter out = new BufferedWriter(
                                     new FileWriter(
                                            new File(CLI.outfile)));

@@ -40,6 +40,11 @@ public class LLVarLocation implements LLExpression, LLLocation {
 	public Type getType() {
 		return type;
 	}
+
+    @Override
+    public void setAddress(String addr) {
+        temp_location = addr;
+    }
 	
 	/*@Override
     public void writeASM(Writer outputStream) throws IOException {

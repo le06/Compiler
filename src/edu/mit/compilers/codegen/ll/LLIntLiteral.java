@@ -4,9 +4,9 @@ public class LLIntLiteral implements LLExpression {
     private long value;
     String address_of_result;
     
-    public LLIntLiteral(long val, String address) {
+    public LLIntLiteral(long val) {
         value = val;
-        address_of_result = address;
+        //address_of_result = address;
     }
     
     public long getValue() {
@@ -27,5 +27,10 @@ public class LLIntLiteral implements LLExpression {
 	public Type getType() {
 		return Type.INT;
 	}
+
+    @Override
+    public void setAddress(String addr) {
+        address_of_result = addr;
+    }
     
 }

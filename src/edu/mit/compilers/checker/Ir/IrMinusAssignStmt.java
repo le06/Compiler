@@ -7,6 +7,7 @@ import edu.mit.compilers.codegen.ll.LLLabel;
 import edu.mit.compilers.codegen.ll.LLLocation;
 import edu.mit.compilers.codegen.ll.LLNode;
 import edu.mit.compilers.codegen.ll.LLVarLocation;
+import edu.mit.compilers.codegen.ll.LLExpression.Type;
 
 public class IrMinusAssignStmt extends IrStatement {
     public IrMinusAssignStmt(IrLocation loc, IrExpression expr) {
@@ -49,7 +50,10 @@ public class IrMinusAssignStmt extends IrStatement {
     @Override
     public LLNode getllRep(LLLabel breakPoint, LLLabel continuePoint) {
         LLLocation expr_lhs = (LLLocation)lhs.getllRep(null, null); 
-        LLBinaryOp new_expr = new LLBinaryOp((LLExpression) expr_lhs, (LLExpression)rhs.getllRep(null, null), IrBinOperator.MINUS);
+        LLBinaryOp new_expr = new LLBinaryOp((LLExpression) expr_lhs, 
+                                             (LLExpression)rhs.getllRep(null, null), 
+                                             IrBinOperator.MINUS,
+                                             Type.INT);
         LLAssign out = new LLAssign(expr_lhs, (LLExpression)new_expr);
         return out;
     }

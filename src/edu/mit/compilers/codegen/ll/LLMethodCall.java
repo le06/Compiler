@@ -55,4 +55,9 @@ public class LLMethodCall implements LLExpression {
 	public Type getType() {
 		return type;
 	}
+
+    @Override
+    public void setAddress(String addr) {
+        this.temp_location = addr;
+    }
 }

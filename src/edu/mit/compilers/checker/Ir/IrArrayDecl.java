@@ -47,12 +47,13 @@ public class IrArrayDecl extends IrGlobalDecl {
 
     @Override
     public LLNode getllRep(LLLabel breakPoint, LLLabel continuePoint) {
-        try {
+        /*try {
             return new LLArrayDecl(id.toString(), array_size.getIntRep());
         } catch (NumberFormatException e) {
             System.err.println("IrIntRep array size check failed");
             System.exit(-1);
             return null;
-        }
+        }*/
+        return null;
     }
 }

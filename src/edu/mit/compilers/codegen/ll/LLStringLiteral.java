@@ -38,5 +38,10 @@ public class LLStringLiteral implements LLExpression {
 		// irrelevant. used only in callouts.
 		return null;
 	}
+
+    @Override
+    public void setAddress(String addr) {
+        // irrelevant. used only in callouts.
+    }
     
 }
