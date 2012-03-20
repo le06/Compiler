@@ -28,9 +28,16 @@ public class LLMethodDecl implements LLNode {
         num_temps = temps;
     }
     
+    public int getNumTemps() {
+    	return num_temps;
+    }
+    
+    public LLEnvironment getEnv() {
+    	return method_code;
+    }
+    
     @Override
     public void accept(LLNodeVisitor v) {
         v.visit(this);
-        method_code.accept(v);
     }
 }
