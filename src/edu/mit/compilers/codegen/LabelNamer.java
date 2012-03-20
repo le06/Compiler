@@ -75,12 +75,6 @@ public class LabelNamer implements LLNodeVisitor {
     }
 
     @Override
-    public void visit(LLExpression node) {
-        // Do Nothing
-        
-    }
-
-    @Override
     public void visit(LLIntLiteral node) {
         // Do Nothing
         

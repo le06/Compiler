@@ -22,7 +22,7 @@ public class DecafUnoptomizedCodeGenerator {
     public DecafUnoptomizedCodeGenerator(DecafChecker dc) {
         checker = dc;
         lNamer = new LabelNamer();
-        generator = new CodeGenerator();
+        //generator = new CodeGenerator();
     }
     
     public void setTrace(boolean doDebug) {
