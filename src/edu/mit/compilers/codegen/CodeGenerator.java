@@ -314,7 +314,7 @@ public class CodeGenerator implements LLNodeVisitor {
     	// arg exprs are evaluated in accept(). read those values into regs!
     	ArrayList<LLExpression> params = node.getParams();
     	for (int i = params.size()-1; i >= 0; i--) {
-    		pushArgument(i, params.get(i)); // push from RIGHT-TO-LEFT.
+    		pushArgument(i-1, params.get(i)); // push from RIGHT-TO-LEFT.
     	}
     	
     	// boilerplate instruction for callouts.
