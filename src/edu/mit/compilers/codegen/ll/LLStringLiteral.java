@@ -29,19 +29,19 @@ public class LLStringLiteral implements LLExpression {
 
 	@Override
 	public String addressOfResult() {
-		// irrelevant. used only in callouts.
-		return null;
+		// refers to a constant address in memory.
+		return "$." + label.getName();
 	}
 
 	@Override
 	public Type getType() {
-		// irrelevant. used only in callouts.
+		// irrelevant. used only as a callout arg.
 		return null;
 	}
 
     @Override
     public void setAddress(String addr) {
-        // irrelevant. used only in callouts.
+        // irrelevant. address is already implied by label.
     }
     
 }

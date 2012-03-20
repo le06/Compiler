@@ -29,7 +29,11 @@ public class LLCallout implements LLExpression {
         return fn_name;
     }
     
-    @Override
+    public ArrayList<LLExpression> getParams() {
+		return params;
+	}
+
+	@Override
     public void accept(LLNodeVisitor v) {
         for (int i = 1; i < params.size(); i++) {
             params.get(i).accept(v);

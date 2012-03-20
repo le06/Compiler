@@ -228,7 +228,10 @@ public class CodeGenerator implements LLNodeVisitor {
     }    
 
     private void pushArgument(int n, LLExpression arg) {
+    	// polymorphic, so we don't have to check if arg is
+    	// a StringLiteral or not.
     	String addr = arg.addressOfResult();
+    	
     	LLMov mov;
     	// regs in order: rdi, rsi, rdx, rcx, r8, r9.
     	switch (n) {
@@ -264,7 +267,7 @@ public class CodeGenerator implements LLNodeVisitor {
     public void visit(LLMethodCall node) {
     	// arg exprs are evaluated in accept(). read those values into regs!
     	ArrayList<LLExpression> params = node.getParams();
-    	for (int i = node.getNumParams(); i >= 0; i--) {
+    	for (int i = params.size()-1; i >= 0; i--) {
     		pushArgument(i, params.get(i)); // push from RIGHT-TO-LEFT.
     	}
     	
@@ -282,7 +285,26 @@ public class CodeGenerator implements LLNodeVisitor {
     
     @Override
     public void visit(LLCallout node) {
-        // TODO Auto-generated method stub
+    	// arg exprs are evaluated in accept(). read those values into regs!
+    	ArrayList<LLExpression> params = node.getParams();
+    	for (int i = params.size()-1; i >= 0; i--) {
+    		pushArgument(i, params.get(i)); // push from RIGHT-TO-LEFT.
+    	}
+    	
+    	// boilerplate instruction for callouts.
+    	LLMov mov_rax = new LLMov("$0", RAX);
+    	mov_rax.accept(this);
+    	
+    	String call_inst = "call";
+    	String call_arg = node.getFnName();
+    	String call_line = formatLine(call_inst, call_arg);
+    	writeLine(call_line);
+    	
+    	String expr_addr = node.addressOfResult();
+    	if (expr_addr != null) {
+    		LLMov mov_result = new LLMov(RAX, expr_addr);
+    		mov_result.accept(this);
+    	}
     }
     
     @Override
