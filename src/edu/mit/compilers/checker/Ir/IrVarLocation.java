@@ -10,6 +10,7 @@ public class IrVarLocation extends IrLocation {
     }
     
 	private IrIdentifier id;
+	private int bp_offset;
 
 	public IrIdentifier getId() {
 		return id;
@@ -23,6 +24,10 @@ public class IrVarLocation extends IrLocation {
 	@Override
 	public void accept(IrNodeVisitor v) {
 		v.visit(this);
+	}
+
+	public void setBpOffset(int offset) {
+		bp_offset = offset;
 	}
 	
 	public String toString() {

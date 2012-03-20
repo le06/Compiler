@@ -165,6 +165,7 @@ public class CodeGenerator implements LLNodeVisitor {
         
         error_array_oob();
         error_missing_return();
+        error_div_by_zero();
     }
     
     @Override

@@ -26,6 +26,8 @@ public class IrForStmt extends IrStatement {
     private IrExpression myStop_value;
     private IrBlock myBlock;
 
+    private int counter_bp_offset;
+    
     public IrIdentifier getCounter() {
         return myCounter;
     }
@@ -41,12 +43,16 @@ public class IrForStmt extends IrStatement {
     public IrBlock getBlock() {
         return myBlock;
     }
-
+    
     @Override
     public void accept(IrNodeVisitor v) {
         v.visit(this);
     }
 
+    public void setBpOffset(int offset) {
+    	counter_bp_offset = offset;
+    }
+    
     public String toString(int s) {
         StringBuilder out = new StringBuilder();
         for (int i = 0; i < s; i++) {

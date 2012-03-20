@@ -16,18 +16,21 @@ public class IrNodeChecker implements IrNodeVisitor {
 
 	protected class Env {
 		private HashMap<String, Type> field_table;
+		private HashMap<String, Integer> bp_offset_table;
 		private Env previous_env;
 		private Ir current_body;
 		// i.e. the global scope, within a method, a for/while loop, etc...
 		
 		public Env() {
 			field_table = new HashMap<String, Type>();
+			bp_offset_table = new HashMap<String, Integer>();
 			previous_env = null;
 			current_body = null;
 		}
 		
 		public Env(Env previous_env, Ir current_body) {
 			field_table = new HashMap<String, Type>();
+			bp_offset_table = new HashMap<String, Integer>();
 			this.previous_env = previous_env;
 			this.current_body = current_body;
 		}
@@ -42,6 +45,10 @@ public class IrNodeChecker implements IrNodeVisitor {
 		
 		public HashMap<String, Type> getFieldTable() {
 			return field_table;
+		}
+		
+		public HashMap<String, Integer> getOffsetTable() {
+			return bp_offset_table;
 		}
 	}
 
@@ -86,6 +93,10 @@ public class IrNodeChecker implements IrNodeVisitor {
 	private boolean found_main_method = false;
 	private int currently_evaluating_expr = 0; // true if non-zero.
 	
+	// necessary for allocating locals during the codegen phase!
+	private int local_count = 0;
+	private int local_offset = 0;
+	
 	private Env getCurrentEnv() { return env_stack.peek(); }
 	
 	public IrNodeChecker() {
@@ -116,6 +127,14 @@ public class IrNodeChecker implements IrNodeVisitor {
 		while (current_env != null) {
 			Type type = current_env.getFieldTable().get(name);
 			if (type != null && type != Type.VOID) {
+				HashMap<String, Integer> offset_table =
+					current_env.getOffsetTable();
+				
+				// if this var is a local, set the offset.
+				if (offset_table != null) {
+					local_offset = offset_table.get(name);
+				} // otherwise, 0 by default (i.e. var is a global).
+				
 				if (type == Type.INT) {
 					return new IrType(IrType.Type.INT);
 				} else {
@@ -265,6 +284,8 @@ public class IrNodeChecker implements IrNodeVisitor {
 	
 	@Override
 	public void visit(IrMethodDecl node) {
+		local_count = 0; // each method has its own %bp and locals.
+		
 		if (found_main_method) { // ignore methods defined after main().
 			IrType type_node = node.getReturnType();
 			int line = type_node.getLineNumber();
@@ -367,6 +388,12 @@ public class IrNodeChecker implements IrNodeVisitor {
 		} else {
 			// visitor will add id regardless of current_type's validity.
 			field_table.put(id, current_type);
+			
+			// the local needs to be allocated during codegen.
+			local_count++;
+			HashMap<String, Integer> offset_table = getCurrentEnv().
+													getOffsetTable();
+			offset_table.put(id, local_count);
 		}
 	}
 
@@ -539,8 +566,12 @@ public class IrNodeChecker implements IrNodeVisitor {
 		IrBlock block = node.getBlock();
 		IrIdentifier id = node.getCounter();
 		Env for_env = new Env(getCurrentEnv(), node);
+		
 		// add the counter to the for loop env.
 		for_env.getFieldTable().put(id.getId(), Type.INT);
+		// make sure memory gets allocated for the loop counter.
+		local_count++;
+		for_env.getOffsetTable().put(id.getId(), local_count);
 		
 		env_stack.push(for_env); // enter the new env.		
 		block.accept(this);      // execute the block.
@@ -753,6 +784,10 @@ public class IrNodeChecker implements IrNodeVisitor {
 			int column = id_node.getColumnNumber();
 			String message = "Variable identifier is undefined: " + id_node.getId();
 			System.out.println(errorPosMessage(line, column) + message);
+		} else {
+			// var is defined, set node's bp offset!
+			node.setBpOffset(local_offset);
+			local_offset = 0;
 		}
 	}
 
