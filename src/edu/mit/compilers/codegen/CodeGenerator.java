@@ -140,7 +140,7 @@ public class CodeGenerator implements LLNodeVisitor {
 	@Override
 	public void visit(LLMalloc node) {
 		long size = node.getSize();
-		String inst = ".space"; // GCC directive., String arg2
+		String inst = ".space"; // GCC directive.
 		String arg;
 		if (size > 1) {
 			arg = "(" + "8 * " + String.valueOf(size) + ")";
@@ -161,7 +161,7 @@ public class CodeGenerator implements LLNodeVisitor {
 	
     @Override
     public void visit(LLEnvironment node) {
-        // TODO Auto-gegetName()nerated method stub
+        // TODO Auto-generated method stub
         
     }    
     
