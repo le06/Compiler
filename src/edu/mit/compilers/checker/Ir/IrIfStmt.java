@@ -1,6 +1,7 @@
 package edu.mit.compilers.checker.Ir;
 
 import edu.mit.compilers.codegen.ll.LLEnvironment;
+import edu.mit.compilers.codegen.ll.LLExpression;
 import edu.mit.compilers.codegen.ll.LLJump;
 import edu.mit.compilers.codegen.ll.LLLabel;
 import edu.mit.compilers.codegen.ll.LLNode;
@@ -55,14 +56,16 @@ public class IrIfStmt extends IrStatement {
         LLLabel true_label = new LLLabel("true");
         LLLabel if_end = new LLLabel("endif");
         
-        LLJump jump_true = new LLJump(LLJump.JumpType.NOT_EQUAL, true_label);
-        LLJump end_false = new LLJump(LLJump.JumpType.UNCONDITIONAL, if_end);
         
-        LLEnvironment eval_cond_env = (LLEnvironment)condition.getllRep(null, null);
+        
+        LLExpression eval_cond_env = (LLExpression)condition.getllRep(null, null);
         LLEnvironment true_env = (LLEnvironment)true_block.getllRep(breakPoint, continuePoint);
         LLEnvironment false_env = (LLEnvironment)false_block.getllRep(breakPoint, continuePoint);
         
-        currentEnvironment.addNode(eval_cond_env);
+        LLJump jump_true = new LLJump(eval_cond_env, true_label);
+        LLJump end_false = new LLJump(LLJump.JumpType.UNCONDITIONAL, if_end);
+        
+        //currentEnvironment.addNode(eval_cond_env);
         currentEnvironment.addNode(jump_true);
         currentEnvironment.addNode(false_env);
         currentEnvironment.addNode(end_false);

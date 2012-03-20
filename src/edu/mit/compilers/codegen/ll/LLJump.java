@@ -6,9 +6,15 @@ import java.io.Writer;
 public class LLJump implements LLNode {
     private JumpType type;
     private LLLabel label;
+    private LLExpression cond;
     
     public LLJump(JumpType t, LLLabel loc) {
         type = t;
+        label = loc;
+    }
+    
+    public LLJump(LLExpression expr, LLLabel loc) {
+        cond = expr;
         label = loc;
     }
     
@@ -16,8 +22,10 @@ public class LLJump implements LLNode {
         UNCONDITIONAL,
         EQUAL,
         NOT_EQUAL,
-        LESS_THAN,
-        MORE_THAN;
+        LT,
+        GT,
+        LEQ,
+        GEQ;
     }
     
     public String getOpcode() {
@@ -28,9 +36,9 @@ public class LLJump implements LLNode {
             return "je";
         case NOT_EQUAL:
             return "jne";
-        case LESS_THAN:
+        case LT:
         	return "jl";
-        case MORE_THAN:
+        case GT:
         	return "jg";
         default:
             return null;

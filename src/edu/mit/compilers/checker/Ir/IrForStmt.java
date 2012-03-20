@@ -66,8 +66,6 @@ public class IrForStmt extends IrStatement {
         LLLabel for_begin = new LLLabel("for_begin");
         LLLabel for_end = new LLLabel("for_end");
         
-        LLJump jump_end = new LLJump(JumpType.EQUAL, for_end);
-        LLJump jump_begin = new LLJump(JumpType.UNCONDITIONAL, for_begin);
         
         //LLVarDecl dec = new LLVarDecl(myCounter.getId());
         LLLocation var = (LLLocation)(new LLVarLocation(myCounter.getId(),
@@ -89,12 +87,15 @@ public class IrForStmt extends IrStatement {
         
         LLEnvironment block = (LLEnvironment)myBlock.getllRep(for_end, for_begin);
         
+        LLJump jump_end = new LLJump(test, for_end);
+        LLJump jump_begin = new LLJump(JumpType.UNCONDITIONAL, for_begin);
+        
         
         LLEnvironment out = new LLEnvironment();
         //out.addNode(dec);
         out.addNode(init);
         out.addNode(for_begin);
-        out.addNode(test);
+        //out.addNode(test);
         out.addNode(jump_end);
         out.addNode(block);
         out.addNode(incr);
