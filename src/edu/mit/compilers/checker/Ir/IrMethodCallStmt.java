@@ -19,6 +19,7 @@ public class IrMethodCallStmt extends IrInvokeStmt {
     
 	private IrIdentifier method_name;
 	private ArrayList<IrExpression> args;
+	private IrType type;
 	
 	public IrIdentifier getMethodName() {
 		return method_name;
@@ -35,7 +36,8 @@ public class IrMethodCallStmt extends IrInvokeStmt {
 	
 	@Override
 	public IrType getExprType(IrNodeChecker c) {
-		return c.lookupMethodType(method_name);
+	    type = c.lookupMethodType(method_name);
+		return type;
 	}
 	
 	@Override
@@ -55,7 +57,25 @@ public class IrMethodCallStmt extends IrInvokeStmt {
 
     @Override
     public LLNode getllRep(LLLabel breakPoint, LLLabel continuePoint) {
-        LLMethodCall out = new LLMethodCall(method_name.getId());
+        LLMethodCall out;
+        
+        switch (type.myType) {
+        case INT:
+            out = new LLMethodCall(method_name.getId(),
+                                   LLExpression.Type.INT);
+            break;
+        case BOOLEAN:
+            out = new LLMethodCall(method_name.getId(),
+                                   LLExpression.Type.BOOLEAN);
+            break;
+        case VOID:
+            out = new LLMethodCall(method_name.getId(),
+                                   LLExpression.Type.VOID);
+            break;
+        default:
+            out = null;    
+        }
+        
         
         for (IrExpression arg : args) {
             out.addParam((LLExpression)arg.getllRep(null, null));
