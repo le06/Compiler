@@ -9,6 +9,7 @@ import edu.mit.compilers.checker.DecafChecker;
 import edu.mit.compilers.checker.Ir.Ir;
 import edu.mit.compilers.checker.Ir.IrNode;
 import edu.mit.compilers.codegen.ll.LLFile;
+import edu.mit.compilers.codegen.LabelNamer;
 
 public class DecafUnoptomizedCodeGenerator {
     private CodeGenerator generator;
