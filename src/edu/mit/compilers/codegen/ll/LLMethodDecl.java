@@ -2,8 +2,8 @@ package edu.mit.compilers.codegen.ll;
 
 public class LLMethodDecl implements LLNode {
 	
-    String method_name;
-    LLEnvironment method_code;
+    private String method_name;
+    private LLEnvironment method_code;
     
     public LLMethodDecl(String name) {
         method_name = name;

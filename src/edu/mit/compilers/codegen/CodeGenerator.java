@@ -77,9 +77,8 @@ public class CodeGenerator implements LLNodeVisitor {
     
     private Writer outputStream;
     private int tab_level;
-    private LLNode root;
     
-    public CodeGenerator(LLNode root) {
+    public CodeGenerator() {
     	tab_level = 0;
     }
     
@@ -109,6 +108,7 @@ public class CodeGenerator implements LLNodeVisitor {
         	m.accept(this);
         }
 
+        mainDirective(); // write ".globl main".
         node.getMain().accept(this);
         
         for (LLStringLiteral l : node.getStringLiterals()) {
@@ -153,16 +153,27 @@ public class CodeGenerator implements LLNodeVisitor {
     
 ///////////////////////////////////////////////////////////////////////////////
 	
+	private void mainDirective() {
+		tab_level++;
+		writeLine(".globl main");
+		tab_level--;
+	}
+	
 	@Override
 	public void visit(LLMethodDecl node) {
-		// TODO Auto-generated method stub
-		
+		// generate function label.
+		LLLabel label = new LLLabel(node.getName());
+		label.accept(this);
+		// node accept function goes to node environment next.
 	}
 	
     @Override
     public void visit(LLEnvironment node) {
-        // TODO Auto-generated method stub
-        
+		tab_level++;
+        for (LLNode n : node.getSubnodes()) {
+            n.accept(this);
+        }
+		tab_level--;
     }    
     
 ///////////////////////////////////////////////////////////////////////////////
@@ -170,7 +181,7 @@ public class CodeGenerator implements LLNodeVisitor {
     @Override
     public void visit(LLAssign node) {
         // TODO Auto-generated method stub
-    	// TODO Auto-generated method stub
+
         
     }    
     
@@ -270,5 +281,6 @@ public class CodeGenerator implements LLNodeVisitor {
         
         // Write ret
     }
+
 
 }

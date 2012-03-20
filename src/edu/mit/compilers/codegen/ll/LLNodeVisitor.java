@@ -1,7 +1,6 @@
 package edu.mit.compilers.codegen.ll;
 
 public interface LLNodeVisitor {
-	
     public void visit(LLFile node);
 	public void visit(LLGlobalDecl node);
 	public void visit(LLArrayDecl node);
