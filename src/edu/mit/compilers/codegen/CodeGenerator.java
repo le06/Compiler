@@ -632,7 +632,13 @@ public class CodeGenerator implements LLNodeVisitor {
     
     @Override
     public void visit(LLJump node) {
-        // TODO Auto-generated method stub
+    	LLLabel loc = node.getLabel();    	
+    	String jmp_inst = node.getOpcode();
+    	if (jmp_inst != null) {
+    		String label = "." + loc.getName();
+    		String jmp_line = formatLine(jmp_inst, label);
+    		writeLine(jmp_line);
+    	}    	
     }
 
     @Override
