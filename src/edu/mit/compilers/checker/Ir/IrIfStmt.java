@@ -52,8 +52,8 @@ public class IrIfStmt extends IrStatement {
     public llNode getllRep(llLabel breakPoint, llLabel continuePoint) {
         llEnvironment currentEnvironment = new llEnvironment();
         
-        llLabel true_label = new llLabel();
-        llLabel if_end = new llLabel();
+        llLabel true_label = new llLabel("true");
+        llLabel if_end = new llLabel("endif");
         
         llJump jump_true = new llJump(llJump.JumpType.NOT_EQUAL, true_label);
         llJump end_false = new llJump(llJump.JumpType.UNCONDITIONAL, if_end);

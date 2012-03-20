@@ -49,8 +49,8 @@ public class IrWhileStmt extends IrStatement {
     public llNode getllRep(llLabel breakPoint, llLabel continuePoint) {
         llEnvironment out = new llEnvironment();
         
-        llLabel w_start = new llLabel();
-        llLabel w_end = new llLabel();
+        llLabel w_start = new llLabel("w_start");
+        llLabel w_end = new llLabel("w_end");
         
         llJump jump_end = new llJump(JumpType.NOT_EQUAL, w_end);
         llJump jump_start = new llJump(JumpType.UNCONDITIONAL, w_start);

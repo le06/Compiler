@@ -6,6 +6,7 @@ import antlr.CommonAST;
 import antlr.Token;
 import antlr.collections.AST;
 import edu.mit.compilers.checker.DecafChecker;
+import edu.mit.compilers.codegen.DecafUnoptomizedCodeGenerator;
 import edu.mit.compilers.grammar.*;
 import edu.mit.compilers.tools.CLI;
 import edu.mit.compilers.tools.CLI.Action;
@@ -90,6 +91,17 @@ class Main {
             System.exit(-1);
         }
         
+      } else if (CLI.target == Action.ASSEMBLY) {
+          DecafScanner scanner = 
+                  new DecafScanner(new DataInputStream(inputStream));
+          DecafParser parser = new DecafParser(scanner);
+          DecafChecker checker = new DecafChecker(parser);
+          DecafUnoptomizedCodeGenerator gen = new DecafUnoptomizedCodeGenerator(checker, null);
+          gen.setTrace(CLI.debug);
+          gen.gen();
+          if (gen.getError()) {
+              System.exit(-1);
+          }
       }
     } catch(Exception e) {
       // print the error:

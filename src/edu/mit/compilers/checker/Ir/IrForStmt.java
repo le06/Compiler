@@ -64,8 +64,8 @@ public class IrForStmt extends IrStatement {
 
     @Override
     public llNode getllRep(llLabel breakPoint, llLabel continuePoint) {
-        llLabel for_begin = new llLabel();
-        llLabel for_end = new llLabel();
+        llLabel for_begin = new llLabel("for_begin");
+        llLabel for_end = new llLabel("for_end");
         
         llJump jump_end = new llJump(JumpType.EQUAL, for_end);
         llJump jump_begin = new llJump(JumpType.UNCONDITIONAL, for_begin);

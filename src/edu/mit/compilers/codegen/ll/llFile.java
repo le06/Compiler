@@ -14,13 +14,14 @@ public class llFile implements llNode {
         methods = new ArrayList<llMethodDef>();
         arrayDecs = new ArrayList<llArrayDec>();
         globalDecs = new ArrayList<llGlobalDec>();
-        
+        strings = new ArrayList<llStringLiteral>();
     }
     
     public llFile() {
         methods = new ArrayList<llMethodDef>();
         arrayDecs = new ArrayList<llArrayDec>();
         globalDecs = new ArrayList<llGlobalDec>();
+        strings = new ArrayList<llStringLiteral>();
     }
     
     public void setMain(llMethodDef mainMethod) {
@@ -37,6 +38,10 @@ public class llFile implements llNode {
     
     public void addGlobalDec(llGlobalDec dec) {
         globalDecs.add(dec);
+    }
+    
+    public void addString(llStringLiteral str) {
+        strings.add(str);
     }
 
     @Override

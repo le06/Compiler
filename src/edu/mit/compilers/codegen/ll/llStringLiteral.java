@@ -24,6 +24,7 @@ public class llStringLiteral implements llExpression {
     
     @Override
     public void accept(llNodeVisitor v) {
+        label.accept(v);
         v.visit(this);
     }
     
