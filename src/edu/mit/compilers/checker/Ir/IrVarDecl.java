@@ -2,10 +2,10 @@ package edu.mit.compilers.checker.Ir;
 
 import java.util.ArrayList;
 
-import edu.mit.compilers.codegen.ll.llEnvironment;
-import edu.mit.compilers.codegen.ll.llLabel;
-import edu.mit.compilers.codegen.ll.llNode;
-import edu.mit.compilers.codegen.ll.llVarDec;
+import edu.mit.compilers.codegen.ll.LLEnvironment;
+import edu.mit.compilers.codegen.ll.LLLabel;
+import edu.mit.compilers.codegen.ll.LLNode;
+import edu.mit.compilers.codegen.ll.LLVarDecl;
 
 public class IrVarDecl extends Ir {
 
@@ -52,11 +52,11 @@ public class IrVarDecl extends Ir {
 	}
 
     @Override
-    public llNode getllRep(llLabel breakPoint, llLabel continuePoint) {
-        llEnvironment out = new llEnvironment();
+    public LLNode getllRep(LLLabel breakPoint, LLLabel continuePoint) {
+        LLEnvironment out = new LLEnvironment();
         
         for (IrLocalDecl dec : locals) {
-            out.addNode(new llVarDec(dec.getId().getId()));
+            out.addNode(new LLVarDecl(dec.getId().getId()));
         }
         
         return out;

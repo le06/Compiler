@@ -1,11 +1,10 @@
 package edu.mit.compilers.codegen.ll;
 
-public class llStringLiteral implements llExpression {
-    llLabel label;
+public class LLStringLiteral implements LLExpression {
+    LLLabel label;
     String literal;
     
-    
-    public llStringLiteral(String text, llLabel l) {
+    public LLStringLiteral(String text, LLLabel l) {
         label = l;
         literal = text;
     }
@@ -23,8 +22,20 @@ public class llStringLiteral implements llExpression {
     }
     
     @Override
-    public void accept(llNodeVisitor v) {
+    public void accept(LLNodeVisitor v) {
         v.visit(this);
     }
+
+	@Override
+	public String addressOfResult() {
+		// irrelevant. used only in callouts.
+		return null;
+	}
+
+	@Override
+	public Type getType() {
+		// irrelevant. used only in callouts.
+		return null;
+	}
     
 }

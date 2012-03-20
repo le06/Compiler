@@ -2,8 +2,8 @@ package edu.mit.compilers.checker.Ir;
 
 import java.util.ArrayList;
 
-import edu.mit.compilers.codegen.ll.llLabel;
-import edu.mit.compilers.codegen.ll.llNode;
+import edu.mit.compilers.codegen.ll.LLLabel;
+import edu.mit.compilers.codegen.ll.LLNode;
 
 public class IrFieldDecl extends IrMemberDecl {
     IrType type;
@@ -48,7 +48,7 @@ public class IrFieldDecl extends IrMemberDecl {
 	}
 
     @Override
-    public llNode getllRep(llLabel breakPoint, llLabel continuePoint) {
+    public LLNode getllRep(LLLabel breakPoint, LLLabel continuePoint) {
         return null;
     }
 }

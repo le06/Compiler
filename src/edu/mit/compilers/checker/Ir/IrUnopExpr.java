@@ -1,10 +1,10 @@
 package edu.mit.compilers.checker.Ir;
 
-import edu.mit.compilers.codegen.ll.llExpression;
-import edu.mit.compilers.codegen.ll.llLabel;
-import edu.mit.compilers.codegen.ll.llNode;
-import edu.mit.compilers.codegen.ll.llUnaryNeg;
-import edu.mit.compilers.codegen.ll.llUnaryNot;
+import edu.mit.compilers.codegen.ll.LLExpression;
+import edu.mit.compilers.codegen.ll.LLLabel;
+import edu.mit.compilers.codegen.ll.LLNode;
+import edu.mit.compilers.codegen.ll.LLUnaryNeg;
+import edu.mit.compilers.codegen.ll.LLUnaryNot;
 
 public class IrUnopExpr extends Ir implements IrExpression {
     public IrUnopExpr(IrUnaryOperator op, IrExpression expression) {
@@ -64,13 +64,13 @@ public class IrUnopExpr extends Ir implements IrExpression {
     }
 
     @Override
-    public llNode getllRep(llLabel breakPoint, llLabel continuePoint) {
-        llExpression val = (llExpression)expr.getllRep(null, null);
+    public LLNode getllRep(LLLabel breakPoint, LLLabel continuePoint) {
+        LLExpression val = (LLExpression)expr.getllRep(null, null);
         
         if (operator == IrUnaryOperator.MINUS) {
-            return (llNode)(new llUnaryNeg(val));
+            return (LLNode)(new LLUnaryNeg(val));
         } else { // NOT
-            return (llNode)(new llUnaryNot(val));
+            return (LLNode)(new LLUnaryNot(val));
         }
     }
 }

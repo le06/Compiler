@@ -1,9 +1,9 @@
 package edu.mit.compilers.checker.Ir;
 
-import edu.mit.compilers.codegen.ll.llEnvironment;
-import edu.mit.compilers.codegen.ll.llJump;
-import edu.mit.compilers.codegen.ll.llLabel;
-import edu.mit.compilers.codegen.ll.llNode;
+import edu.mit.compilers.codegen.ll.LLEnvironment;
+import edu.mit.compilers.codegen.ll.LLJump;
+import edu.mit.compilers.codegen.ll.LLLabel;
+import edu.mit.compilers.codegen.ll.LLNode;
 
 public class IrIfStmt extends IrStatement {
     public IrIfStmt(IrExpression test, IrBlock if_block, IrBlock else_block) {
@@ -49,18 +49,18 @@ public class IrIfStmt extends IrStatement {
     }
 
     @Override
-    public llNode getllRep(llLabel breakPoint, llLabel continuePoint) {
-        llEnvironment currentEnvironment = new llEnvironment();
+    public LLNode getllRep(LLLabel breakPoint, LLLabel continuePoint) {
+        LLEnvironment currentEnvironment = new LLEnvironment();
         
-        llLabel true_label = new llLabel();
-        llLabel if_end = new llLabel();
+        LLLabel true_label = new LLLabel();
+        LLLabel if_end = new LLLabel();
         
-        llJump jump_true = new llJump(llJump.JumpType.NOT_EQUAL, true_label);
-        llJump end_false = new llJump(llJump.JumpType.UNCONDITIONAL, if_end);
+        LLJump jump_true = new LLJump(LLJump.JumpType.NOT_EQUAL, true_label);
+        LLJump end_false = new LLJump(LLJump.JumpType.UNCONDITIONAL, if_end);
         
-        llEnvironment eval_cond_env = (llEnvironment)condition.getllRep(null, null);
-        llEnvironment true_env = (llEnvironment)true_block.getllRep(breakPoint, continuePoint);
-        llEnvironment false_env = (llEnvironment)false_block.getllRep(breakPoint, continuePoint);
+        LLEnvironment eval_cond_env = (LLEnvironment)condition.getllRep(null, null);
+        LLEnvironment true_env = (LLEnvironment)true_block.getllRep(breakPoint, continuePoint);
+        LLEnvironment false_env = (LLEnvironment)false_block.getllRep(breakPoint, continuePoint);
         
         currentEnvironment.addNode(eval_cond_env);
         currentEnvironment.addNode(jump_true);

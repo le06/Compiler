@@ -1,8 +1,8 @@
 package edu.mit.compilers.checker.Ir;
 
-import edu.mit.compilers.codegen.ll.llLabel;
-import edu.mit.compilers.codegen.ll.llNode;
-import edu.mit.compilers.codegen.ll.llVarAccess;
+import edu.mit.compilers.codegen.ll.LLLabel;
+import edu.mit.compilers.codegen.ll.LLNode;
+import edu.mit.compilers.codegen.ll.LLVarLocation;
 
 public class IrVarLocation extends IrLocation {
     public IrVarLocation(IrIdentifier var) {
@@ -39,7 +39,7 @@ public class IrVarLocation extends IrLocation {
     }
 
     @Override
-    public llNode getllRep(llLabel breakPoint, llLabel continuePoint) {
-        return new llVarAccess(id.getId());
+    public LLNode getllRep(LLLabel breakPoint, LLLabel continuePoint) {
+        return new LLVarLocation(id.getId());
     }
 }

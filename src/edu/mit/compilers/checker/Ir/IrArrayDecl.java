@@ -2,9 +2,9 @@ package edu.mit.compilers.checker.Ir;
 
 import javax.management.RuntimeErrorException;
 
-import edu.mit.compilers.codegen.ll.llArrayDec;
-import edu.mit.compilers.codegen.ll.llLabel;
-import edu.mit.compilers.codegen.ll.llNode;
+import edu.mit.compilers.codegen.ll.LLArrayDecl;
+import edu.mit.compilers.codegen.ll.LLLabel;
+import edu.mit.compilers.codegen.ll.LLNode;
 
 public class IrArrayDecl extends IrGlobalDecl {
 	private IrIdentifier id;
@@ -46,9 +46,9 @@ public class IrArrayDecl extends IrGlobalDecl {
     }
 
     @Override
-    public llNode getllRep(llLabel breakPoint, llLabel continuePoint) {
+    public LLNode getllRep(LLLabel breakPoint, LLLabel continuePoint) {
         try {
-            return new llArrayDec(id.toString(), array_size.getIntRep());
+            return new LLArrayDecl(id.toString(), array_size.getIntRep());
         } catch (NumberFormatException e) {
             System.err.println("IrIntRep array size check failed");
             System.exit(-1);

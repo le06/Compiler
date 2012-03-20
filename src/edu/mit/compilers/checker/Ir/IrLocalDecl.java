@@ -1,8 +1,8 @@
 package edu.mit.compilers.checker.Ir;
 
-import edu.mit.compilers.codegen.ll.llLabel;
-import edu.mit.compilers.codegen.ll.llNode;
-import edu.mit.compilers.codegen.ll.llVarDec;
+import edu.mit.compilers.codegen.ll.LLLabel;
+import edu.mit.compilers.codegen.ll.LLNode;
+import edu.mit.compilers.codegen.ll.LLVarDecl;
 
 public class IrLocalDecl extends Ir {
     public IrLocalDecl(IrIdentifier name) {
@@ -32,7 +32,7 @@ public class IrLocalDecl extends Ir {
         return out.toString();
     }
     @Override
-    public llNode getllRep(llLabel breakPoint, llLabel continuePoint) {
-        return new llVarDec(id.getId());
+    public LLNode getllRep(LLLabel breakPoint, LLLabel continuePoint) {
+        return new LLVarDecl(id.getId());
     }
 }

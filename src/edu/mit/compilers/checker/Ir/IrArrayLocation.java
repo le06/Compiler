@@ -1,10 +1,10 @@
 package edu.mit.compilers.checker.Ir;
 
-import edu.mit.compilers.codegen.ll.llArrayAccess;
-import edu.mit.compilers.codegen.ll.llExpression;
-import edu.mit.compilers.codegen.ll.llLabel;
-import edu.mit.compilers.codegen.ll.llLocation;
-import edu.mit.compilers.codegen.ll.llNode;
+import edu.mit.compilers.codegen.ll.LLArrayLocation;
+import edu.mit.compilers.codegen.ll.LLExpression;
+import edu.mit.compilers.codegen.ll.LLLabel;
+import edu.mit.compilers.codegen.ll.LLLocation;
+import edu.mit.compilers.codegen.ll.LLNode;
 
 public class IrArrayLocation extends IrLocation {
     public IrArrayLocation(IrIdentifier name, IrExpression expr) {
@@ -45,8 +45,8 @@ public class IrArrayLocation extends IrLocation {
         return out.toString();
     }
     @Override
-    public llNode getllRep(llLabel breakPoint, llLabel continuePoint) {
-        return (llNode)(new llArrayAccess(id.getId(), (llExpression)index.getllRep(null, null)));
+    public LLNode getllRep(LLLabel breakPoint, LLLabel continuePoint) {
+        return (LLNode)(new LLArrayLocation(id.getId(), (LLExpression)index.getllRep(null, null)));
     }
 
 }
