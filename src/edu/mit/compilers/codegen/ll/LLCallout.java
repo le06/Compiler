@@ -35,7 +35,7 @@ public class LLCallout implements LLExpression {
 
 	@Override
     public void accept(LLNodeVisitor v) {
-        for (int i = 1; i < params.size(); i++) {
+        for (int i = 0; i < params.size(); i++) {
             params.get(i).accept(v);
         }
         v.visit(this);

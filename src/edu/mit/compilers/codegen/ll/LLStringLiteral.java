@@ -21,9 +21,13 @@ public class LLStringLiteral implements LLExpression {
         return label.getASMLabel();
     }
     
+    public LLLabel getLabel() {
+        return label;
+    }
+    
     @Override
     public void accept(LLNodeVisitor v) {
-        label.accept(v);
+        //label.accept(v);
         v.visit(this);
     }
 

@@ -20,8 +20,11 @@ public class LabelNamer implements LLNodeVisitor {
 
     @Override
     public void visit(LLFile node) {
-        // Do Nothing
+        for (LLMethodDecl m : node.getMethods()) {
+            m.accept(this);
+        }
         
+        node.getMain().accept(this);
     }
 
     @Override
@@ -68,8 +71,9 @@ public class LabelNamer implements LLNodeVisitor {
 
     @Override
     public void visit(LLEnvironment node) {
-        // Do Nothing
-        
+        for (LLNode n : node.getSubnodes()) {
+            n.accept(this);
+        }
     }
 
     @Override
@@ -121,6 +125,7 @@ public class LabelNamer implements LLNodeVisitor {
     @Override
     public void visit(LLStringLiteral node) {
         currentFile.addString(node);
+        node.getLabel().accept(this);
     }
 
     @Override
@@ -144,7 +149,7 @@ public class LabelNamer implements LLNodeVisitor {
     @Override
     public void visit(LLMethodDecl llMethodDecl) {
         // Do Nothing
-        
+        llMethodDecl.getEnv().accept(this);
     }
 
     @Override

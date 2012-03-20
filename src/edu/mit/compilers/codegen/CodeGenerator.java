@@ -50,6 +50,7 @@ public class CodeGenerator implements LLNodeVisitor {
 	private final String R10 = "%r10";
 	private final String R11 = "%r11";
 	
+	
     /*
      * Printing functions.
      */
@@ -101,6 +102,8 @@ public class CodeGenerator implements LLNodeVisitor {
     private LLLabel array_oob_label;
     private LLLabel missing_return_label;
     
+    private boolean printString = false;
+    
     public CodeGenerator() {
 
     }
@@ -148,6 +151,8 @@ public class CodeGenerator implements LLNodeVisitor {
 
         mainDirective(); // write ".globl main".
         node.getMain().accept(this);
+        
+        printString = true;
         
         for (LLStringLiteral l : node.getStringLiterals()) {
         	l.accept(this);
@@ -365,12 +370,15 @@ public class CodeGenerator implements LLNodeVisitor {
     
     @Override
     public void visit(LLStringLiteral node) {
-    	tab_level++;
-    	String directive = ".string";
-    	String arg = node.getText();
-    	String line = formatLine(directive, arg);
-    	writeLine(line);
-    	tab_level--;
+        if (printString) {
+            node.getLabel().accept(this);
+            tab_level++;
+            String directive = ".string";
+            String arg = node.getText();
+            String line = formatLine(directive, arg);
+            writeLine(line);
+            tab_level--;
+        }
     }
 
 ///////////////////////////////////////////////////////////////////////////////    
