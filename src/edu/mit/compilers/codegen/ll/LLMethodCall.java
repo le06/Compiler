@@ -38,6 +38,10 @@ public class LLMethodCall implements LLExpression {
         return method;
     }
     
+    public ArrayList<LLExpression> getParams() {
+    	return params;
+    }
+    
     @Override
     public void accept(LLNodeVisitor v) {
         for (LLExpression p : params) {

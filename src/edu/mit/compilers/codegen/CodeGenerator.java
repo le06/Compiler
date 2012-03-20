@@ -2,6 +2,7 @@ package edu.mit.compilers.codegen;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.ArrayList;
 
 import edu.mit.compilers.codegen.ll.LLLocation;
 import edu.mit.compilers.codegen.ll.LLMalloc;
@@ -34,6 +35,8 @@ public class CodeGenerator implements LLNodeVisitor {
 	/*
 	 * Constant values.
 	 */
+	private final String RAX = "%rax";
+	
 	private final String RDI = "%rdi";
 	private final String RSI = "%rsi";
 	private final String RDX = "%rdx";
@@ -215,24 +218,69 @@ public class CodeGenerator implements LLNodeVisitor {
     		arg2 = arg2 + "(" + R10 + ")";	// i.e. array_label(%r10).
     	}
     	
-		LLMov mov_to_reg = new LLMov(arg1, R10);	// move expr to register.
+		LLMov mov_to_reg = new LLMov(arg1, R11);	// move expr to register.
 		mov_to_reg.accept(this);
     	
     	// move the result of the expr evaluation to loc!
-    	LLMov mov_to_mem = new LLMov(R10, arg2);
+    	LLMov mov_to_mem = new LLMov(R11, arg2);
     	mov_to_mem.accept(this);
     }    
+
+    private void pushArgument(int n, LLExpression arg) {
+    	String addr = arg.addressOfResult();
+    	LLMov mov;
+    	// regs in order: rdi, rsi, rdx, rcx, r8, r9.
+    	switch (n) {
+    	case 0:
+    		mov = new LLMov(addr, RDI);
+    		mov.accept(this);
+    	case 1:
+    		mov = new LLMov(addr, RSI);
+    		mov.accept(this);
+    	case 2:
+    		mov = new LLMov(addr, RDX);
+    		mov.accept(this);
+    	case 3:
+    		mov = new LLMov(addr, RCX);
+    		mov.accept(this);
+    	case 4:
+    		mov = new LLMov(addr, R8);
+    		mov.accept(this);
+    	case 5:
+    		mov = new LLMov(addr, R9);
+    		mov.accept(this);
+    	default:
+    		mov = new LLMov(addr, R10);
+    		mov.accept(this);
+    		String inst = "push"; // push arg onto stack!
+    		String src = R10;
+    		String push_line = formatLine(inst, src);
+    		writeLine(push_line);
+    	}
+    }
     
     @Override
     public void visit(LLMethodCall node) {
-        // Assumes all parameters are in their proper locations
-        writeLine("call " + node.getMethodName());
-        writeLine("push %rax");
+    	// arg exprs are evaluated in accept(). read those values into regs!
+    	ArrayList<LLExpression> params = node.getParams();
+    	for (int i = node.getNumParams(); i >= 0; i--) {
+    		pushArgument(i, params.get(i)); // push from RIGHT-TO-LEFT.
+    	}
+    	
+    	String call_inst = "call";
+    	String call_arg = node.getMethodName();
+    	String call_line = formatLine(call_inst, call_arg);
+    	writeLine(call_line);
+    	
+    	String expr_addr = node.addressOfResult();
+    	if (expr_addr != null) {
+    		LLMov mov_result = new LLMov(RAX, expr_addr);
+    		mov_result.accept(this);
+    	}
     }
     
-    @Override        // finally the main method.
+    @Override
     public void visit(LLCallout node) {
-        // TODO Auto-generated method stub
 
     }    
     
