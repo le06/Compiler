@@ -100,12 +100,15 @@ class Main {
           gen.setTrace(CLI.debug);
           
           System.out.println(CLI.outfile);
+          File f = new File(CLI.outfile);
+          
+          f.createNewFile();
           
           BufferedWriter out = new BufferedWriter(
-                                    new FileWriter(
-                                           new File(CLI.outfile)));
+                                    new FileWriter(f));
           
           gen.gen(out);
+          out.close();
           if (gen.getError()) {
               System.exit(-1);
           }

@@ -24,7 +24,7 @@ public class DecafUnoptomizedCodeGenerator {
         checker = dc;
         lNamer = new LabelNamer();
         aAssign = new AddressAssigner();
-        //generator = new CodeGenerator();
+        generator = new CodeGenerator();
     }
     
     public void setTrace(boolean doDebug) {
@@ -41,6 +41,7 @@ public class DecafUnoptomizedCodeGenerator {
         file = (LLFile)ir.getllRep(null, null); // Convert to LL
         lNamer.name(file);                      // Make labels unique
         aAssign.assign(file);                   // Assign temp var addresses
+        
         generator.outputASM(stream, file);      // Write actual ASM to stream
     }
     
