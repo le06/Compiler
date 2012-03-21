@@ -200,7 +200,11 @@ public class AddressAssigner implements LLNodeVisitor {
 
     @Override
     public void visit(LLJump node) {
-    	// Do nothing
+    	// jump nodes can contain exprs. need to assign address if so!
+    	LLExpression cond = node.getCond();
+    	if (cond != null) {
+    		cond.accept(this);
+    	}
     }
 
     @Override
