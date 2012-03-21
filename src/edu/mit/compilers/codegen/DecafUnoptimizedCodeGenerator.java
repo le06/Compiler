@@ -41,12 +41,17 @@ public class DecafUnoptimizedCodeGenerator {
         }
         HashMap<String, Integer> localCounts = checker.getLocalCounts();
 
+        System.out.println(1);
         ir = checker.getIr();                   // Get Ir
+        System.out.println(2);
         file = (LLFile)ir.getllRep(null, null); // Convert to LL
+        System.out.println(3);
         lNamer.name(file);                      // Make labels unique
+        System.out.println(4);
         aAssign.setLocalCounts(localCounts);	// Pass info about locals
+        System.out.println(5);
         aAssign.assign(file);                   // Assign temp var addresses
-        
+        System.out.println(6);        
         generator.outputASM(stream, file);      // Write actual ASM to stream
     }
     

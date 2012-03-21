@@ -356,6 +356,14 @@ public class IrNodeChecker implements IrNodeVisitor {
 			}
 			else {
 				method_env.getFieldTable().put(name, type);
+				
+				// params are treated as locals.
+				// thus, these need to be allocated during codegen.
+				local_count++;
+				HashMap<String, Integer> offset_table = method_env.
+														getOffsetTable();
+				offset_table.put(name, local_count);
+				
 			}
 		}
 		

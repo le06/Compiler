@@ -6,18 +6,21 @@ public class LLMethodDecl implements LLNode {
 	
     private String method_name;
     private LLEnvironment method_code;
+    private int num_args;
     private int num_temps;
     private Type type;
     
-    public LLMethodDecl(String name, Type t) {
+    public LLMethodDecl(String name, Type t, int num_args) {
         method_name = name;
         type = t;
+        this.num_args = num_args;
     }
     
-    public LLMethodDecl(String name, Type t, LLEnvironment code) {
+    public LLMethodDecl(String name, Type t, int num_args, LLEnvironment code) {
         method_name = name;
         method_code = code;
         type = t;
+        this.num_args = num_args;
     }
     
     public String getName() {
@@ -26,6 +29,10 @@ public class LLMethodDecl implements LLNode {
     
     public void setNumTemps(int temps) {
         num_temps = temps;
+    }
+    
+    public int getNumArgs() {
+    	return num_args;
     }
     
     public int getNumTemps() {

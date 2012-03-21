@@ -219,7 +219,10 @@ public class AddressAssigner implements LLNodeVisitor {
 
     @Override
     public void visit(LLReturn node) {
-    	// Do nothing
+    	LLExpression expr = node.getExpr();
+    	if (expr != null) {
+    		expr.accept(this);
+    	}
     }
 
     @Override

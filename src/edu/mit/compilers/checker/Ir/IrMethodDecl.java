@@ -72,14 +72,15 @@ public class IrMethodDecl extends IrMemberDecl {
     @Override
     public LLNode getllRep(LLLabel breakPoint, LLLabel continuePoint) {
         LLEnvironment code = (LLEnvironment)block.getllRep(null, null);
+        int num_args = params.size();
         
         switch (return_type.myType) {
         case BOOLEAN:
-            return new LLMethodDecl(id.getId(), LLExpression.Type.BOOLEAN, code);
+            return new LLMethodDecl(id.getId(), LLExpression.Type.BOOLEAN, num_args, code);
         case INT:
-            return new LLMethodDecl(id.getId(), LLExpression.Type.INT, code);
+            return new LLMethodDecl(id.getId(), LLExpression.Type.INT, num_args, code);
         case VOID:
-            return new LLMethodDecl(id.getId(), LLExpression.Type.VOID, code);
+            return new LLMethodDecl(id.getId(), LLExpression.Type.VOID, num_args, code);
         default:
             throw new RuntimeException("Cannot have a method with mixed type");
         }

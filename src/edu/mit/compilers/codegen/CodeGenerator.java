@@ -40,7 +40,8 @@ public class CodeGenerator implements LLNodeVisitor {
 	 * Constant values.
 	 */
 	private final String RAX = "%rax";
-	
+    private final int OFFSET = 8;
+    private final String RBP = "(%rbp)";	
 	private final String RDI = "%rdi";
 	private final String RSI = "%rsi";
 	private final String RDX = "%rdx";
@@ -125,14 +126,17 @@ public class CodeGenerator implements LLNodeVisitor {
      */
     private void error_array_oob() {
     	// TODO: fill in ASM
+    	array_oob_label.accept(this);
     }
     
     private void error_missing_return() {
     	// TODO: fill in ASM
+    	missing_return_label.accept(this);
     }
     
     private void error_div_by_zero() {
     	// TODO: fill in ASM
+    	div_by_zero_label.accept(this);
     }
     
     /*
@@ -222,6 +226,11 @@ public class CodeGenerator implements LLNodeVisitor {
 		String enter_arg2 = "$0";
 		String enter_line = formatLine(enter_inst, enter_arg1, enter_arg2);
 		writeLine(enter_line);
+	
+		int num_params = node.getNumArgs();
+		for (int i = 0; i < num_params; i++) {
+			loadArgument(i, i+1);
+		}
 		
 		// check the method code.
 		node.getEnv().accept(this);
@@ -240,6 +249,50 @@ public class CodeGenerator implements LLNodeVisitor {
 		
 		tab_level--;
 	}
+	
+    private void loadArgument(int n, int offset) {
+    	long actual_offset = offset*OFFSET;
+    	String addr = "-" + String.valueOf(actual_offset) + RBP;
+    	LLMov mov;
+    	// regs in order: rdi, rsi, rdx, rcx, r8, r9.
+    	switch (n) {
+    	case 0:
+    		mov = new LLMov(RDI, addr);
+    		mov.accept(this);
+    		break;
+    	case 1:
+    		mov = new LLMov(RSI, addr);
+    		mov.accept(this);
+    		break;
+    	case 2:
+    		mov = new LLMov(RDX, addr);
+    		mov.accept(this);
+    		break;
+    	case 3:
+    		mov = new LLMov(RCX, addr);
+    		mov.accept(this);
+    		break;
+    	case 4:
+    		mov = new LLMov(R8, addr);
+    		mov.accept(this);
+    		break;
+    	case 5:
+    		mov = new LLMov(R9, addr);
+    		mov.accept(this);
+    		break;
+    	default: // 16+8*0,1,2,3...
+    		int arg_offset = (n-6)+2;
+    		long actual_arg_offset = arg_offset*OFFSET;
+    		String arg_addr = String.valueOf(actual_arg_offset) + RBP;
+    		
+    		// memory > address > memory.    		
+    		mov = new LLMov(arg_addr, R10);
+    		LLMov mov2 = new LLMov(R10, addr);
+    		mov.accept(this);
+    		mov2.accept(this);
+    		break;
+    	}
+    }
 	
     @Override
     public void visit(LLEnvironment node) {
@@ -860,7 +913,10 @@ public class CodeGenerator implements LLNodeVisitor {
     public void visit(LLReturn node) {
     	LLMov mov = null;
         if (node.hasReturn()) {
+        	// walk the return expr.
         	LLExpression expr = node.getExpr();
+        	expr.accept(this);
+        	
         	String addr = expr.addressOfResult();
         	mov = new LLMov(addr, RAX);
         } else {
