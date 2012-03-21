@@ -1,0 +1,11 @@
+class Program {
+
+    int[5] x;
+    
+    void main() {
+    
+        x[0] = 5;
+    
+    }
+
+}

@@ -128,6 +128,16 @@ public class IrNodeChecker implements IrNodeVisitor {
 		}
 	}
 	
+	public long lookupArraySize(IrIdentifier id) {
+		String name = id.getId();
+		Long size = array_sizes.get(name);
+		if (size == null) {
+			return 0;
+		} else {
+			return size;
+		}
+	}
+	
 	public IrType lookupVarType(IrIdentifier id) {
 		String name = id.getId();
 		Env current_env = getCurrentEnv();
@@ -598,9 +608,12 @@ public class IrNodeChecker implements IrNodeVisitor {
 		
 		// add the counter to the for loop env.
 		for_env.getFieldTable().put(id.getId(), Type.INT);
+		
 		// make sure memory gets allocated for the loop counter.
 		local_count++;
 		for_env.getOffsetTable().put(id.getId(), local_count);
+		// set base pointer offset for for loop counter.
+		node.setBpOffset(local_count);
 		
 		env_stack.push(for_env); // enter the new env.		
 		block.accept(this);      // execute the block.
@@ -833,6 +846,10 @@ public class IrNodeChecker implements IrNodeVisitor {
 			String message = "Array identifier is undefined: " + id_node.getId();
 			System.out.println(errorPosMessage(line, column) + message);
 		}
+		
+		// pass the array size to the node.
+		long size = lookupArraySize(id_node);
+		node.setArraySize(size);
 		
 		IrExpression index_node = node.getIndex();
 		Type index_type = determineType(index_node.getExprType(this));

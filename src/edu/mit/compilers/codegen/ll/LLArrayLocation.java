@@ -9,7 +9,8 @@ public class LLArrayLocation implements LLExpression, LLLocation {
 	private LLExpression index;
     
 	// can be used as a location or an expression.
-	public LLArrayLocation(String label, LLExpression index) {
+	public LLArrayLocation(String label, long size, LLExpression index) {
+		this.size = size;
 		this.label = label;
 		this.type = null;
 		this.temp_location = null;

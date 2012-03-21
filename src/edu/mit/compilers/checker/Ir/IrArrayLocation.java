@@ -14,7 +14,8 @@ public class IrArrayLocation extends IrLocation {
     
 	private IrIdentifier id;
 	private IrExpression index;
-
+	private long array_size = 0;
+	
 	public IrIdentifier getId() {
 		return id;
 	}
@@ -32,6 +33,10 @@ public class IrArrayLocation extends IrLocation {
 		index.accept(v);
 	}
 	
+	public void setArraySize(long size) {
+		array_size = size;
+	}
+	
 	public String toString() {
         return id.toString() + "[" + index.toString() + "]";
     }
@@ -46,7 +51,7 @@ public class IrArrayLocation extends IrLocation {
     }
     @Override
     public LLNode getllRep(LLLabel breakPoint, LLLabel continuePoint) {
-        return (LLNode)(new LLArrayLocation(id.getId(), (LLExpression)index.getllRep(null, null)));
+        return (LLNode)(new LLArrayLocation(id.getId(), array_size, (LLExpression)index.getllRep(null, null)));
     }
 
 }

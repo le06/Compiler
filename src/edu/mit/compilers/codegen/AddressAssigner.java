@@ -82,12 +82,12 @@ public class AddressAssigner implements LLNodeVisitor {
     
     @Override
     public void visit(LLGlobalDecl node) {
-        // TODO
+        // Do nothing
     }
 
     @Override
     public void visit(LLArrayDecl node) {
-    	// TODO
+    	// Do nothing
     }
 
     @Override
@@ -153,7 +153,8 @@ public class AddressAssigner implements LLNodeVisitor {
         	String address = generateAddress(offset);
         	node.setLocation(address);
         } else { // global
-        	// TODO
+        	String address = "." + node.getLabel();
+        	node.setLocation(address);
         }
         node.setAddress(getNextAddress());
     }
@@ -163,7 +164,8 @@ public class AddressAssigner implements LLNodeVisitor {
     	LLExpression index = node.getIndexExpr();
     	index.accept(this);
     	
-    	// TODO
+    	String location = "." + node.getLabel();
+    	node.setLocation(location);
         node.setAddress(getNextAddress());
     }
 

@@ -321,7 +321,7 @@ public class CodeGenerator implements LLNodeVisitor {
     		LLMov mov_index = new LLMov(index_val, R10);	// move offset to register.
     		mov_index.accept(this);							// write this inType ASM.
     		
-    		String mul_inst = "mul"; // change index into address offset.
+    		String mul_inst = "imul"; // change index into address offset.
     		String mul_val = "$8";	 // quadword size.
     		String mul_line = formatLine(mul_inst, mul_val, R10);
     		writeLine(mul_line);	 // write this in ASM.
@@ -504,8 +504,8 @@ public class CodeGenerator implements LLNodeVisitor {
     	}
     	
     	if (is_expr) {
-    		String mul_inst = "mul"; // change index into address offset.
-    		String mul_val = "$8";	 // quadword size.
+    		String mul_inst = "imul";	// change index into address offset.
+    		String mul_val = "$8";	    // quadword size.
     		String mul_line = formatLine(mul_inst, mul_val, R10);
     		writeLine(mul_line);	 // write this in ASM.
     		
@@ -809,7 +809,7 @@ public class CodeGenerator implements LLNodeVisitor {
         
         // negate only the 1st bit.
         String inst = "xor";
-        String inst_line = formatLine(inst, R10, "$1");
+        String inst_line = formatLine(inst, "$1", R10);
         writeLine(inst_line);
         
         String result_addr = node.addressOfResult();
