@@ -40,7 +40,6 @@ public class IrBinopExpr extends Ir implements IrExpression {
 		IrType lhs_type = lhs.getExprType(c);
 		IrType rhs_type = rhs.getExprType(c);
 		
-
 		if (lhs_type.myType == rhs_type.myType) {
 			
 			switch (operator) {
@@ -51,22 +50,24 @@ public class IrBinopExpr extends Ir implements IrExpression {
 			case DIV:
 			case MOD:
 				type = new IrType(IrType.Type.INT);
+				break;
 			// rel_op
 			case LT:
 			case GT:
 			case LEQ:
 			case GEQ:
 			    type = new IrType(IrType.Type.BOOLEAN);
+			    break;
 			case EQ:
 			case NEQ:
 			    type = new IrType(IrType.Type.BOOLEAN);
+			    break;
 			case AND:
 			case OR:
 			    type = new IrType(IrType.Type.BOOLEAN);
+			    break;
 			}
 			
-			
-			type = new IrType(lhs_type.myType);
 		} else {
 		    type = new IrType(IrType.Type.MIXED);
 		}

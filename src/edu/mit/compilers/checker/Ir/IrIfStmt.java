@@ -56,22 +56,33 @@ public class IrIfStmt extends IrStatement {
         LLLabel true_label = new LLLabel("true");
         LLLabel if_end = new LLLabel("endif");
         
-        
-        
         LLExpression eval_cond_env = (LLExpression)condition.getllRep(null, null);
         LLEnvironment true_env = (LLEnvironment)true_block.getllRep(breakPoint, continuePoint);
-        LLEnvironment false_env = (LLEnvironment)false_block.getllRep(breakPoint, continuePoint);
         
-        LLJump jump_true = new LLJump(eval_cond_env, true, true_label);
-        LLJump end_false = new LLJump(LLJump.JumpType.UNCONDITIONAL, if_end);
-        
-        //currentEnvironment.addNode(eval_cond_env);
-        currentEnvironment.addNode(jump_true);
-        currentEnvironment.addNode(false_env);
-        currentEnvironment.addNode(end_false);
-        currentEnvironment.addNode(true_label);
-        currentEnvironment.addNode(true_env);
-        currentEnvironment.addNode(if_end);
+        if (false_block != null) {
+        	LLEnvironment false_env = (LLEnvironment)false_block.getllRep(breakPoint, continuePoint);
+        	
+            LLJump jump_true = new LLJump(eval_cond_env, true, true_label);
+            LLJump end_false = new LLJump(LLJump.JumpType.UNCONDITIONAL, if_end);
+        	
+            //currentEnvironment.addNode(eval_cond_env);
+            currentEnvironment.addNode(jump_true);
+            currentEnvironment.addNode(false_env);
+            currentEnvironment.addNode(end_false);
+            currentEnvironment.addNode(true_label);
+            currentEnvironment.addNode(true_env);
+            currentEnvironment.addNode(if_end);
+        	
+        } else {
+        	// i.e. SKIP PAST THE IF if the cond is false.
+        	LLJump jump_false = new LLJump(eval_cond_env, false, if_end);
+        	
+            //currentEnvironment.addNode(eval_cond_env);
+            currentEnvironment.addNode(jump_false);
+            currentEnvironment.addNode(true_label); // not strictly necessary.
+            currentEnvironment.addNode(true_env);
+            currentEnvironment.addNode(if_end);
+        }
         
         return currentEnvironment;
     }
