@@ -853,7 +853,7 @@ public class IrNodeChecker implements IrNodeVisitor {
 		
 		IrType type_node = node.getExprType(this);
 		Type type = determineType(type_node);
-
+		
 		if (type == Type.MIXED) {
 			error_flag = true;
 			int line = lhs.getLineNumber();
@@ -900,7 +900,7 @@ public class IrNodeChecker implements IrNodeVisitor {
 					int column = lhs.getColumnNumber();
 					String message = "Expression operands have invalid types";
 					System.out.println(errorPosMessage(line, column) + message);
-				} else {
+				} else if (lhs_type != rhs_type) {
 					error_flag = true;
 					int line = lhs.getLineNumber();
 					int column = lhs.getColumnNumber();

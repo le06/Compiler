@@ -40,7 +40,7 @@ public class DecafUnoptimizedCodeGenerator {
             return;
         }
         HashMap<String, Integer> localCounts = checker.getLocalCounts();
-        
+
         ir = checker.getIr();                   // Get Ir
         file = (LLFile)ir.getllRep(null, null); // Convert to LL
         lNamer.name(file);                      // Make labels unique
