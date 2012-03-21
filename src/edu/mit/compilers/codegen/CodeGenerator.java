@@ -428,7 +428,7 @@ public class CodeGenerator implements LLNodeVisitor {
 		// check lower bounds.
     	LLMov mov_lower_bound = new LLMov("$0", R11);
     	mov_lower_bound.accept(this);
-    	cmp_line = formatLine(cmp_inst, R10, R11);
+    	cmp_line = formatLine(cmp_inst, R11, R10);		// dest (cmp) src.
     	writeLine(cmp_line);
     	LLJump jmp_if_less = new LLJump(LLJump.JumpType.LT,
     									array_oob_label);
@@ -439,7 +439,7 @@ public class CodeGenerator implements LLNodeVisitor {
     	String upper_bound_operand = "$" + String.valueOf(upper_bound);
     	LLMov mov_upper_bound = new LLMov(upper_bound_operand, R11);
     	mov_upper_bound.accept(this);
-    	cmp_line = formatLine(cmp_inst, R10, R11);
+    	cmp_line = formatLine(cmp_inst, R11, R10);
     	writeLine(cmp_line);
     	LLJump jmp_if_more = new LLJump(LLJump.JumpType.GT,
     									array_oob_label);
@@ -520,7 +520,7 @@ public class CodeGenerator implements LLNodeVisitor {
     		inst_line = formatLine(inst, R11, R10);
     		writeLine(inst_line);
     		break;
-    	case DIV:
+    	case DIV: // TODO: fix division.
     		// are we dividing by zero? check the divisor.
     		mov_divisor = new LLMov(right.addressOfResult(), R10);
     		mov_zero = new LLMov("$0", R11);
@@ -528,7 +528,7 @@ public class CodeGenerator implements LLNodeVisitor {
     		mov_zero.accept(this);
     		
         	inst = "cmp";
-        	inst_line = formatLine(inst, R10, R11);
+        	inst_line = formatLine(inst, R11, R10); // dest (cmp) src.
         	writeLine(inst_line);
         	
         	div_error = new LLJump(LLJump.JumpType.EQUAL, div_by_zero_label);
@@ -548,7 +548,7 @@ public class CodeGenerator implements LLNodeVisitor {
     		LLMov mov_quotient = new LLMov(RAX, R10);
     		mov_quotient.accept(this);
     		break;
-    	case MOD:
+    	case MOD: // TODO: fix division.
     		// are we dividing by zero? check the divisor.
     		mov_divisor = new LLMov(right.addressOfResult(), R10);
     		mov_zero = new LLMov("$0", R11);
@@ -584,7 +584,7 @@ public class CodeGenerator implements LLNodeVisitor {
         	mov_right.accept(this);
         	
         	inst = "cmp";
-        	inst_line = formatLine(inst, R10, R11);
+        	inst_line = formatLine(inst, R11, R10);
         	writeLine(inst_line);
         	
         	mov_false = new LLMov("$0", R10);
@@ -603,7 +603,7 @@ public class CodeGenerator implements LLNodeVisitor {
         	mov_right.accept(this);
         	
         	inst = "cmp";
-        	inst_line = formatLine(inst, R10, R11);
+        	inst_line = formatLine(inst, R11, R10);
         	writeLine(inst_line);
         	
         	mov_false = new LLMov("$0", R10);
@@ -622,7 +622,7 @@ public class CodeGenerator implements LLNodeVisitor {
         	mov_right.accept(this);
         	
         	inst = "cmp";
-        	inst_line = formatLine(inst, R10, R11);
+        	inst_line = formatLine(inst, R11, R10);
         	writeLine(inst_line);
         	
         	mov_false = new LLMov("$0", R10);
@@ -630,7 +630,7 @@ public class CodeGenerator implements LLNodeVisitor {
         	mov_false.accept(this);
         	mov_true.accept(this);
         	
-        	inst = "cmovg";
+        	inst = "cmovge";
         	inst_line = formatLine(inst, R11, R10);
         	writeLine(inst_line);
         	break;
@@ -641,7 +641,7 @@ public class CodeGenerator implements LLNodeVisitor {
         	mov_right.accept(this);
         	
         	inst = "cmp";
-        	inst_line = formatLine(inst, R10, R11);
+        	inst_line = formatLine(inst, R11, R10);
         	writeLine(inst_line);
         	
         	mov_false = new LLMov("$0", R10);
@@ -649,7 +649,7 @@ public class CodeGenerator implements LLNodeVisitor {
         	mov_false.accept(this);
         	mov_true.accept(this);
         	
-        	inst = "cmovge";
+        	inst = "cmovg";
         	inst_line = formatLine(inst, R11, R10);
         	writeLine(inst_line);
         	break;
@@ -662,8 +662,9 @@ public class CodeGenerator implements LLNodeVisitor {
         	
         	// compare operands.
         	inst = "and";
-        	inst_line = formatLine(inst, R10, R11);
+        	inst_line = formatLine(inst, R11, R10); // result gets stored into dest.
         	writeLine(inst_line);
+        	break;
     	case OR:
         	mov_left = new LLMov(left.addressOfResult(), R10);
         	mov_right = new LLMov(right.addressOfResult(), R11);
@@ -672,8 +673,9 @@ public class CodeGenerator implements LLNodeVisitor {
         	
         	// compare operands.
         	inst = "or";
-        	inst_line = formatLine(inst, R10, R11);
+        	inst_line = formatLine(inst, R11, R10); // result gets stored into dest.
         	writeLine(inst_line);
+        	break;
 		// eq ops.
     	case EQ:
         	mov_left = new LLMov(left.addressOfResult(), R10);
@@ -682,7 +684,7 @@ public class CodeGenerator implements LLNodeVisitor {
         	mov_right.accept(this);
         	
         	inst = "cmp";
-        	inst_line = formatLine(inst, R10, R11);
+        	inst_line = formatLine(inst, R11, R10);
         	writeLine(inst_line);
         	
         	mov_false = new LLMov("$0", R10);
@@ -693,6 +695,7 @@ public class CodeGenerator implements LLNodeVisitor {
         	inst = "cmove";
         	inst_line = formatLine(inst, R11, R10);
         	writeLine(inst_line);
+        	break;
     	case NEQ:
         	mov_left = new LLMov(left.addressOfResult(), R10);
         	mov_right = new LLMov(right.addressOfResult(), R11);
@@ -700,7 +703,7 @@ public class CodeGenerator implements LLNodeVisitor {
         	mov_right.accept(this);
         	
         	inst = "cmp";
-        	inst_line = formatLine(inst, R10, R11);
+        	inst_line = formatLine(inst, R11, R10);
         	writeLine(inst_line);
         	
         	mov_false = new LLMov("$0", R10);
@@ -711,6 +714,7 @@ public class CodeGenerator implements LLNodeVisitor {
         	inst = "cmovne";
         	inst_line = formatLine(inst, R11, R10);
         	writeLine(inst_line);
+        	break;
     	}
     	
     	String addr = node.addressOfResult();
@@ -809,7 +813,9 @@ public class CodeGenerator implements LLNodeVisitor {
         	}    
     		
     	} else { // else, eval the expr and check its truth value
+    		cond.accept(this);
     		String expr_addr = cond.addressOfResult();
+    		
     		// load value of cond into reg
     		LLMov mov_cond = new LLMov(expr_addr, R10);
     		LLMov mov_true = new LLMov("$1", R11);
@@ -820,7 +826,7 @@ public class CodeGenerator implements LLNodeVisitor {
     		
     		// check if true.
         	String inst = "cmp";
-        	String inst_line = formatLine(inst, R10, R11);
+        	String inst_line = formatLine(inst, R11, R10);
         	writeLine(inst_line);
         	
         	LLJump jmp;
