@@ -657,6 +657,10 @@ public class IrNodeChecker implements IrNodeVisitor {
 			
 			return;
 		}
+		
+		// method is defined; set the type of the return expr, if appropriate.
+		node.getExprType(this);
+		
 		IrMethodDecl called_method = method_table.get(method_name.getId());
 		ArrayList<IrParameterDecl> params = called_method.getParams();
 		
@@ -698,7 +702,6 @@ public class IrNodeChecker implements IrNodeVisitor {
 			String message = "Void methods cannot be part of int or boolean expressions";
 			System.out.println(errorPosMessage(line, column) + message);
 		}
-		
 	}
 
 	@Override
