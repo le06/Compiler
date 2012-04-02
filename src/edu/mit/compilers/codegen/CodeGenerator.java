@@ -543,7 +543,8 @@ public class CodeGenerator implements LLNodeVisitor {
     	
     	LLMov mov_left, mov_right;
         
-    	LLMov mov_divisor, mov_zero;
+    	// mov instructions needed specifically for division.
+    	LLMov mov_divisor, mov_zero, mov_dividend, mov_highbits;
     	LLJump div_error;
     	
     	IrBinOperator op = node.getOp();
@@ -581,7 +582,7 @@ public class CodeGenerator implements LLNodeVisitor {
     		inst_line = formatLine(inst, R11, R10);
     		writeLine(inst_line);
     		break;
-    	case DIV: // TODO: fix division.
+    	case DIV:
     		// are we dividing by zero? check the divisor.
     		mov_divisor = new LLMov(right.addressOfResult(), R10);
     		mov_zero = new LLMov("$0", R11);
@@ -595,21 +596,37 @@ public class CodeGenerator implements LLNodeVisitor {
         	div_error = new LLJump(LLJump.JumpType.EQUAL, div_by_zero_label);
         	div_error.accept(this);
     		
-    		// do the actual division.
-        	mov_left = new LLMov(left.addressOfResult(), RDX);
-        	mov_right = new LLMov(right.addressOfResult(), RAX);
-        	mov_left.accept(this);
-        	mov_right.accept(this);
+    		// move the dividend.
+        	mov_dividend = new LLMov(left.addressOfResult(), RAX);
+        	mov_dividend.accept(this);
         	
+        	// make sure the higher-order 64 bits are filled correctly!
+        	inst = "cmp";
+        	inst_line = formatLine(inst, "$0", RAX); // dest (cmp) src.
+        	writeLine(inst_line);
+        	
+        	// if non-negative, the higher-order bits should be zeroed.
+        	mov_highbits = new LLMov("$0", RDX);
+        	mov_highbits.accept(this);
+
+        	// if negative, need to fill with 1-bits ("$-1") instead!
+        	mov_highbits = new LLMov("$-1", R11);
+        	mov_highbits.accept(this);
+        	inst = "cmovl";
+        	inst_line = formatLine(inst, R11, RDX);
+        	writeLine(inst_line);
+        	
+        	// now perform the division.
+        	// note that the divisor is already stored in %r10!
     		inst = "idiv";
-    		inst_line = formatLine(inst, RDX, RAX);
+    		inst_line = formatLine(inst, R10);
     		writeLine(inst_line);
     		
     		// move quotient from %rax to result register.
     		LLMov mov_quotient = new LLMov(RAX, R10);
     		mov_quotient.accept(this);
     		break;
-    	case MOD: // TODO: fix division.
+    	case MOD:
     		// are we dividing by zero? check the divisor.
     		mov_divisor = new LLMov(right.addressOfResult(), R10);
     		mov_zero = new LLMov("$0", R11);
@@ -617,23 +634,39 @@ public class CodeGenerator implements LLNodeVisitor {
     		mov_zero.accept(this);
     		
         	inst = "cmp";
-        	inst_line = formatLine(inst, R10, R11);
+        	inst_line = formatLine(inst, R11, R10); // dest (cmp) src.
         	writeLine(inst_line);
         	
         	div_error = new LLJump(LLJump.JumpType.EQUAL, div_by_zero_label);
         	div_error.accept(this);
     		
-    		// do the actual division.
-        	mov_left = new LLMov(left.addressOfResult(), RDX);
-        	mov_right = new LLMov(right.addressOfResult(), RAX);
-        	mov_left.accept(this);
-        	mov_right.accept(this);
+    		// move the dividend.
+        	mov_dividend = new LLMov(left.addressOfResult(), RAX);
+        	mov_dividend.accept(this);
         	
+        	// make sure the higher-order 64 bits are filled correctly!
+        	inst = "cmp";
+        	inst_line = formatLine(inst, "$0", RAX); // dest (cmp) src.
+        	writeLine(inst_line);
+        	
+        	// if non-negative, the higher-order bits should be zeroed.
+        	mov_highbits = new LLMov("$0", RDX);
+        	mov_highbits.accept(this);
+
+        	// if negative, need to fill with 1-bits ("$-1") instead!
+        	mov_highbits = new LLMov("$-1", R11);
+        	mov_highbits.accept(this);
+        	inst = "cmovl";
+        	inst_line = formatLine(inst, R11, RDX);
+        	writeLine(inst_line);
+        	
+        	// now perform the division.
+        	// note that the divisor is already stored in %r10!
     		inst = "idiv";
-    		inst_line = formatLine(inst, RDX, RAX);
+    		inst_line = formatLine(inst, R10);
     		writeLine(inst_line);
     		
-    		// move remainder from %rax to result register.
+    		// move remainder from %rdx to result register.
     		LLMov mov_remainder = new LLMov(RDX, R10);
     		mov_remainder.accept(this);
     		break;
