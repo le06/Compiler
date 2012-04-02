@@ -30,7 +30,6 @@ public class IrArrayLocation extends IrLocation {
 	@Override
 	public void accept(IrNodeVisitor v) {
 		v.visit(this);
-		index.accept(v);
 	}
 	
 	public void setArraySize(long size) {

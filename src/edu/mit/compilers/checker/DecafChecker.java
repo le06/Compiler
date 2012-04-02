@@ -16,6 +16,7 @@ public class DecafChecker {
     private boolean debug;
     private Ir ir;
     
+    // maps the number of locals used in each method.
     private HashMap<String, Integer> local_counts;
     
     public DecafChecker (DecafParser decaf_parser) {

@@ -31,12 +31,7 @@ public class IrBlock extends Ir {
 
 	@Override
 	public void accept(IrNodeVisitor v) {
-		for (IrVarDecl d : var_decls) {
-			d.accept(v);
-		}
-		for (IrStatement s : statements) {
-			s.accept(v);
-		}
+		v.visit(this);
 	}
 	
 	public String toString (int s) {

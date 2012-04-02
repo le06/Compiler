@@ -27,9 +27,6 @@ public class IrClassDecl extends Ir {
 
 	@Override
 	public void accept(IrNodeVisitor v) {
-		for (IrMemberDecl m : members) {
-			m.accept(v);
-		}
 		v.visit(this);
 	}
 	

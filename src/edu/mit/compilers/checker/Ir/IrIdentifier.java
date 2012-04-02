@@ -27,6 +27,9 @@ public class IrIdentifier extends Ir implements IrExpression {
 		v.visit(this);
 	}
 
+	// offset == 0 implies global.
+	// offset > 0 implies local.
+	// offset == -1 is an error.
 	public void setBpOffset(int offset) {
 		bp_offset = offset;
 	}

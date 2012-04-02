@@ -15,11 +15,14 @@ public class IrNodeChecker implements IrNodeVisitor {
 	}
 
 	protected class Env {
+		// the set of variables defined in this scope.
 		private HashMap<String, Type> field_table;
+		// table of offsets from the base pointer, for local variables.
 		private HashMap<String, Integer> bp_offset_table;
+		// the parent environment. if previous_env is null, this env is the global scope.
 		private Env previous_env;
+		// the global scope, within a method, a for/while loop, etc...
 		private Ir current_body;
-		// i.e. the global scope, within a method, a for/while loop, etc...
 		
 		public Env() {
 			field_table = new HashMap<String, Type>();
@@ -52,34 +55,6 @@ public class IrNodeChecker implements IrNodeVisitor {
 		}
 	}
 
-	/*
-	protected class MethodSignature {
-
-		private final ArrayList<Type> param_types;
-		private final ArrayList<String> param_ids;
-		private final Type return_type;
-
-		public MethodSignature(ArrayList<Type> param_types,
-				ArrayList<String> param_ids, Type return_type) {
-			this.param_types = param_types;
-			this.param_ids = param_ids;
-			this.return_type = return_type;
-		}
-
-		public ArrayList<Type> getParamTypes() {
-			return param_types;
-		}
-
-		public ArrayList<String> getParamIds() {
-			return param_ids;
-		}
-
-		public Type getReturnType() {
-			return return_type;
-		}
-	}
-	*/
-
 	private boolean error_flag = false;
 	
 	public boolean getError() { return error_flag; }
@@ -91,12 +66,12 @@ public class IrNodeChecker implements IrNodeVisitor {
 
 	private Type current_type = Type.VOID;
 	private boolean found_main_method = false;
-	private int currently_evaluating_expr = 0; // true if non-zero.
+	private int currently_evaluating_expr = 0; // "true" if non-zero. like a semaphore.
 	
 	// necessary for allocating locals during the codegen phase!
 	private int local_count = 0;
 
-	// count number of locals per method.
+	// count number of locals used in each method.
 	private HashMap<String, Integer> locals_in_method =
 		new HashMap<String, Integer>();
 	
@@ -114,8 +89,13 @@ public class IrNodeChecker implements IrNodeVisitor {
 		array_sizes = new HashMap<String, Long>();
 	}
 	
-	// null type means a variable or array was declared incorrectly,
-	// or simply wasn't declared.
+	/*
+	 * Methods for looking up environment variables, given an identifier.
+	 * 
+	 * A return value of null implies a variable or array was declared
+	 * incorrectly or wasn't declared in the first place.
+	 */
+	
 	public IrType lookupArrayType(IrIdentifier id) {
 		String name = id.getId();
 		Type type = array_types.get(name);
@@ -143,6 +123,7 @@ public class IrNodeChecker implements IrNodeVisitor {
 		Env current_env = getCurrentEnv();
 		while (current_env != null) {
 			Type type = current_env.getFieldTable().get(name);
+			// if the variable was declared properly...
 			if (type != null && type != Type.VOID) {				
 				if (type == Type.INT) {
 					return new IrType(IrType.Type.INT);
@@ -152,10 +133,10 @@ public class IrNodeChecker implements IrNodeVisitor {
 			}
 			current_env = current_env.getPreviousEnv();
 		}
-		return null; // var undefined.
+		return null; // var is undefined.
 	}
 
-	public int lookupOffset(String id) {
+	public int lookupBPOffset(String id) {
 		Env current_env = getCurrentEnv();
 		while (current_env != null) {
 			Type type = current_env.getFieldTable().get(id);
@@ -167,10 +148,13 @@ public class IrNodeChecker implements IrNodeVisitor {
 				if (offset != null) {
 					return offset;
 				}
+				else {
+					return 0; // var is global.
+				}
 			}
 			current_env = current_env.getPreviousEnv();
 		}
-		return 0; // var undefined.
+		return -1; // var is undefined. handle this case appropriately.
 	}
 	
 	public IrType lookupMethodType(IrIdentifier id) {
@@ -178,7 +162,7 @@ public class IrNodeChecker implements IrNodeVisitor {
 		IrMethodDecl signature = method_table.get(name);
 		
 		if (signature == null) {
-			return null; // method undefined.
+			return null; // method is undefined.
 		}
 		
 		Type return_type = determineType(signature.getReturnType());
@@ -218,6 +202,10 @@ public class IrNodeChecker implements IrNodeVisitor {
 	 */
 
 	public void visit(IrClassDecl node) {
+		for (IrMemberDecl m : node.getMembers()) {
+			m.accept(this);
+		}
+		
 		if (!found_main_method) {
 			error_flag = true;
 			int line = node.getLineNumber();
@@ -243,6 +231,8 @@ public class IrNodeChecker implements IrNodeVisitor {
 		for (IrGlobalDecl g : globals) {
 			g.accept(this);
 		}
+
+		current_type = null;
 	}
 	
 	// note that the parser rejects any fields that are declared after
@@ -347,10 +337,12 @@ public class IrNodeChecker implements IrNodeVisitor {
 				}
 			}
 		}
-		
 		// check contents of method no matter what, assuming that main()
 		// hasn't been found yet.
+		
+		// create the local scope.
 		Env method_env = new Env(getCurrentEnv(), node);
+		
 		// don't forget to add the formal parameters to the symbol table,
 		// and also check their consistency.
 		ArrayList<IrParameterDecl> params = node.getParams();
@@ -368,7 +360,7 @@ public class IrNodeChecker implements IrNodeVisitor {
 				method_env.getFieldTable().put(name, type);
 				
 				// params are treated as locals.
-				// thus, these need to be allocated during codegen.
+				// thus, these need to be allocated during codegen phase.
 				local_count++;
 				HashMap<String, Integer> offset_table = method_env.
 														getOffsetTable();
@@ -378,10 +370,12 @@ public class IrNodeChecker implements IrNodeVisitor {
 		}
 		
 		env_stack.push(method_env); // new env for each method.
-		node.getBlock().accept(this);
+		node.getBlock().accept(this); // check the actual code in the env.
 		env_stack.pop();	// on exit, destroy the env.
 		
 		// record number of locals in this method.
+		// this code doesn't check for duplicate method decls, but if that
+		// occurs, can't make it past semantic phase
 		locals_in_method.put(id, local_count);
 	}
 	
@@ -401,11 +395,12 @@ public class IrNodeChecker implements IrNodeVisitor {
 			String message = "Invalid type for variable declaration: void";
 			System.out.println(errorPosMessage(line, column) + message);
 		}
-
+		
 		ArrayList<IrLocalDecl> locals = node.getLocals();
 		for (IrLocalDecl l : locals) {
 			l.accept(this);
 		}
+
 	}
 	
 	@Override
@@ -415,7 +410,7 @@ public class IrNodeChecker implements IrNodeVisitor {
 		String id = id_node.getId();
 		HashMap<String, Type> field_table = getCurrentEnv().getFieldTable();
 		
-		// i.e. if the id is declared twice IN THE SAME SCOPE.
+		// is the id is declared twice in the same scope?
 		// note that since method calls and decls can be distinguished,
 		// method ids are never shadowed!
 		if (field_table.containsKey(id)) {
@@ -435,11 +430,21 @@ public class IrNodeChecker implements IrNodeVisitor {
 			offset_table.put(id, local_count);
 		}
 	}
-
+	
+	@Override
+	public void visit(IrBlock node) {
+		for (IrVarDecl d : node.getVarDecls()) {
+			d.accept(this);
+		}
+		for (IrStatement s : node.getStatements()) {
+			s.accept(this);
+		}
+	}
+	
 	@Override
 	public void visit(IrBlockStmt node) {
 		IrBlock block = node.getBlock();
-		// create a new scope...
+		// create a nested local scope.
 		Env method_env = new Env(getCurrentEnv(), node);
 		env_stack.push(method_env); // enter the new env.
 		block.accept(this);	// execute the block.
@@ -451,22 +456,19 @@ public class IrNodeChecker implements IrNodeVisitor {
 		// recursively check through the environments to see if the stmt is
 		// contained in the body of a for or while stmt.
 		Env env = getCurrentEnv();
-		Ir current_body = env.getCurrentBody();
+		Ir current_body;
 		boolean legal_stmt = false;
 		
-		while (env != null && !(current_body instanceof IrMethodDecl)) {
+		while (env != null) {
+			current_body = env.getCurrentBody();
 			if ((current_body instanceof IrForStmt) ||
 				(current_body instanceof IrWhileStmt)) {
 				legal_stmt = true;
 				break;
 			}
 			env = env.getPreviousEnv();
-			current_body = env.getCurrentBody();
 		}
-		if (env == null) { // sanity check. this should never be true!
-			// TODO: complain hard!
-			error_flag = true;
-		}
+
 		if (!legal_stmt) {
 			error_flag = true;
 			int line = node.getLineNumber();
@@ -481,21 +483,17 @@ public class IrNodeChecker implements IrNodeVisitor {
 		// recursively check through the environments to see if the stmt is
 		// contained in the body of a for or while stmt.
 		Env env = getCurrentEnv();
-		Ir current_body = env.getCurrentBody();
+		Ir current_body;
 		boolean legal_stmt = false;
 		
-		while (env != null && !(current_body instanceof IrMethodDecl)) {			
+		while (env != null) {
+			current_body = env.getCurrentBody();
 			if ((current_body instanceof IrForStmt) ||
 				(current_body instanceof IrWhileStmt)) {
 				legal_stmt = true;
 				break;
 			}
 			env = env.getPreviousEnv();
-			current_body = env.getCurrentBody();
-		}
-		if (env == null) { // sanity check. this should never be true!
-			// TODO: complain hard!
-			error_flag = true;
 		}
 		
 		if (!legal_stmt) {
@@ -516,8 +514,11 @@ public class IrNodeChecker implements IrNodeVisitor {
 			current_body = env.getCurrentBody();
 		}
 		if (env == null) { // sanity check. this should never be true!
-			// TODO: complain hard!
 			error_flag = true;
+			int line = node.getLineNumber();
+			int column = node.getColumnNumber();
+			String message = "Return statement must be contained in the block of a method";
+			System.out.println(errorPosMessage(line, column) + message);
 		}
 
 		IrExpression return_expr = node.getReturnExpr();
@@ -606,7 +607,7 @@ public class IrNodeChecker implements IrNodeVisitor {
 		IrIdentifier id = node.getCounter();
 		Env for_env = new Env(getCurrentEnv(), node);
 		
-		// add the counter to the for loop env.
+		// add the counter to the for-loop env.
 		for_env.getFieldTable().put(id.getId(), Type.INT);
 		
 		// make sure memory gets allocated for the loop counter.
@@ -623,8 +624,7 @@ public class IrNodeChecker implements IrNodeVisitor {
 	@Override
 	public void visit(IrIfStmt node) {
 		IrExpression condition = node.getCondition();
-		// if condition well-formed?
-		condition.accept(this);
+		condition.accept(this); // is if-condition well-formed?
 		IrType type_node = condition.getExprType(this);
 		Type type = determineType(type_node);
 		if (type != Type.BOOLEAN) {
@@ -682,7 +682,7 @@ public class IrNodeChecker implements IrNodeVisitor {
 			arg.accept(this);
 		}
 		
-		// if the signatures don't match...
+		// check if the method signatures match.
 		if (args.size() != params.size()) {
 			error_flag = true;
 			int line = args.get(0).getLineNumber();
@@ -698,7 +698,7 @@ public class IrNodeChecker implements IrNodeVisitor {
 					error_flag = true;
 					int line = param_type.getLineNumber();
 					int column = param_type.getColumnNumber();
-					String message = "Mismatching types of arguments";
+					String message = "Mismatching argument type";
 					System.out.println(errorPosMessage(line, column) + message);
 
 					break;
@@ -706,36 +706,37 @@ public class IrNodeChecker implements IrNodeVisitor {
 			}
 		}
 		
-		// if the method call is part of an expression...
+		// if the method call is part of an expression, check return type
 		Type return_type = determineType(called_method.getReturnType());
 		if (currently_evaluating_expr > 0 && return_type == Type.VOID) {
 			error_flag = true;
 			int line = node.getMethodName().getLineNumber();
 			int column = node.getMethodName().getColumnNumber();
-			String message = "Void methods cannot be part of int or boolean expressions";
+			String message = "Void methods cannot be used in int or boolean expressions";
 			System.out.println(errorPosMessage(line, column) + message);
 		}
 	}
 
 	@Override
 	public void visit(IrCalloutStmt node) {
-		currently_evaluating_expr++;
 		// check that the args are well-formed.
+		// mismatched signatures are found during run-time.
 		for (IrCalloutArg arg : node.getArgs()) {
 			arg.accept(this);
 		}
-		currently_evaluating_expr--;
 	}
 
 	@Override
-	public void visit(IrAssignStmt node) {
-		currently_evaluating_expr++;
-		
+	public void visit(IrAssignStmt node) {		
 		IrLocation loc = node.getLeft();
 		IrExpression expr = node.getRight();
+		
 		// check that loc and expr are well-formed.
 		loc.accept(this);
+		currently_evaluating_expr++;
 		expr.accept(this);
+		currently_evaluating_expr--;
+		
 		// check that the types match up.
 		Type loc_type = determineType(loc.getExprType(this));
 		Type expr_type = determineType(expr.getExprType(this));
@@ -754,19 +755,19 @@ public class IrNodeChecker implements IrNodeVisitor {
 			String message = "Assignment operands have mismatching types";
 			System.out.println(errorPosMessage(line, column) + message);
 		}
-		
-		currently_evaluating_expr--;
 	}
 
 	@Override
 	public void visit(IrPlusAssignStmt node) {
-		currently_evaluating_expr++;
-
 		IrLocation loc = node.getLeft();
 		IrExpression expr = node.getRight();
+		
 		// check that loc and expr are well-formed.
 		loc.accept(this);
+		currently_evaluating_expr++;
 		expr.accept(this);
+		currently_evaluating_expr--;
+		
 		// check that the types match up.
 		Type loc_type = determineType(loc.getExprType(this));
 		Type expr_type = determineType(expr.getExprType(this));
@@ -785,19 +786,19 @@ public class IrNodeChecker implements IrNodeVisitor {
 			String message = "RHS of plus assignment must be int type";
 			System.out.println(errorPosMessage(line, column) + message);
 		}
-		
-		currently_evaluating_expr--;
 	}
 
 	@Override
 	public void visit(IrMinusAssignStmt node) {
-		currently_evaluating_expr++;
-
 		IrLocation loc = node.getLeft();
 		IrExpression expr = node.getRight();
+		
 		// check that loc and expr are well-formed.
 		loc.accept(this);
+		currently_evaluating_expr++;
 		expr.accept(this);
+		currently_evaluating_expr--;
+		
 		// check that the types match up.
 		Type loc_type = determineType(loc.getExprType(this));
 		Type expr_type = determineType(expr.getExprType(this));
@@ -816,8 +817,6 @@ public class IrNodeChecker implements IrNodeVisitor {
 			String message = "RHS of minus assignment must be int type";
 			System.out.println(errorPosMessage(line, column) + message);
 		}
-		
-		currently_evaluating_expr--;
 	}
 
 	@Override
@@ -831,13 +830,16 @@ public class IrNodeChecker implements IrNodeVisitor {
 			System.out.println(errorPosMessage(line, column) + message);
 		} else {
 			// var is defined, set node's bp offset!
-			int offset = lookupOffset(id_node.getId());
+			int offset = lookupBPOffset(id_node.getId());
 			node.setBpOffset(offset);
 		}
 	}
 
 	@Override
 	public void visit(IrArrayLocation node) {
+		// check that index expr is well-formed.
+		node.getIndex().accept(this);
+		
 		IrIdentifier id_node = node.getId();
 		if (!arrayIsDefined(id_node.getId())) {
 			error_flag = true;
@@ -851,6 +853,7 @@ public class IrNodeChecker implements IrNodeVisitor {
 		long size = lookupArraySize(id_node);
 		node.setArraySize(size);
 		
+		// array type checking.
 		IrExpression index_node = node.getIndex();
 		Type index_type = determineType(index_node.getExprType(this));
 
@@ -872,9 +875,9 @@ public class IrNodeChecker implements IrNodeVisitor {
 	@Override
 	public void visit(IrBinopExpr node) {
 		currently_evaluating_expr++;
-
+		
 		IrExpression lhs = node.getLeft();
-		IrExpression rhs = node.getRight();
+		IrExpression rhs = node.getRight();		
 		// check that lhs and rhs are well-formed.
 		lhs.accept(this);
 		rhs.accept(this);
@@ -948,7 +951,6 @@ public class IrNodeChecker implements IrNodeVisitor {
 				}
 				break;
 			}
-			
 		}
 		
 		currently_evaluating_expr--;
@@ -959,8 +961,8 @@ public class IrNodeChecker implements IrNodeVisitor {
 		currently_evaluating_expr++;
 
 		IrUnaryOperator op = node.getOperator();
-		
 		IrExpression expr = node.getExpr();
+		expr.accept(this); // check that the expr is well-formed.
 		Type expr_type = determineType(expr.getExprType(this));
 
 		if (expr_type == Type.MIXED || expr_type == Type.VOID) {
@@ -1005,7 +1007,7 @@ public class IrNodeChecker implements IrNodeVisitor {
 			System.out.println(errorPosMessage(line, column) + message);
 		} else {
 			// var is defined, set node's bp offset!
-			int offset = lookupOffset(id);
+			int offset = lookupBPOffset(id);
 			node.setBpOffset(offset);
 		}
 	}

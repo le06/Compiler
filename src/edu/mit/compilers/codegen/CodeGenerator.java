@@ -174,6 +174,10 @@ public class CodeGenerator implements LLNodeVisitor {
     
     @Override
     public void visit(LLGlobalDecl node) {
+    	tab_level++;
+    	writeLine(".data");
+    	tab_level--;
+    	
         node.getLabel().accept(this);
         
         tab_level++;
@@ -183,6 +187,10 @@ public class CodeGenerator implements LLNodeVisitor {
     
     @Override
     public void visit(LLArrayDecl node) {
+    	tab_level++;
+    	writeLine(".data");
+    	tab_level--;
+    	
         node.getLabel().accept(this);
         
         tab_level++;
@@ -319,7 +327,7 @@ public class CodeGenerator implements LLNodeVisitor {
     		LLExpression index = ((LLArrayLocation)loc).getIndexExpr();
     		String index_val = index.addressOfResult();		// calculate index offset.
     		LLMov mov_index = new LLMov(index_val, R10);	// move offset to register.
-    		mov_index.accept(this);							// write this inType ASM.
+    		mov_index.accept(this);							// write this in ASM.
     		
     		String mul_inst = "imul"; // change index into address offset.
     		String mul_val = "$8";	 // quadword size.
