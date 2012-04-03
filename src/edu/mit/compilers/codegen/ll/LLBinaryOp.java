@@ -9,6 +9,7 @@ public class LLBinaryOp implements LLExpression {
     private Type type;
     
     String address_of_result;
+    LLLabel short_circuit_label = null;
     
     public LLBinaryOp(LLExpression lhs, LLExpression rhs, IrBinOperator op,
     				  Type type) {
@@ -16,6 +17,9 @@ public class LLBinaryOp implements LLExpression {
         this.rhs = rhs;
         this.op = op;
         this.type = type;
+        if (op == IrBinOperator.AND || op == IrBinOperator.OR) {
+        	short_circuit_label = new LLLabel("short_circuit");
+        }
     }
 
     @Override
@@ -35,6 +39,10 @@ public class LLBinaryOp implements LLExpression {
 		return op;
 	}
 
+	public LLLabel getLabel() {
+		return short_circuit_label;
+	}
+	
 	@Override
 	public String addressOfResult() {
 		return address_of_result;

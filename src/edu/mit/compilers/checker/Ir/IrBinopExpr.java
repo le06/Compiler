@@ -79,17 +79,17 @@ public class IrBinopExpr extends Ir implements IrExpression {
 		v.visit(this);
 	}
 	
-	   public String toString (int s) {
-	        StringBuilder out = new StringBuilder();
-	        for (int i = 0; i < s; i++) {
-	            out.append(" ");
-	        }
-	        out.append(operator.toString().concat("\n"));
-	        out.append(lhs.toString(s+1).concat("\n"));
-	        out.append(rhs.toString(s+1).concat("\n"));
-	        
-	        return out.toString();
-	    }
+   public String toString (int s) {
+        StringBuilder out = new StringBuilder();
+        for (int i = 0; i < s; i++) {
+            out.append(" ");
+        }
+        out.append(operator.toString().concat("\n"));
+        out.append(lhs.toString(s+1).concat("\n"));
+        out.append(rhs.toString(s+1).concat("\n"));
+        
+        return out.toString();
+    }
 
     @Override
     public LLNode getllRep(LLLabel breakPoint, LLLabel continuePoint) {

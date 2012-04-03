@@ -32,6 +32,11 @@ public class LabelNamer implements LLNodeVisitor {
         }
         
         node.getMain().accept(this);
+        
+        // make sure the run-time error labels aren't duplicated.
+        node.getArrayOobLabel().accept(this);
+        node.getDivByZeroLabel().accept(this);
+        node.getMissingReturnLabel().accept(this);
     }
 
     @Override
@@ -63,7 +68,7 @@ public class LabelNamer implements LLNodeVisitor {
     
     @Override
     public void visit(LLAssign node) {
-        // Do Nothing
+        node.getExpr().accept(this);
     }
     
     @Override
@@ -100,7 +105,10 @@ public class LabelNamer implements LLNodeVisitor {
 
     @Override
     public void visit(LLBinaryOp node) {
-        // Do Nothing
+    	LLLabel label = node.getLabel();
+    	if (label != null) { // only AND/OR ops have labels.
+    		node.getLabel().accept(this);
+    	}
     }
 
     @Override
@@ -110,7 +118,7 @@ public class LabelNamer implements LLNodeVisitor {
 
     @Override
     public void visit(LLUnaryNot node) {
-        // Do Nothing
+        node.getExpr().accept(this);
     }
     
     @Override
@@ -125,8 +133,12 @@ public class LabelNamer implements LLNodeVisitor {
 
     @Override
     public void visit(LLJump node) {
-        // Do Nothing
-    	// TODO: jumps have labels. is it fine to gloss over?
+        // label can be ignored since it will be walked anyway.
+    	// do check the expr.
+    	LLExpression expr = node.getCond();
+    	if (expr != null) {
+    		expr.accept(this);
+    	}
     }
 
     @Override
