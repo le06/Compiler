@@ -124,19 +124,46 @@ public class CodeGenerator implements LLNodeVisitor {
     /*
      * ASM run-time error methods.
      */
-    private void error_array_oob() {
-    	// TODO: fill in ASM
+    private void error_array_oob(LLFile node) {
     	array_oob_label.accept(this);
+    	
+    	tab_level++;    	
+        LLCallout print_error = node.getArrayOobCallout();
+        print_error.accept(this);
+    	writeASMExit(1);
+    	tab_level--;
     }
     
-    private void error_missing_return() {
-    	// TODO: fill in ASM
+    private void error_missing_return(LLFile node) {
     	missing_return_label.accept(this);
+    	
+    	tab_level++;    	
+        LLCallout print_error = node.getMissingReturnCallout();
+        print_error.accept(this);
+    	writeASMExit(2);
+    	tab_level--;
     }
     
-    private void error_div_by_zero() {
-    	// TODO: fill in ASM
+    private void error_div_by_zero(LLFile node) {
     	div_by_zero_label.accept(this);
+    	
+    	tab_level++;    	
+        LLCallout print_error = node.getDivByZeroCallout();
+        print_error.accept(this);
+    	writeASMExit(3);
+    	tab_level--;
+    }
+    
+    private void writeASMExit(int error) {
+    	// system call for exit.
+    	LLMov mov_exit = new LLMov("$1", RAX);
+    	mov_exit.accept(this);
+    	
+    	// interrupt to kernel.
+    	String inst = "int";
+    	String inst_line = formatLine(inst, "$0x80");
+    	writeLine(inst_line);
+    	
     }
     
     /*
@@ -161,15 +188,16 @@ public class CodeGenerator implements LLNodeVisitor {
         mainDirective(); // write ".globl main".
         node.getMain().accept(this);
         
+        error_array_oob(node);
+        error_missing_return(node);
+        error_div_by_zero(node);
+        
         printString = true;
-
         for (LLStringLiteral l : node.getStringLiterals()) {
         	l.accept(this);
         }
+        printString = false;
         
-        error_array_oob();
-        error_missing_return();
-        error_div_by_zero();
     }
     
     @Override
@@ -773,7 +801,7 @@ public class CodeGenerator implements LLNodeVisitor {
         	writeLine(inst_line);
         	break;
 		// cond ops. results get stored in the first operand!
-    	case AND: // TODO: short-circuit
+    	case AND:
     		LLLabel short_circuit_label = node.getLabel();
     		LLJump short_circuit_jump;
     		if (short_circuit_label == null) { // should never be reached.
@@ -812,13 +840,11 @@ public class CodeGenerator implements LLNodeVisitor {
     			mov_right.accept(this);
     			
     			// put the short circuit label after evaluation of the right expr.
-    			tab_level--;
     			short_circuit_label.accept(this);
-            	tab_level++;
     			
     			break;
     		}
-    	case OR: // TODO: short-circuit
+    	case OR:
     		short_circuit_label = node.getLabel();
     		if (short_circuit_label == null) { // should never be reached.
     	    	left.accept(this);
@@ -856,9 +882,7 @@ public class CodeGenerator implements LLNodeVisitor {
     			mov_right.accept(this);
     			
     			// put the short circuit label after evaluation of the right expr.
-    			tab_level--;
     			short_circuit_label.accept(this);
-            	tab_level++;
     			
     			break;
     		}
@@ -1034,8 +1058,15 @@ public class CodeGenerator implements LLNodeVisitor {
 
     @Override
     public void visit(LLLabel node) {
-    	String name = node.getASMLabel();
-    	writeLine(name);
+    	if (tab_level <= 0) {
+        	String name = node.getASMLabel();
+        	writeLine(name);
+    	} else {
+    		tab_level--;
+        	String name = node.getASMLabel();
+        	writeLine(name);
+    		tab_level++;
+    	}
     }
 
 	@Override

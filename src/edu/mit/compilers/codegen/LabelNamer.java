@@ -33,10 +33,15 @@ public class LabelNamer implements LLNodeVisitor {
         
         node.getMain().accept(this);
         
+        // check the string literals associated with the run-time error callouts.
+        node.getArrayOobCallout().accept(this);
+        node.getMissingReturnCallout().accept(this);
+        node.getDivByZeroCallout().accept(this);
+        
         // make sure the run-time error labels aren't duplicated.
         node.getArrayOobLabel().accept(this);
-        node.getDivByZeroLabel().accept(this);
         node.getMissingReturnLabel().accept(this);
+        node.getDivByZeroLabel().accept(this);
     }
 
     @Override
