@@ -99,7 +99,7 @@ class Main {
           DecafUnoptimizedCodeGenerator gen = new DecafUnoptimizedCodeGenerator(checker);
           gen.setTrace(CLI.debug);
           
-          System.out.println(CLI.outfile);
+ //         System.out.println(CLI.outfile);
           File f = new File(CLI.outfile);
           
           f.createNewFile();

@@ -156,7 +156,7 @@ array_access! : left:ID LSQUARE! right:expr RSQUARE!
  * corresponds to a unary minus, and expr_tf is the lowest
  * level rule, corresponding to all of the other possible 
  * productions of expr.                                     */
-expr! : left:expr_l0 (op:or_op right:expr)? 
+/*expr! : left:expr_l0 (op:or_op right:expr)? 
            { #expr = #(op, left, right); } ;
 
 expr_l0! : left:expr_l1 (op:and_op right:expr_l0)?
@@ -166,13 +166,25 @@ expr_l1! : left:expr_l2 (op:eq_op right:expr_l1)?
            { #expr_l1 = #(op, left, right); } ;
 
 expr_l2! : left:expr_l3 (op:rel_op right:expr_l2)? 
-		   { #expr_l2 = #(op, left, right); } ;
+		   { #expr_l2 = #(op, left, right); } ;*/
 
-expr_l3! : left:expr_l4 (op:linear_op right:expr_l3)?
-           { #expr_l3 = #(op, left, right); } ;
+//expr_l3! : left:expr_l4 (op:linear_op right:expr_l3)?
+//           { #expr_l3 = #(op, left, right); } ;
 
-expr_l4! : left:expr_t (op:mul_op right:expr_l4)?
-           { #expr_l4 = #(op, left, right); } ;
+expr : expr_l0 (OR^ expr_l0)*;
+
+expr_l0 : expr_l1 (AND^ expr_l1)*;
+
+expr_l1 : expr_l2 ((EQ^|NEQ^) expr_l2)*;
+
+expr_l2 : expr_l3 ((LT^|GT^|LEQ^|GEQ^) expr_l3)*;
+
+expr_l3 : expr_l4 ((PLUS^|MINUS^) expr_l4)* ;
+
+expr_l4 : expr_t ((MOD^|DIV^|MUL^) expr_t)* ;
+
+//expr_l4 : left:expr_t (op:mul_op right:expr_l4)?
+//           { #expr_l4 = #(op, left, right); } ;
 
 expr_t : logical_not | expr_tm;
 logical_not : NOT^ expr_tm;
