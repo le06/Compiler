@@ -124,19 +124,46 @@ public class CodeGenerator implements LLNodeVisitor {
     /*
      * ASM run-time error methods.
      */
-    private void error_array_oob() {
-    	// TODO: fill in ASM
+    private void error_array_oob(LLFile node) {
     	array_oob_label.accept(this);
+    	
+    	tab_level++;    	
+        LLCallout print_error = node.getArrayOobCallout();
+        print_error.accept(this);
+    	writeASMExit(1);
+    	tab_level--;
     }
     
-    private void error_missing_return() {
-    	// TODO: fill in ASM
+    private void error_missing_return(LLFile node) {
     	missing_return_label.accept(this);
+    	
+    	tab_level++;    	
+        LLCallout print_error = node.getMissingReturnCallout();
+        print_error.accept(this);
+    	writeASMExit(2);
+    	tab_level--;
     }
     
-    private void error_div_by_zero() {
-    	// TODO: fill in ASM
+    private void error_div_by_zero(LLFile node) {
     	div_by_zero_label.accept(this);
+    	
+    	tab_level++;    	
+        LLCallout print_error = node.getDivByZeroCallout();
+        print_error.accept(this);
+    	writeASMExit(3);
+    	tab_level--;
+    }
+    
+    private void writeASMExit(int error) {
+    	// system call for exit.
+    	LLMov mov_exit = new LLMov("$1", RAX);
+    	mov_exit.accept(this);
+    	
+    	// interrupt to kernel.
+    	String inst = "int";
+    	String inst_line = formatLine(inst, "$0x80");
+    	writeLine(inst_line);
+    	
     }
     
     /*
@@ -161,15 +188,16 @@ public class CodeGenerator implements LLNodeVisitor {
         mainDirective(); // write ".globl main".
         node.getMain().accept(this);
         
+        error_array_oob(node);
+        error_missing_return(node);
+        error_div_by_zero(node);
+        
         printString = true;
-
         for (LLStringLiteral l : node.getStringLiterals()) {
         	l.accept(this);
         }
+        printString = false;
         
-        error_array_oob();
-        error_missing_return();
-        error_div_by_zero();
     }
     
     @Override
@@ -535,11 +563,9 @@ public class CodeGenerator implements LLNodeVisitor {
     @Override
     public void visit(LLBinaryOp node) {
     	
-        // walk both the lhs and rhs expressions.
+        // get both the lhs and rhs expressions, but don't walk them yet!
     	LLExpression left = node.getLhs();
     	LLExpression right = node.getRhs();
-    	left.accept(this);
-    	right.accept(this);
     	
     	LLMov mov_left, mov_right;
         
@@ -553,6 +579,9 @@ public class CodeGenerator implements LLNodeVisitor {
     	switch (op) { // define the result to be stored in %r10 no matter what.
     	// arithmetic ops.
     	case PLUS:
+        	left.accept(this);
+        	right.accept(this);
+    		
         	mov_left = new LLMov(left.addressOfResult(), R10);
         	mov_right = new LLMov(right.addressOfResult(), R11);
         	mov_left.accept(this);
@@ -563,6 +592,9 @@ public class CodeGenerator implements LLNodeVisitor {
     		writeLine(inst_line);
     		break;
     	case MINUS:
+        	left.accept(this);
+        	right.accept(this);
+    		
         	mov_left = new LLMov(left.addressOfResult(), R10);
         	mov_right = new LLMov(right.addressOfResult(), R11);
         	mov_left.accept(this);
@@ -573,6 +605,9 @@ public class CodeGenerator implements LLNodeVisitor {
     		writeLine(inst_line);
     		break;
     	case MUL:
+        	left.accept(this);
+        	right.accept(this);
+    		
         	mov_left = new LLMov(left.addressOfResult(), R10);
         	mov_right = new LLMov(right.addressOfResult(), R11);
         	mov_left.accept(this);
@@ -583,6 +618,9 @@ public class CodeGenerator implements LLNodeVisitor {
     		writeLine(inst_line);
     		break;
     	case DIV:
+        	left.accept(this);
+        	right.accept(this);
+    		
     		// are we dividing by zero? check the divisor.
     		mov_divisor = new LLMov(right.addressOfResult(), R10);
     		mov_zero = new LLMov("$0", R11);
@@ -627,6 +665,9 @@ public class CodeGenerator implements LLNodeVisitor {
     		mov_quotient.accept(this);
     		break;
     	case MOD:
+        	left.accept(this);
+        	right.accept(this);
+    		
     		// are we dividing by zero? check the divisor.
     		mov_divisor = new LLMov(right.addressOfResult(), R10);
     		mov_zero = new LLMov("$0", R11);
@@ -672,6 +713,9 @@ public class CodeGenerator implements LLNodeVisitor {
     		break;
     		// arithmetic comparison operations.
     	case LT:
+        	left.accept(this);
+        	right.accept(this);
+    		
         	mov_left = new LLMov(left.addressOfResult(), R10);
         	mov_right = new LLMov(right.addressOfResult(), R11);
         	mov_left.accept(this);
@@ -691,6 +735,9 @@ public class CodeGenerator implements LLNodeVisitor {
         	writeLine(inst_line);
         	break;
     	case LEQ:
+        	left.accept(this);
+        	right.accept(this);
+    		
         	mov_left = new LLMov(left.addressOfResult(), R10);
         	mov_right = new LLMov(right.addressOfResult(), R11);
         	mov_left.accept(this);
@@ -710,6 +757,9 @@ public class CodeGenerator implements LLNodeVisitor {
         	writeLine(inst_line);
         	break;
     	case GEQ:
+        	left.accept(this);
+        	right.accept(this);
+    		
         	mov_left = new LLMov(left.addressOfResult(), R10);
         	mov_right = new LLMov(right.addressOfResult(), R11);
         	mov_left.accept(this);
@@ -729,6 +779,9 @@ public class CodeGenerator implements LLNodeVisitor {
         	writeLine(inst_line);
         	break;
     	case GT:
+        	left.accept(this);
+        	right.accept(this);
+    		
         	mov_left = new LLMov(left.addressOfResult(), R10);
         	mov_right = new LLMov(right.addressOfResult(), R11);
         	mov_left.accept(this);
@@ -749,29 +802,95 @@ public class CodeGenerator implements LLNodeVisitor {
         	break;
 		// cond ops. results get stored in the first operand!
     	case AND:
-        	mov_left = new LLMov(left.addressOfResult(), R10);
-        	mov_right = new LLMov(right.addressOfResult(), R11);
-        	mov_left.accept(this);
-        	mov_right.accept(this);
-        	
-        	// compare operands.
-        	inst = "and";
-        	inst_line = formatLine(inst, R11, R10); // result gets stored into dest.
-        	writeLine(inst_line);
-        	break;
+    		LLLabel short_circuit_label = node.getLabel();
+    		LLJump short_circuit_jump;
+    		if (short_circuit_label == null) { // should never be reached.
+    	    	left.accept(this);
+    	    	right.accept(this);
+    			
+            	mov_left = new LLMov(left.addressOfResult(), R10);
+            	mov_right = new LLMov(right.addressOfResult(), R11);
+            	mov_left.accept(this);
+            	mov_right.accept(this);
+            	
+            	// compare operands.
+            	inst = "and";
+            	inst_line = formatLine(inst, R11, R10); // result gets stored into dest.
+            	writeLine(inst_line);
+            	break;
+    		} else {
+    	    	left.accept(this);
+    			
+    			mov_left = new LLMov(left.addressOfResult(), R10);
+    			mov_right = new LLMov("$0", R11);
+    			mov_left.accept(this);
+    			mov_right.accept(this);
+    			
+            	inst = "cmp";
+            	inst_line = formatLine(inst, R11, R10);
+            	writeLine(inst_line);
+            	
+            	// if short circuiting, 0 (false) is already stored in R10!
+            	short_circuit_jump = new LLJump(LLJump.JumpType.EQUAL, short_circuit_label);
+    			short_circuit_jump.accept(this);
+    			
+    			// otherwise, AND equals the value of the right expr.
+    			right.accept(this);
+    			mov_right = new LLMov(right.addressOfResult(), R10);
+    			mov_right.accept(this);
+    			
+    			// put the short circuit label after evaluation of the right expr.
+    			short_circuit_label.accept(this);
+    			
+    			break;
+    		}
     	case OR:
-        	mov_left = new LLMov(left.addressOfResult(), R10);
-        	mov_right = new LLMov(right.addressOfResult(), R11);
-        	mov_left.accept(this);
-        	mov_right.accept(this);
-        	
-        	// compare operands.
-        	inst = "or";
-        	inst_line = formatLine(inst, R11, R10); // result gets stored into dest.
-        	writeLine(inst_line);
-        	break;
+    		short_circuit_label = node.getLabel();
+    		if (short_circuit_label == null) { // should never be reached.
+    	    	left.accept(this);
+    	    	right.accept(this);
+    			
+            	mov_left = new LLMov(left.addressOfResult(), R10);
+            	mov_right = new LLMov(right.addressOfResult(), R11);
+            	mov_left.accept(this);
+            	mov_right.accept(this);
+            	
+            	// compare operands.
+            	inst = "or";
+            	inst_line = formatLine(inst, R11, R10); // result gets stored into dest.
+            	writeLine(inst_line);
+            	break;
+    		} else {
+    			left.accept(this);
+    			
+    			mov_left = new LLMov(left.addressOfResult(), R10);
+    			mov_right = new LLMov("$1", R11);
+    			mov_left.accept(this);
+    			mov_right.accept(this);
+    			
+            	inst = "cmp";
+            	inst_line = formatLine(inst, R11, R10);
+            	writeLine(inst_line);
+            	
+            	// if short circuiting, 1 (true) is already stored in R10!
+            	short_circuit_jump = new LLJump(LLJump.JumpType.EQUAL, short_circuit_label);
+    			short_circuit_jump.accept(this);
+    			
+    			// otherwise, OR equals the value of the right expr.
+    			right.accept(this);
+    			mov_right = new LLMov(right.addressOfResult(), R10);
+    			mov_right.accept(this);
+    			
+    			// put the short circuit label after evaluation of the right expr.
+    			short_circuit_label.accept(this);
+    			
+    			break;
+    		}
 		// eq ops.
     	case EQ:
+        	left.accept(this);
+        	right.accept(this);
+    		
         	mov_left = new LLMov(left.addressOfResult(), R10);
         	mov_right = new LLMov(right.addressOfResult(), R11);
         	mov_left.accept(this);
@@ -791,6 +910,9 @@ public class CodeGenerator implements LLNodeVisitor {
         	writeLine(inst_line);
         	break;
     	case NEQ:
+        	left.accept(this);
+        	right.accept(this);
+    		
         	mov_left = new LLMov(left.addressOfResult(), R10);
         	mov_right = new LLMov(right.addressOfResult(), R11);
         	mov_left.accept(this);
@@ -936,8 +1058,15 @@ public class CodeGenerator implements LLNodeVisitor {
 
     @Override
     public void visit(LLLabel node) {
-    	String name = node.getASMLabel();
-    	writeLine(name);
+    	if (tab_level <= 0) {
+        	String name = node.getASMLabel();
+        	writeLine(name);
+    	} else {
+    		tab_level--;
+        	String name = node.getASMLabel();
+        	writeLine(name);
+    		tab_level++;
+    	}
     }
 
 	@Override

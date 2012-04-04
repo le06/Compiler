@@ -1,24 +1,55 @@
-Overview
---------
-For the most part, we kept to the original design, which can be found
-in the same directory as this document under the filename
-unoptomized_code_generator_design.txt, with a few deviations/additions.
-The main deviations in terms of design are listed here
+1. Division of work
+-------------------
+Similar to the semantic checker, Patrick (patrickv) focused on converting the
+high-level IR to the low-level IR, and Jae (jaechung) worked on generating ASM
+by walking the low-level IR.
 
-Deviations from/additions to original design doc:
- - Char literals are converted to int literals in ll rep
+We worked together on designing the low-level IR, and on other overarching
+design decisions.
+
+
+2. Clarifications
+-----------------
+We addressed questions of language ambiguity in the previous phase of this
+project. The code generation mostly involved implementation issues; hence there
+are no major clarifications to the problem.
+
+That said, the implementation of run-time errors assumes the Linux convention
+for system interrupts. The use and syntax of assembler directives may also be
+dependent on a specific assembler. For this phase, we used gcc to test our code.
+
+
+3. Overview
+-----------
+We mostly followed the original design (unoptimized_code_generator_design.txt).
+Per Liz's suggestion, we killed the push/pop strategy for local variables and
+designed a slightly-less-naive method for storing locals and temps.
+
+Briefly, the number of declared local variables is counted during the semantic
+phase. When the low-level IR is walked, we also determine the number of temp
+variables required in a given stack frame. Each LLExpression node is assumed to
+return some value. Thus each LLExpression is allocated a memory address on the
+stack. This occurs regardless of the situation (a method call might not be used
+as an expression, for example). We hope to be able to eliminate these major
+inefficiencies in subsequent phases.
+
+Other deviations and additions to the original design include:
+ - char literals are converted to int literals in the low-level representation.
  
-Interesting Implementation Issues
----------------------------------
- - In converting from the high level to low level Ir, there were some
-   aspects that were more suited to a recursive call, and some that were
-   more suited to a visitor pattern, so we used a hybrid design. The low
-   level Ir is generated using the recursive call getLLRep implemented in
-   every IrNode. Then, the LabelNamer visitor ensures that every label in
-   the file is unique. Finally, the AddressAssigner visitor assigns stack
-   locations to all of the allocated variables for each method.
+
+4. Interesting implementation issues
+------------------------------------
+ - The conversion from the high-level to the low-level IR involved other things
+   which we thought of only when we actually began implementing the code
+   generator. Most importantly, some vital information is lost in the
+   transformation from high-level to low-level. We implemented the following:
    
- - Break/Continue statements were an interesting issue because they need
+   LabelNamer is a visitor that ensures each label in the ASM file is unique.
+   AddressAssigner is a visitor that assigns addresses to each var and array
+   location used in the code, and also determines the number of local and temp
+   variables to allocate when entering a new stack frame.
+   
+ - break/continue statements were an interesting issue because they need
    to bind to the closest for or while statement around them. Because of 
    the tree structure of the Ir, there must be some sort of state kept 
    about the closest for/while block, and the appropriate labels to which
@@ -26,18 +57,24 @@ Interesting Implementation Issues
    appropriate labels as parameters to the getLLRep function, and setting
    these parameters whenever a new for or while is encountered.
  
- 
- 
-Division of Work
-----------------
-In a similar division of work to the semantic checker,
-Patrick (patrickv) focused on converting the high level IR to the
-low level IR, and Jae (jaechung) worked on turning the low level IR
-into actual ASM.
+ - Numerous other changes were needed to account for missing information in the
+   low-level IR nodes. For example, some jumps require evaluation of some
+   expression, which would have been difficult for the LL visitor to handle if
+   the jump and the expression were completely separate.
+   
+ - Making division work by filling in the higher-order bits in %rdx was a cute
+   exercise.
+   
+ - Testing the code generator exposed errors originally unnoticed in previous
+   phases. One particularly heinous example was the semantic checker missing
+   break statements in a switch statement :(
+   
+   
+5. Source code comments
+-----------------------
+N/A.
 
-We worked together on designing the low level Ir, and on the overall 
-design. 
 
-Known Issues
-------------
-None at this time
+6. Known issues
+---------------
+Nothing else at this time.

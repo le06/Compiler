@@ -10,6 +10,10 @@ public class LLFile implements LLNode {
     private ArrayList<LLStringLiteral> strings;
     private LLMethodDecl main;
 
+    private LLCallout array_oob_callout;
+    private LLCallout missing_return_callout;
+    private LLCallout div_by_zero_callout;
+    
     private LLLabel array_oob_label;
     private LLLabel missing_return_label;
     private LLLabel div_by_zero_label;
@@ -21,9 +25,7 @@ public class LLFile implements LLNode {
         strings = new ArrayList<LLStringLiteral>();
         main = mainMethod;
         
-        array_oob_label = new LLLabel("ARRAY_OUT_OF_BOUNDS");
-        missing_return_label = new LLLabel("MISSING_RETURN");
-        div_by_zero_label = new LLLabel("DIVIDE_BY_ZERO");
+        initErrorLabels();
     }
     
     public LLFile() {
@@ -32,8 +34,23 @@ public class LLFile implements LLNode {
         methods = new ArrayList<LLMethodDecl>();
         strings = new ArrayList<LLStringLiteral>();
         
+        initErrorLabels();
+    }
+    
+    private void initErrorLabels() {
+        String message = "\"Exception: array index out-of-bounds\\n\"";
+        array_oob_callout = new LLCallout("\"printf\"");
+        array_oob_callout.addParam(new LLStringLiteral(message, new LLLabel("error")));
         array_oob_label = new LLLabel("ARRAY_OUT_OF_BOUNDS");
+        
+        message = "\"Exception: non-void function missing return statement\\n\"";
+        missing_return_callout = new LLCallout("\"printf\"");
+        missing_return_callout.addParam(new LLStringLiteral(message, new LLLabel("error")));
         missing_return_label = new LLLabel("MISSING_RETURN");
+        
+        message = "\"Exception: division by zero\\n\"";
+        div_by_zero_callout = new LLCallout("\"printf\"");
+        div_by_zero_callout.addParam(new LLStringLiteral(message, new LLLabel("error")));
         div_by_zero_label = new LLLabel("DIVIDE_BY_ZERO");
     }
     
@@ -49,6 +66,11 @@ public class LLFile implements LLNode {
         methods.add(method);
     }
     
+    // error 1: array bounds.
+    public LLCallout getArrayOobCallout() {
+    	return array_oob_callout;
+    }
+    
     public LLLabel getArrayOobLabel() {
 		return array_oob_label;
 	}
@@ -57,6 +79,11 @@ public class LLFile implements LLNode {
 		array_oob_label = arrayOobLabel;
 	}
 
+	// error 2: missing return stmt.
+    public LLCallout getMissingReturnCallout() {
+    	return missing_return_callout;
+    }
+	
 	public LLLabel getMissingReturnLabel() {
 		return missing_return_label;
 	}
@@ -65,6 +92,11 @@ public class LLFile implements LLNode {
 		missing_return_label = missingReturnLabel;
 	}
 
+	// error 3: div-by-zero.
+    public LLCallout getDivByZeroCallout() {
+    	return div_by_zero_callout;
+    }
+	
 	public LLLabel getDivByZeroLabel() {
 		return div_by_zero_label;
 	}
