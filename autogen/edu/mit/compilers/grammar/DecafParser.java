@@ -968,33 +968,28 @@ public DecafParser(ParserSharedInputState state) {
 			returnAST = null;
 			ASTPair currentAST = new ASTPair();
 			AST expr_AST = null;
-			AST left_AST = null;
-			AST op_AST = null;
-			AST right_AST = null;
 			
 			try {      // for error handling
 				expr_l0();
-				left_AST = (AST)returnAST;
+				astFactory.addASTChild(currentAST, returnAST);
 				{
-				if ((LA(1)==OR) && (_tokenSet_10.member(LA(2))) && (_tokenSet_11.member(LA(3)))) {
-					or_op();
-					op_AST = (AST)returnAST;
-					expr();
-					right_AST = (AST)returnAST;
-				}
-				else if ((_tokenSet_4.member(LA(1))) && (_tokenSet_12.member(LA(2))) && (_tokenSet_13.member(LA(3)))) {
-				}
-				else {
-					throw new NoViableAltException(LT(1), getFilename());
-				}
-				
+				_loop47:
+				do {
+					if ((LA(1)==OR) && (_tokenSet_10.member(LA(2))) && (_tokenSet_11.member(LA(3)))) {
+						AST tmp50_AST = null;
+						tmp50_AST = astFactory.create(LT(1));
+						astFactory.makeASTRoot(currentAST, tmp50_AST);
+						match(OR);
+						expr_l0();
+						astFactory.addASTChild(currentAST, returnAST);
+					}
+					else {
+						break _loop47;
+					}
+					
+				} while (true);
 				}
 				expr_AST = (AST)currentAST.root;
-				expr_AST = (AST)astFactory.make( (new ASTArray(3)).add(op_AST).add(left_AST).add(right_AST));
-				currentAST.root = expr_AST;
-				currentAST.child = expr_AST!=null &&expr_AST.getFirstChild()!=null ?
-					expr_AST.getFirstChild() : expr_AST;
-				currentAST.advanceChildToEnd();
 			}
 			catch (RecognitionException ex) {
 				reportError(ex);
@@ -1015,10 +1010,10 @@ public DecafParser(ParserSharedInputState state) {
 			AST location_AST = null;
 			
 			try {      // for error handling
-				if ((LA(1)==ID) && (_tokenSet_14.member(LA(2)))) {
-					AST tmp50_AST = null;
-					tmp50_AST = astFactory.create(LT(1));
-					astFactory.addASTChild(currentAST, tmp50_AST);
+				if ((LA(1)==ID) && (_tokenSet_12.member(LA(2)))) {
+					AST tmp51_AST = null;
+					tmp51_AST = astFactory.create(LT(1));
+					astFactory.addASTChild(currentAST, tmp51_AST);
 					match(ID);
 					location_AST = (AST)currentAST.root;
 				}
@@ -1034,7 +1029,7 @@ public DecafParser(ParserSharedInputState state) {
 			}
 			catch (RecognitionException ex) {
 				reportError(ex);
-				recover(ex,_tokenSet_14);
+				recover(ex,_tokenSet_12);
 			}
 			returnAST = location_AST;
 		} finally { // debugging
@@ -1054,27 +1049,27 @@ public DecafParser(ParserSharedInputState state) {
 				switch ( LA(1)) {
 				case ASSIGN:
 				{
-					AST tmp51_AST = null;
-					tmp51_AST = astFactory.create(LT(1));
-					astFactory.addASTChild(currentAST, tmp51_AST);
+					AST tmp52_AST = null;
+					tmp52_AST = astFactory.create(LT(1));
+					astFactory.addASTChild(currentAST, tmp52_AST);
 					match(ASSIGN);
 					assign_op_AST = (AST)currentAST.root;
 					break;
 				}
 				case INC_ASSIGN:
 				{
-					AST tmp52_AST = null;
-					tmp52_AST = astFactory.create(LT(1));
-					astFactory.addASTChild(currentAST, tmp52_AST);
+					AST tmp53_AST = null;
+					tmp53_AST = astFactory.create(LT(1));
+					astFactory.addASTChild(currentAST, tmp53_AST);
 					match(INC_ASSIGN);
 					assign_op_AST = (AST)currentAST.root;
 					break;
 				}
 				case DEC_ASSIGN:
 				{
-					AST tmp53_AST = null;
-					tmp53_AST = astFactory.create(LT(1));
-					astFactory.addASTChild(currentAST, tmp53_AST);
+					AST tmp54_AST = null;
+					tmp54_AST = astFactory.create(LT(1));
+					astFactory.addASTChild(currentAST, tmp54_AST);
 					match(DEC_ASSIGN);
 					assign_op_AST = (AST)currentAST.root;
 					break;
@@ -1177,14 +1172,14 @@ public DecafParser(ParserSharedInputState state) {
 			AST callout_AST = null;
 			
 			try {      // for error handling
-				AST tmp57_AST = null;
-				tmp57_AST = astFactory.create(LT(1));
-				astFactory.makeASTRoot(currentAST, tmp57_AST);
+				AST tmp58_AST = null;
+				tmp58_AST = astFactory.create(LT(1));
+				astFactory.makeASTRoot(currentAST, tmp58_AST);
 				match(TK_callout);
 				match(LPAREN);
-				AST tmp59_AST = null;
-				tmp59_AST = astFactory.create(LT(1));
-				astFactory.addASTChild(currentAST, tmp59_AST);
+				AST tmp60_AST = null;
+				tmp60_AST = astFactory.create(LT(1));
+				astFactory.addASTChild(currentAST, tmp60_AST);
 				match(STRING);
 				{
 				_loop41:
@@ -1222,15 +1217,15 @@ public DecafParser(ParserSharedInputState state) {
 			AST method_name_AST = null;
 			
 			try {      // for error handling
-				AST tmp62_AST = null;
-				tmp62_AST = astFactory.create(LT(1));
-				astFactory.addASTChild(currentAST, tmp62_AST);
+				AST tmp63_AST = null;
+				tmp63_AST = astFactory.create(LT(1));
+				astFactory.addASTChild(currentAST, tmp63_AST);
 				match(ID);
 				method_name_AST = (AST)currentAST.root;
 			}
 			catch (RecognitionException ex) {
 				reportError(ex);
-				recover(ex,_tokenSet_15);
+				recover(ex,_tokenSet_13);
 			}
 			returnAST = method_name_AST;
 		} finally { // debugging
@@ -1267,9 +1262,9 @@ public DecafParser(ParserSharedInputState state) {
 				}
 				case STRING:
 				{
-					AST tmp63_AST = null;
-					tmp63_AST = astFactory.create(LT(1));
-					astFactory.addASTChild(currentAST, tmp63_AST);
+					AST tmp64_AST = null;
+					tmp64_AST = astFactory.create(LT(1));
+					astFactory.addASTChild(currentAST, tmp64_AST);
 					match(STRING);
 					callout_arg_AST = (AST)currentAST.root;
 					break;
@@ -1318,7 +1313,7 @@ public DecafParser(ParserSharedInputState state) {
 			}
 			catch (RecognitionException ex) {
 				reportError(ex);
-				recover(ex,_tokenSet_14);
+				recover(ex,_tokenSet_12);
 			}
 			returnAST = array_access_AST;
 		} finally { // debugging
@@ -1333,33 +1328,28 @@ public DecafParser(ParserSharedInputState state) {
 			returnAST = null;
 			ASTPair currentAST = new ASTPair();
 			AST expr_l0_AST = null;
-			AST left_AST = null;
-			AST op_AST = null;
-			AST right_AST = null;
 			
 			try {      // for error handling
 				expr_l1();
-				left_AST = (AST)returnAST;
+				astFactory.addASTChild(currentAST, returnAST);
 				{
-				if ((LA(1)==AND) && (_tokenSet_10.member(LA(2))) && (_tokenSet_11.member(LA(3)))) {
-					and_op();
-					op_AST = (AST)returnAST;
-					expr_l0();
-					right_AST = (AST)returnAST;
-				}
-				else if ((_tokenSet_4.member(LA(1))) && (_tokenSet_12.member(LA(2))) && (_tokenSet_13.member(LA(3)))) {
-				}
-				else {
-					throw new NoViableAltException(LT(1), getFilename());
-				}
-				
+				_loop50:
+				do {
+					if ((LA(1)==AND) && (_tokenSet_10.member(LA(2))) && (_tokenSet_11.member(LA(3)))) {
+						AST tmp67_AST = null;
+						tmp67_AST = astFactory.create(LT(1));
+						astFactory.makeASTRoot(currentAST, tmp67_AST);
+						match(AND);
+						expr_l1();
+						astFactory.addASTChild(currentAST, returnAST);
+					}
+					else {
+						break _loop50;
+					}
+					
+				} while (true);
 				}
 				expr_l0_AST = (AST)currentAST.root;
-				expr_l0_AST = (AST)astFactory.make( (new ASTArray(3)).add(op_AST).add(left_AST).add(right_AST));
-				currentAST.root = expr_l0_AST;
-				currentAST.child = expr_l0_AST!=null &&expr_l0_AST.getFirstChild()!=null ?
-					expr_l0_AST.getFirstChild() : expr_l0_AST;
-				currentAST.advanceChildToEnd();
 			}
 			catch (RecognitionException ex) {
 				reportError(ex);
@@ -1371,31 +1361,6 @@ public DecafParser(ParserSharedInputState state) {
 		}
 	}
 	
-	public final void or_op() throws RecognitionException, TokenStreamException {
-		
-		traceIn("or_op");
-		try { // debugging
-			returnAST = null;
-			ASTPair currentAST = new ASTPair();
-			AST or_op_AST = null;
-			
-			try {      // for error handling
-				AST tmp66_AST = null;
-				tmp66_AST = astFactory.create(LT(1));
-				astFactory.addASTChild(currentAST, tmp66_AST);
-				match(OR);
-				or_op_AST = (AST)currentAST.root;
-			}
-			catch (RecognitionException ex) {
-				reportError(ex);
-				recover(ex,_tokenSet_10);
-			}
-			returnAST = or_op_AST;
-		} finally { // debugging
-			traceOut("or_op");
-		}
-	}
-	
 	public final void expr_l1() throws RecognitionException, TokenStreamException {
 		
 		traceIn("expr_l1");
@@ -1403,33 +1368,48 @@ public DecafParser(ParserSharedInputState state) {
 			returnAST = null;
 			ASTPair currentAST = new ASTPair();
 			AST expr_l1_AST = null;
-			AST left_AST = null;
-			AST op_AST = null;
-			AST right_AST = null;
 			
 			try {      // for error handling
 				expr_l2();
-				left_AST = (AST)returnAST;
+				astFactory.addASTChild(currentAST, returnAST);
 				{
-				if ((LA(1)==EQ||LA(1)==NEQ) && (_tokenSet_10.member(LA(2))) && (_tokenSet_11.member(LA(3)))) {
-					eq_op();
-					op_AST = (AST)returnAST;
-					expr_l1();
-					right_AST = (AST)returnAST;
-				}
-				else if ((_tokenSet_4.member(LA(1))) && (_tokenSet_12.member(LA(2))) && (_tokenSet_13.member(LA(3)))) {
-				}
-				else {
-					throw new NoViableAltException(LT(1), getFilename());
-				}
-				
+				_loop54:
+				do {
+					if ((LA(1)==EQ||LA(1)==NEQ) && (_tokenSet_10.member(LA(2))) && (_tokenSet_11.member(LA(3)))) {
+						{
+						switch ( LA(1)) {
+						case EQ:
+						{
+							AST tmp68_AST = null;
+							tmp68_AST = astFactory.create(LT(1));
+							astFactory.makeASTRoot(currentAST, tmp68_AST);
+							match(EQ);
+							break;
+						}
+						case NEQ:
+						{
+							AST tmp69_AST = null;
+							tmp69_AST = astFactory.create(LT(1));
+							astFactory.makeASTRoot(currentAST, tmp69_AST);
+							match(NEQ);
+							break;
+						}
+						default:
+						{
+							throw new NoViableAltException(LT(1), getFilename());
+						}
+						}
+						}
+						expr_l2();
+						astFactory.addASTChild(currentAST, returnAST);
+					}
+					else {
+						break _loop54;
+					}
+					
+				} while (true);
 				}
 				expr_l1_AST = (AST)currentAST.root;
-				expr_l1_AST = (AST)astFactory.make( (new ASTArray(3)).add(op_AST).add(left_AST).add(right_AST));
-				currentAST.root = expr_l1_AST;
-				currentAST.child = expr_l1_AST!=null &&expr_l1_AST.getFirstChild()!=null ?
-					expr_l1_AST.getFirstChild() : expr_l1_AST;
-				currentAST.advanceChildToEnd();
 			}
 			catch (RecognitionException ex) {
 				reportError(ex);
@@ -1441,31 +1421,6 @@ public DecafParser(ParserSharedInputState state) {
 		}
 	}
 	
-	public final void and_op() throws RecognitionException, TokenStreamException {
-		
-		traceIn("and_op");
-		try { // debugging
-			returnAST = null;
-			ASTPair currentAST = new ASTPair();
-			AST and_op_AST = null;
-			
-			try {      // for error handling
-				AST tmp67_AST = null;
-				tmp67_AST = astFactory.create(LT(1));
-				astFactory.addASTChild(currentAST, tmp67_AST);
-				match(AND);
-				and_op_AST = (AST)currentAST.root;
-			}
-			catch (RecognitionException ex) {
-				reportError(ex);
-				recover(ex,_tokenSet_10);
-			}
-			returnAST = and_op_AST;
-		} finally { // debugging
-			traceOut("and_op");
-		}
-	}
-	
 	public final void expr_l2() throws RecognitionException, TokenStreamException {
 		
 		traceIn("expr_l2");
@@ -1473,33 +1428,64 @@ public DecafParser(ParserSharedInputState state) {
 			returnAST = null;
 			ASTPair currentAST = new ASTPair();
 			AST expr_l2_AST = null;
-			AST left_AST = null;
-			AST op_AST = null;
-			AST right_AST = null;
 			
 			try {      // for error handling
 				expr_l3();
-				left_AST = (AST)returnAST;
+				astFactory.addASTChild(currentAST, returnAST);
 				{
-				if (((LA(1) >= LT && LA(1) <= GEQ)) && (_tokenSet_10.member(LA(2))) && (_tokenSet_11.member(LA(3)))) {
-					rel_op();
-					op_AST = (AST)returnAST;
-					expr_l2();
-					right_AST = (AST)returnAST;
-				}
-				else if ((_tokenSet_4.member(LA(1))) && (_tokenSet_12.member(LA(2))) && (_tokenSet_13.member(LA(3)))) {
-				}
-				else {
-					throw new NoViableAltException(LT(1), getFilename());
-				}
-				
+				_loop58:
+				do {
+					if (((LA(1) >= LT && LA(1) <= GEQ)) && (_tokenSet_10.member(LA(2))) && (_tokenSet_11.member(LA(3)))) {
+						{
+						switch ( LA(1)) {
+						case LT:
+						{
+							AST tmp70_AST = null;
+							tmp70_AST = astFactory.create(LT(1));
+							astFactory.makeASTRoot(currentAST, tmp70_AST);
+							match(LT);
+							break;
+						}
+						case GT:
+						{
+							AST tmp71_AST = null;
+							tmp71_AST = astFactory.create(LT(1));
+							astFactory.makeASTRoot(currentAST, tmp71_AST);
+							match(GT);
+							break;
+						}
+						case LEQ:
+						{
+							AST tmp72_AST = null;
+							tmp72_AST = astFactory.create(LT(1));
+							astFactory.makeASTRoot(currentAST, tmp72_AST);
+							match(LEQ);
+							break;
+						}
+						case GEQ:
+						{
+							AST tmp73_AST = null;
+							tmp73_AST = astFactory.create(LT(1));
+							astFactory.makeASTRoot(currentAST, tmp73_AST);
+							match(GEQ);
+							break;
+						}
+						default:
+						{
+							throw new NoViableAltException(LT(1), getFilename());
+						}
+						}
+						}
+						expr_l3();
+						astFactory.addASTChild(currentAST, returnAST);
+					}
+					else {
+						break _loop58;
+					}
+					
+				} while (true);
 				}
 				expr_l2_AST = (AST)currentAST.root;
-				expr_l2_AST = (AST)astFactory.make( (new ASTArray(3)).add(op_AST).add(left_AST).add(right_AST));
-				currentAST.root = expr_l2_AST;
-				currentAST.child = expr_l2_AST!=null &&expr_l2_AST.getFirstChild()!=null ?
-					expr_l2_AST.getFirstChild() : expr_l2_AST;
-				currentAST.advanceChildToEnd();
 			}
 			catch (RecognitionException ex) {
 				reportError(ex);
@@ -1511,50 +1497,6 @@ public DecafParser(ParserSharedInputState state) {
 		}
 	}
 	
-	public final void eq_op() throws RecognitionException, TokenStreamException {
-		
-		traceIn("eq_op");
-		try { // debugging
-			returnAST = null;
-			ASTPair currentAST = new ASTPair();
-			AST eq_op_AST = null;
-			
-			try {      // for error handling
-				switch ( LA(1)) {
-				case EQ:
-				{
-					AST tmp68_AST = null;
-					tmp68_AST = astFactory.create(LT(1));
-					astFactory.addASTChild(currentAST, tmp68_AST);
-					match(EQ);
-					eq_op_AST = (AST)currentAST.root;
-					break;
-				}
-				case NEQ:
-				{
-					AST tmp69_AST = null;
-					tmp69_AST = astFactory.create(LT(1));
-					astFactory.addASTChild(currentAST, tmp69_AST);
-					match(NEQ);
-					eq_op_AST = (AST)currentAST.root;
-					break;
-				}
-				default:
-				{
-					throw new NoViableAltException(LT(1), getFilename());
-				}
-				}
-			}
-			catch (RecognitionException ex) {
-				reportError(ex);
-				recover(ex,_tokenSet_10);
-			}
-			returnAST = eq_op_AST;
-		} finally { // debugging
-			traceOut("eq_op");
-		}
-	}
-	
 	public final void expr_l3() throws RecognitionException, TokenStreamException {
 		
 		traceIn("expr_l3");
@@ -1562,33 +1504,48 @@ public DecafParser(ParserSharedInputState state) {
 			returnAST = null;
 			ASTPair currentAST = new ASTPair();
 			AST expr_l3_AST = null;
-			AST left_AST = null;
-			AST op_AST = null;
-			AST right_AST = null;
 			
 			try {      // for error handling
 				expr_l4();
-				left_AST = (AST)returnAST;
+				astFactory.addASTChild(currentAST, returnAST);
 				{
-				if ((LA(1)==MINUS||LA(1)==PLUS) && (_tokenSet_10.member(LA(2))) && (_tokenSet_11.member(LA(3)))) {
-					linear_op();
-					op_AST = (AST)returnAST;
-					expr_l3();
-					right_AST = (AST)returnAST;
-				}
-				else if ((_tokenSet_4.member(LA(1))) && (_tokenSet_12.member(LA(2))) && (_tokenSet_13.member(LA(3)))) {
-				}
-				else {
-					throw new NoViableAltException(LT(1), getFilename());
-				}
-				
+				_loop62:
+				do {
+					if ((LA(1)==MINUS||LA(1)==PLUS) && (_tokenSet_10.member(LA(2))) && (_tokenSet_11.member(LA(3)))) {
+						{
+						switch ( LA(1)) {
+						case PLUS:
+						{
+							AST tmp74_AST = null;
+							tmp74_AST = astFactory.create(LT(1));
+							astFactory.makeASTRoot(currentAST, tmp74_AST);
+							match(PLUS);
+							break;
+						}
+						case MINUS:
+						{
+							AST tmp75_AST = null;
+							tmp75_AST = astFactory.create(LT(1));
+							astFactory.makeASTRoot(currentAST, tmp75_AST);
+							match(MINUS);
+							break;
+						}
+						default:
+						{
+							throw new NoViableAltException(LT(1), getFilename());
+						}
+						}
+						}
+						expr_l4();
+						astFactory.addASTChild(currentAST, returnAST);
+					}
+					else {
+						break _loop62;
+					}
+					
+				} while (true);
 				}
 				expr_l3_AST = (AST)currentAST.root;
-				expr_l3_AST = (AST)astFactory.make( (new ASTArray(3)).add(op_AST).add(left_AST).add(right_AST));
-				currentAST.root = expr_l3_AST;
-				currentAST.child = expr_l3_AST!=null &&expr_l3_AST.getFirstChild()!=null ?
-					expr_l3_AST.getFirstChild() : expr_l3_AST;
-				currentAST.advanceChildToEnd();
 			}
 			catch (RecognitionException ex) {
 				reportError(ex);
@@ -1600,67 +1557,6 @@ public DecafParser(ParserSharedInputState state) {
 		}
 	}
 	
-	public final void rel_op() throws RecognitionException, TokenStreamException {
-		
-		traceIn("rel_op");
-		try { // debugging
-			returnAST = null;
-			ASTPair currentAST = new ASTPair();
-			AST rel_op_AST = null;
-			
-			try {      // for error handling
-				{
-				switch ( LA(1)) {
-				case LT:
-				{
-					AST tmp70_AST = null;
-					tmp70_AST = astFactory.create(LT(1));
-					astFactory.addASTChild(currentAST, tmp70_AST);
-					match(LT);
-					break;
-				}
-				case GT:
-				{
-					AST tmp71_AST = null;
-					tmp71_AST = astFactory.create(LT(1));
-					astFactory.addASTChild(currentAST, tmp71_AST);
-					match(GT);
-					break;
-				}
-				case LEQ:
-				{
-					AST tmp72_AST = null;
-					tmp72_AST = astFactory.create(LT(1));
-					astFactory.addASTChild(currentAST, tmp72_AST);
-					match(LEQ);
-					break;
-				}
-				case GEQ:
-				{
-					AST tmp73_AST = null;
-					tmp73_AST = astFactory.create(LT(1));
-					astFactory.addASTChild(currentAST, tmp73_AST);
-					match(GEQ);
-					break;
-				}
-				default:
-				{
-					throw new NoViableAltException(LT(1), getFilename());
-				}
-				}
-				}
-				rel_op_AST = (AST)currentAST.root;
-			}
-			catch (RecognitionException ex) {
-				reportError(ex);
-				recover(ex,_tokenSet_10);
-			}
-			returnAST = rel_op_AST;
-		} finally { // debugging
-			traceOut("rel_op");
-		}
-	}
-	
 	public final void expr_l4() throws RecognitionException, TokenStreamException {
 		
 		traceIn("expr_l4");
@@ -1668,33 +1564,56 @@ public DecafParser(ParserSharedInputState state) {
 			returnAST = null;
 			ASTPair currentAST = new ASTPair();
 			AST expr_l4_AST = null;
-			AST left_AST = null;
-			AST op_AST = null;
-			AST right_AST = null;
 			
 			try {      // for error handling
 				expr_t();
-				left_AST = (AST)returnAST;
+				astFactory.addASTChild(currentAST, returnAST);
 				{
-				if (((LA(1) >= MUL && LA(1) <= MOD)) && (_tokenSet_10.member(LA(2))) && (_tokenSet_11.member(LA(3)))) {
-					mul_op();
-					op_AST = (AST)returnAST;
-					expr_l4();
-					right_AST = (AST)returnAST;
-				}
-				else if ((_tokenSet_4.member(LA(1))) && (_tokenSet_12.member(LA(2))) && (_tokenSet_13.member(LA(3)))) {
-				}
-				else {
-					throw new NoViableAltException(LT(1), getFilename());
-				}
-				
+				_loop66:
+				do {
+					if (((LA(1) >= MUL && LA(1) <= MOD)) && (_tokenSet_10.member(LA(2))) && (_tokenSet_11.member(LA(3)))) {
+						{
+						switch ( LA(1)) {
+						case MOD:
+						{
+							AST tmp76_AST = null;
+							tmp76_AST = astFactory.create(LT(1));
+							astFactory.makeASTRoot(currentAST, tmp76_AST);
+							match(MOD);
+							break;
+						}
+						case DIV:
+						{
+							AST tmp77_AST = null;
+							tmp77_AST = astFactory.create(LT(1));
+							astFactory.makeASTRoot(currentAST, tmp77_AST);
+							match(DIV);
+							break;
+						}
+						case MUL:
+						{
+							AST tmp78_AST = null;
+							tmp78_AST = astFactory.create(LT(1));
+							astFactory.makeASTRoot(currentAST, tmp78_AST);
+							match(MUL);
+							break;
+						}
+						default:
+						{
+							throw new NoViableAltException(LT(1), getFilename());
+						}
+						}
+						}
+						expr_t();
+						astFactory.addASTChild(currentAST, returnAST);
+					}
+					else {
+						break _loop66;
+					}
+					
+				} while (true);
 				}
 				expr_l4_AST = (AST)currentAST.root;
-				expr_l4_AST = (AST)astFactory.make( (new ASTArray(3)).add(op_AST).add(left_AST).add(right_AST));
-				currentAST.root = expr_l4_AST;
-				currentAST.child = expr_l4_AST!=null &&expr_l4_AST.getFirstChild()!=null ?
-					expr_l4_AST.getFirstChild() : expr_l4_AST;
-				currentAST.advanceChildToEnd();
 			}
 			catch (RecognitionException ex) {
 				reportError(ex);
@@ -1703,50 +1622,6 @@ public DecafParser(ParserSharedInputState state) {
 			returnAST = expr_l4_AST;
 		} finally { // debugging
 			traceOut("expr_l4");
-		}
-	}
-	
-	public final void linear_op() throws RecognitionException, TokenStreamException {
-		
-		traceIn("linear_op");
-		try { // debugging
-			returnAST = null;
-			ASTPair currentAST = new ASTPair();
-			AST linear_op_AST = null;
-			
-			try {      // for error handling
-				switch ( LA(1)) {
-				case PLUS:
-				{
-					AST tmp74_AST = null;
-					tmp74_AST = astFactory.create(LT(1));
-					astFactory.addASTChild(currentAST, tmp74_AST);
-					match(PLUS);
-					linear_op_AST = (AST)currentAST.root;
-					break;
-				}
-				case MINUS:
-				{
-					AST tmp75_AST = null;
-					tmp75_AST = astFactory.create(LT(1));
-					astFactory.addASTChild(currentAST, tmp75_AST);
-					match(MINUS);
-					linear_op_AST = (AST)currentAST.root;
-					break;
-				}
-				default:
-				{
-					throw new NoViableAltException(LT(1), getFilename());
-				}
-				}
-			}
-			catch (RecognitionException ex) {
-				reportError(ex);
-				recover(ex,_tokenSet_10);
-			}
-			returnAST = linear_op_AST;
-		} finally { // debugging
-			traceOut("linear_op");
 		}
 	}
 	
@@ -1764,7 +1639,7 @@ public DecafParser(ParserSharedInputState state) {
 					astFactory.addASTChild(currentAST, returnAST);
 					expr_t_AST = (AST)currentAST.root;
 				}
-				else if ((_tokenSet_10.member(LA(1))) && (_tokenSet_11.member(LA(2))) && (_tokenSet_16.member(LA(3)))) {
+				else if ((_tokenSet_10.member(LA(1))) && (_tokenSet_11.member(LA(2))) && (_tokenSet_14.member(LA(3)))) {
 					expr_tm();
 					astFactory.addASTChild(currentAST, returnAST);
 					expr_t_AST = (AST)currentAST.root;
@@ -1781,59 +1656,6 @@ public DecafParser(ParserSharedInputState state) {
 			returnAST = expr_t_AST;
 		} finally { // debugging
 			traceOut("expr_t");
-		}
-	}
-	
-	public final void mul_op() throws RecognitionException, TokenStreamException {
-		
-		traceIn("mul_op");
-		try { // debugging
-			returnAST = null;
-			ASTPair currentAST = new ASTPair();
-			AST mul_op_AST = null;
-			
-			try {      // for error handling
-				{
-				switch ( LA(1)) {
-				case MOD:
-				{
-					AST tmp76_AST = null;
-					tmp76_AST = astFactory.create(LT(1));
-					astFactory.addASTChild(currentAST, tmp76_AST);
-					match(MOD);
-					break;
-				}
-				case DIV:
-				{
-					AST tmp77_AST = null;
-					tmp77_AST = astFactory.create(LT(1));
-					astFactory.addASTChild(currentAST, tmp77_AST);
-					match(DIV);
-					break;
-				}
-				case MUL:
-				{
-					AST tmp78_AST = null;
-					tmp78_AST = astFactory.create(LT(1));
-					astFactory.addASTChild(currentAST, tmp78_AST);
-					match(MUL);
-					break;
-				}
-				default:
-				{
-					throw new NoViableAltException(LT(1), getFilename());
-				}
-				}
-				}
-				mul_op_AST = (AST)currentAST.root;
-			}
-			catch (RecognitionException ex) {
-				reportError(ex);
-				recover(ex,_tokenSet_10);
-			}
-			returnAST = mul_op_AST;
-		} finally { // debugging
-			traceOut("mul_op");
 		}
 	}
 	
@@ -1983,7 +1805,7 @@ public DecafParser(ParserSharedInputState state) {
 					break;
 				}
 				default:
-					if ((LA(1)==ID) && (_tokenSet_17.member(LA(2)))) {
+					if ((LA(1)==ID) && (_tokenSet_15.member(LA(2)))) {
 						location();
 						astFactory.addASTChild(currentAST, returnAST);
 						expr_tf_AST = (AST)currentAST.root;
@@ -2060,6 +1882,258 @@ public DecafParser(ParserSharedInputState state) {
 		}
 	}
 	
+	public final void mul_op() throws RecognitionException, TokenStreamException {
+		
+		traceIn("mul_op");
+		try { // debugging
+			returnAST = null;
+			ASTPair currentAST = new ASTPair();
+			AST mul_op_AST = null;
+			
+			try {      // for error handling
+				{
+				switch ( LA(1)) {
+				case MOD:
+				{
+					AST tmp85_AST = null;
+					tmp85_AST = astFactory.create(LT(1));
+					astFactory.addASTChild(currentAST, tmp85_AST);
+					match(MOD);
+					break;
+				}
+				case DIV:
+				{
+					AST tmp86_AST = null;
+					tmp86_AST = astFactory.create(LT(1));
+					astFactory.addASTChild(currentAST, tmp86_AST);
+					match(DIV);
+					break;
+				}
+				case MUL:
+				{
+					AST tmp87_AST = null;
+					tmp87_AST = astFactory.create(LT(1));
+					astFactory.addASTChild(currentAST, tmp87_AST);
+					match(MUL);
+					break;
+				}
+				default:
+				{
+					throw new NoViableAltException(LT(1), getFilename());
+				}
+				}
+				}
+				mul_op_AST = (AST)currentAST.root;
+			}
+			catch (RecognitionException ex) {
+				reportError(ex);
+				recover(ex,_tokenSet_0);
+			}
+			returnAST = mul_op_AST;
+		} finally { // debugging
+			traceOut("mul_op");
+		}
+	}
+	
+	public final void rel_op() throws RecognitionException, TokenStreamException {
+		
+		traceIn("rel_op");
+		try { // debugging
+			returnAST = null;
+			ASTPair currentAST = new ASTPair();
+			AST rel_op_AST = null;
+			
+			try {      // for error handling
+				{
+				switch ( LA(1)) {
+				case LT:
+				{
+					AST tmp88_AST = null;
+					tmp88_AST = astFactory.create(LT(1));
+					astFactory.addASTChild(currentAST, tmp88_AST);
+					match(LT);
+					break;
+				}
+				case GT:
+				{
+					AST tmp89_AST = null;
+					tmp89_AST = astFactory.create(LT(1));
+					astFactory.addASTChild(currentAST, tmp89_AST);
+					match(GT);
+					break;
+				}
+				case LEQ:
+				{
+					AST tmp90_AST = null;
+					tmp90_AST = astFactory.create(LT(1));
+					astFactory.addASTChild(currentAST, tmp90_AST);
+					match(LEQ);
+					break;
+				}
+				case GEQ:
+				{
+					AST tmp91_AST = null;
+					tmp91_AST = astFactory.create(LT(1));
+					astFactory.addASTChild(currentAST, tmp91_AST);
+					match(GEQ);
+					break;
+				}
+				default:
+				{
+					throw new NoViableAltException(LT(1), getFilename());
+				}
+				}
+				}
+				rel_op_AST = (AST)currentAST.root;
+			}
+			catch (RecognitionException ex) {
+				reportError(ex);
+				recover(ex,_tokenSet_0);
+			}
+			returnAST = rel_op_AST;
+		} finally { // debugging
+			traceOut("rel_op");
+		}
+	}
+	
+	public final void eq_op() throws RecognitionException, TokenStreamException {
+		
+		traceIn("eq_op");
+		try { // debugging
+			returnAST = null;
+			ASTPair currentAST = new ASTPair();
+			AST eq_op_AST = null;
+			
+			try {      // for error handling
+				switch ( LA(1)) {
+				case EQ:
+				{
+					AST tmp92_AST = null;
+					tmp92_AST = astFactory.create(LT(1));
+					astFactory.addASTChild(currentAST, tmp92_AST);
+					match(EQ);
+					eq_op_AST = (AST)currentAST.root;
+					break;
+				}
+				case NEQ:
+				{
+					AST tmp93_AST = null;
+					tmp93_AST = astFactory.create(LT(1));
+					astFactory.addASTChild(currentAST, tmp93_AST);
+					match(NEQ);
+					eq_op_AST = (AST)currentAST.root;
+					break;
+				}
+				default:
+				{
+					throw new NoViableAltException(LT(1), getFilename());
+				}
+				}
+			}
+			catch (RecognitionException ex) {
+				reportError(ex);
+				recover(ex,_tokenSet_0);
+			}
+			returnAST = eq_op_AST;
+		} finally { // debugging
+			traceOut("eq_op");
+		}
+	}
+	
+	public final void or_op() throws RecognitionException, TokenStreamException {
+		
+		traceIn("or_op");
+		try { // debugging
+			returnAST = null;
+			ASTPair currentAST = new ASTPair();
+			AST or_op_AST = null;
+			
+			try {      // for error handling
+				AST tmp94_AST = null;
+				tmp94_AST = astFactory.create(LT(1));
+				astFactory.addASTChild(currentAST, tmp94_AST);
+				match(OR);
+				or_op_AST = (AST)currentAST.root;
+			}
+			catch (RecognitionException ex) {
+				reportError(ex);
+				recover(ex,_tokenSet_0);
+			}
+			returnAST = or_op_AST;
+		} finally { // debugging
+			traceOut("or_op");
+		}
+	}
+	
+	public final void and_op() throws RecognitionException, TokenStreamException {
+		
+		traceIn("and_op");
+		try { // debugging
+			returnAST = null;
+			ASTPair currentAST = new ASTPair();
+			AST and_op_AST = null;
+			
+			try {      // for error handling
+				AST tmp95_AST = null;
+				tmp95_AST = astFactory.create(LT(1));
+				astFactory.addASTChild(currentAST, tmp95_AST);
+				match(AND);
+				and_op_AST = (AST)currentAST.root;
+			}
+			catch (RecognitionException ex) {
+				reportError(ex);
+				recover(ex,_tokenSet_0);
+			}
+			returnAST = and_op_AST;
+		} finally { // debugging
+			traceOut("and_op");
+		}
+	}
+	
+	public final void linear_op() throws RecognitionException, TokenStreamException {
+		
+		traceIn("linear_op");
+		try { // debugging
+			returnAST = null;
+			ASTPair currentAST = new ASTPair();
+			AST linear_op_AST = null;
+			
+			try {      // for error handling
+				switch ( LA(1)) {
+				case PLUS:
+				{
+					AST tmp96_AST = null;
+					tmp96_AST = astFactory.create(LT(1));
+					astFactory.addASTChild(currentAST, tmp96_AST);
+					match(PLUS);
+					linear_op_AST = (AST)currentAST.root;
+					break;
+				}
+				case MINUS:
+				{
+					AST tmp97_AST = null;
+					tmp97_AST = astFactory.create(LT(1));
+					astFactory.addASTChild(currentAST, tmp97_AST);
+					match(MINUS);
+					linear_op_AST = (AST)currentAST.root;
+					break;
+				}
+				default:
+				{
+					throw new NoViableAltException(LT(1), getFilename());
+				}
+				}
+			}
+			catch (RecognitionException ex) {
+				reportError(ex);
+				recover(ex,_tokenSet_0);
+			}
+			returnAST = linear_op_AST;
+		} finally { // debugging
+			traceOut("linear_op");
+		}
+	}
+	
 	public final void bool_literal() throws RecognitionException, TokenStreamException {
 		
 		traceIn("bool_literal");
@@ -2072,18 +2146,18 @@ public DecafParser(ParserSharedInputState state) {
 				switch ( LA(1)) {
 				case TK_true:
 				{
-					AST tmp85_AST = null;
-					tmp85_AST = astFactory.create(LT(1));
-					astFactory.addASTChild(currentAST, tmp85_AST);
+					AST tmp98_AST = null;
+					tmp98_AST = astFactory.create(LT(1));
+					astFactory.addASTChild(currentAST, tmp98_AST);
 					match(TK_true);
 					bool_literal_AST = (AST)currentAST.root;
 					break;
 				}
 				case TK_false:
 				{
-					AST tmp86_AST = null;
-					tmp86_AST = astFactory.create(LT(1));
-					astFactory.addASTChild(currentAST, tmp86_AST);
+					AST tmp99_AST = null;
+					tmp99_AST = astFactory.create(LT(1));
+					astFactory.addASTChild(currentAST, tmp99_AST);
 					match(TK_false);
 					bool_literal_AST = (AST)currentAST.root;
 					break;
@@ -2243,34 +2317,24 @@ public DecafParser(ParserSharedInputState state) {
 	}
 	public static final BitSet _tokenSet_11 = new BitSet(mk_tokenSet_11());
 	private static final long[] mk_tokenSet_12() {
-		long[] data = { 218424581690160626L, 0L};
+		long[] data = { 140736972455936L, 0L};
 		return data;
 	}
 	public static final BitSet _tokenSet_12 = new BitSet(mk_tokenSet_12());
 	private static final long[] mk_tokenSet_13() {
-		long[] data = { 218424581692325362L, 0L};
+		long[] data = { 8388608L, 0L};
 		return data;
 	}
 	public static final BitSet _tokenSet_13 = new BitSet(mk_tokenSet_13());
 	private static final long[] mk_tokenSet_14() {
-		long[] data = { 140736972455936L, 0L};
+		long[] data = { 218424581692257778L, 0L};
 		return data;
 	}
 	public static final BitSet _tokenSet_14 = new BitSet(mk_tokenSet_14());
 	private static final long[] mk_tokenSet_15() {
-		long[] data = { 8388608L, 0L};
-		return data;
-	}
-	public static final BitSet _tokenSet_15 = new BitSet(mk_tokenSet_15());
-	private static final long[] mk_tokenSet_16() {
-		long[] data = { 218424581692257778L, 0L};
-		return data;
-	}
-	public static final BitSet _tokenSet_16 = new BitSet(mk_tokenSet_16());
-	private static final long[] mk_tokenSet_17() {
 		long[] data = { 109950648975360L, 0L};
 		return data;
 	}
-	public static final BitSet _tokenSet_17 = new BitSet(mk_tokenSet_17());
+	public static final BitSet _tokenSet_15 = new BitSet(mk_tokenSet_15());
 	
 	}
