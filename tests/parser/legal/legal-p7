@@ -1,5 +1,5 @@
 class Program {
   void main() {
-    j = a * b - e + d;
+    j = a4 + s - t + z - y + x + w - a3;
   }
 }

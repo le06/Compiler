@@ -1,5 +1,8 @@
 package edu.mit.compilers.codegen.ll;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class LLArrayLocation implements LLExpression, LLLocation {
 	private String label;
 	private Type type;
@@ -77,5 +80,19 @@ public class LLArrayLocation implements LLExpression, LLLocation {
 	public void setLocation(String address) {
 		label = address;
 	}
+
+    @Override
+    public List<LLNode> getAllChildren() {
+        ArrayList<LLNode> x = new ArrayList<LLNode>();
+        if (index != null) {
+            x.add(index);
+        }
+        return x;
+    }
+
+    @Override
+    public String getNodeDescription() {
+        return label;
+    }
 
 }
