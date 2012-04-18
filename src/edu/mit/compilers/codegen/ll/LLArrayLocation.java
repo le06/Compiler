@@ -81,18 +81,4 @@ public class LLArrayLocation implements LLExpression, LLLocation {
 		label = address;
 	}
 
-    @Override
-    public List<LLNode> getAllChildren() {
-        ArrayList<LLNode> x = new ArrayList<LLNode>();
-        if (index != null) {
-            x.add(index);
-        }
-        return x;
-    }
-
-    @Override
-    public String getNodeDescription() {
-        return label;
-    }
-
 }

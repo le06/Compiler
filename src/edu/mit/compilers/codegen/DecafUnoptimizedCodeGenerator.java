@@ -33,6 +33,10 @@ public class DecafUnoptimizedCodeGenerator {
         debug = doDebug;
     }
     
+    public LLFile getLLRep() {
+        return file;
+    }
+    
     public void gen(Writer stream) throws RecognitionException, TokenStreamException {
         checker.check();                       // Check semantics
         if (checker.getError()) {              // Check error before continuing

@@ -49,8 +49,10 @@ public class LLVisualize implements LLNodeVisitor{
             m.accept(this);
         }
         
+        node.getMain().accept(this);
+        
         parents.pop();
-    }
+    }   
 
     @Override
     public void visit(LLGlobalDecl node) {
@@ -132,7 +134,7 @@ public class LLVisualize implements LLNodeVisitor{
     public void visit(LLCallout node) {
         name = getNextNode();
         
-        writeNodeInfo(name, node.getFnName());
+        writeNodeInfo(name, "Callout: " + node.getFnName());
         
         parents.push(name);
         for (LLExpression l : node.getParams()) {
@@ -144,8 +146,9 @@ public class LLVisualize implements LLNodeVisitor{
     @Override
     public void visit(LLStringLiteral node) {
         name = getNextNode();
-        
-        writeNodeInfo(name, node.getText());
+        //String x = node.getText().substring(1, node.getText().length() - 2);
+        //writeNodeInfo(name, node.getText().replaceAll("\"", "\\\""));
+        writeNodeInfo(name, "STRING");
     }
 
     @Override
@@ -218,7 +221,7 @@ public class LLVisualize implements LLNodeVisitor{
     public void visit(LLJump node) {
         name = getNextNode();
         
-        writeNodeInfo(name, "JMP " + node.getLabel());
+        writeNodeInfo(name, "JMP " + node.getLabel().getName());
     }
 
     @Override

@@ -159,6 +159,8 @@ public class CLI {
           target = Action.ASSEMBLY;
         } else if (argSansCase.equals("dot")) {
           target = Action.DOT;  
+        } else if (argSansCase.equals("cfg")) {
+            target = Action.CFG;
         } else {
           target = Action.DEFAULT; // Anything else is just default
         }

@@ -25,17 +25,5 @@ public class LLArrayDecl implements LLNode {
     public void accept(LLNodeVisitor v) {
         v.visit(this);
     }
-
-    @Override
-    public List<LLNode> getAllChildren() {
-        ArrayList<LLNode> x = new ArrayList<LLNode>();
-        x.add(malloc);
-        return x;
-    }
-
-    @Override
-    public String getNodeDescription() {
-        return "Declare " + label.getName();
-    }
     
 }

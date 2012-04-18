@@ -1,0 +1,102 @@
+	.globl main
+main:
+	enter	$(8 * 29), $0
+	mov		-8(%rbp), %r10
+	mov		%r10, -56(%rbp)
+	mov		$10, %r10
+	mov		%r10, -48(%rbp)
+	mov		-48(%rbp), %r11
+	mov		%r11, -8(%rbp)
+	mov		-16(%rbp), %r10
+	mov		%r10, -72(%rbp)
+	mov		$20, %r10
+	mov		%r10, -64(%rbp)
+	mov		-64(%rbp), %r11
+	mov		%r11, -16(%rbp)
+	mov		-24(%rbp), %r10
+	mov		%r10, -88(%rbp)
+	mov		$30, %r10
+	mov		%r10, -80(%rbp)
+	mov		-80(%rbp), %r11
+	mov		%r11, -24(%rbp)
+	mov		-32(%rbp), %r10
+	mov		%r10, -120(%rbp)
+	mov		-8(%rbp), %r10
+	mov		%r10, -96(%rbp)
+	mov		-16(%rbp), %r10
+	mov		%r10, -104(%rbp)
+	mov		-96(%rbp), %r10
+	mov		-104(%rbp), %r11
+	add		%r11, %r10
+	mov		%r10, -112(%rbp)
+	mov		-112(%rbp), %r11
+	mov		%r11, -32(%rbp)
+	mov		-40(%rbp), %r10
+	mov		%r10, -152(%rbp)
+	mov		-24(%rbp), %r10
+	mov		%r10, -128(%rbp)
+	mov		$3, %r10
+	mov		%r10, -136(%rbp)
+	mov		-128(%rbp), %r10
+	mov		-136(%rbp), %r11
+	imul	%r11, %r10
+	mov		%r10, -144(%rbp)
+	mov		-144(%rbp), %r11
+	mov		%r11, -40(%rbp)
+	mov		-40(%rbp), %r10
+	mov		%r10, -200(%rbp)
+	mov		-32(%rbp), %r10
+	mov		%r10, -160(%rbp)
+	mov		-40(%rbp), %r10
+	mov		%r10, -168(%rbp)
+	mov		-160(%rbp), %r10
+	mov		-168(%rbp), %r11
+	imul	%r11, %r10
+	mov		%r10, -176(%rbp)
+	mov		$100, %r10
+	mov		%r10, -184(%rbp)
+	mov		-176(%rbp), %r10
+	mov		-184(%rbp), %r11
+	sub		%r11, %r10
+	mov		%r10, -192(%rbp)
+	mov		-192(%rbp), %r11
+	mov		%r11, -40(%rbp)
+	mov		-32(%rbp), %r10
+	mov		%r10, -208(%rbp)
+	mov		-40(%rbp), %r10
+	mov		%r10, -216(%rbp)
+	mov		-216(%rbp), %rdx
+	mov		-208(%rbp), %rsi
+	mov		$.strlit, %rdi
+	mov		$0, %rax
+	call	printf
+	mov		%rax, -224(%rbp)
+	mov		$0, %rax
+	leave
+	ret
+.ARRAY_OUT_OF_BOUNDS:
+	mov		$.error, %rdi
+	mov		$0, %rax
+	call	printf
+	mov		$1, %rax
+	int		$0x80
+.MISSING_RETURN:
+	mov		$.error_1, %rdi
+	mov		$0, %rax
+	call	printf
+	mov		$1, %rax
+	int		$0x80
+.DIVIDE_BY_ZERO:
+	mov		$.error_2, %rdi
+	mov		$0, %rax
+	call	printf
+	mov		$1, %rax
+	int		$0x80
+.strlit:
+	.string	"%d %d\n"
+.error:
+	.string	"Exception: array index out-of-bounds\n"
+.error_1:
+	.string	"Exception: non-void function missing return statement\n"
+.error_2:
+	.string	"Exception: division by zero\n"

@@ -10,6 +10,7 @@ import edu.mit.compilers.codegen.DecafUnoptimizedCodeGenerator;
 import edu.mit.compilers.grammar.*;
 import edu.mit.compilers.tools.CLI;
 import edu.mit.compilers.tools.CLI.Action;
+import edu.mit.compilers.tools.LLVisualize;
 //import edu.mit.compilers.tools.GenericTreeWalk;
 import edu.mit.compilers.tools.TreeVisualizer;
 
@@ -91,14 +92,15 @@ class Main {
             System.exit(-1);
         }
         
-      } else if (CLI.target == Action.ASSEMBLY) {
+      } else if (CLI.target == Action.ASSEMBLY ||
+                 CLI.target == Action.CFG) {
           DecafScanner scanner = 
                   new DecafScanner(new DataInputStream(inputStream));
           DecafParser parser = new DecafParser(scanner);
           DecafChecker checker = new DecafChecker(parser);
           DecafUnoptimizedCodeGenerator gen = new DecafUnoptimizedCodeGenerator(checker);
           gen.setTrace(CLI.debug);
-          
+         
  //         System.out.println(CLI.outfile);
           File f = new File(CLI.outfile);
           
@@ -111,6 +113,11 @@ class Main {
           out.close();
           if (gen.getError()) {
               System.exit(-1);
+          }
+          
+          if (CLI.target == Action.CFG) {
+              LLVisualize v = new LLVisualize();
+              v.visualize(gen.getLLRep(), System.out);
           }
       }
     } catch(Exception e) {

@@ -1,0 +1,110 @@
+class Program
+{
+  int gurp(int a, int b, boolean c, int d, int e, int f, boolean g, int h)
+  {
+    int i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z, a1, a2, a3, a4;
+
+    if ( a > 50 )
+      {
+	o = a + b + l;
+	j = l - m;
+	if ( c )
+	  {
+	    l = e + f - (h + n);
+	    f = f - 1;
+	    q = o - 3;
+	  }
+	else
+	  {
+	    q = o + 3;
+	  }
+	if ( c || g )
+	  {
+	    s = f + e + (h - b);
+	  }
+      }
+    else
+      {
+	o = b - a;
+	j = l + m;
+	if ( g )
+	  {
+	    f = 3 + (a - o);
+	    q = 3 - o;
+	    s = f + q;
+	  }
+	else
+	  {
+	    s = 3 + (o - a - 2);
+	    q = s + j;
+	    f = s + q - q;
+	  }
+      }
+    callout("printf","after first if\n");
+    t = e + l - i;
+    a1 = t + j + o;
+    r = t - a1 + m - j;
+    v = l + a1 + (t - (q + f));
+    if ( g )
+      {
+	w = 3;
+      }
+    else
+      {
+	w = -1;
+      }
+    callout("printf","after second if\n");
+    u = 99 + n - e + t;
+    y = e - s + n + o + m - e + b - b + e;
+    a2 = a1 + t - n - t;
+    a4 = h + f + d - e;
+    if ( w == -1 )
+      {
+	a3 = a2 + a4;
+      }
+    else
+      {
+	a3 = a4 - a2;
+      }
+    z = u - v + w;
+    p = 42 - z;
+
+    callout("printf","after third if\n");
+    callout("printf","%d",a - i + d + j - e - f + l + m);
+    callout("printf"," ");
+    callout("printf","%d",b - k - h + n + o + q - r - a2);
+    callout("printf"," ");
+    callout("printf","%d",a4 + s - t + z - y + x + w - a3);
+    callout("printf"," ");
+    if ( c )
+      {
+	callout("printf","%d",p + u - v + a1);
+      }
+    else
+      {
+	if ( g )
+	  {
+	    callout("printf","%d",u - v + a1 - p);
+	  }
+	else
+	  {
+	    callout("printf","%d",a1 + v + p - u);
+	  }
+      }
+    callout("printf","after fourth if\n");
+    return a - b + d + e + f + h + i + j + k + l + m - n + o - p + q
+      - r + s - t + u - v + w - x + y - z + a1 + a2 + a3 - a4;
+  }
+
+
+  void main()
+  {
+    int y, z, a, b;
+    int x;
+    for (x = 3; 5) 
+      {
+	callout("printf","Top of loop\n");
+	z = gurp(1 + x, 0-x, true, 3, 2 + x, 1 - x, true, 4 - x);
+      }
+  }
+}
