@@ -51,4 +51,9 @@ public class LLMethodDecl implements LLNode {
     public void accept(LLNodeVisitor v) {
         v.visit(this);
     }
+    
+    @Override
+    public String toString() {
+        return method_name;
+    }
 }

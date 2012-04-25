@@ -33,4 +33,8 @@ public class LLIntLiteral implements LLExpression {
         address_of_result = addr;
     }
     
+    @Override
+    public String toString() {
+        return Long.toString(value); 
+    }
 }

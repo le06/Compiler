@@ -22,5 +22,10 @@ public class LLMov implements LLNode {
 	public void accept(LLNodeVisitor v) {
 		v.visit(this);
 	}
+	
+	@Override
+    public String toString() {
+        return "mov " + src + ", " + dest;
+    }
 
 }

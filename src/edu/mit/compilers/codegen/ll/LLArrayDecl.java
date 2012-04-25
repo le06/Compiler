@@ -26,4 +26,8 @@ public class LLArrayDecl implements LLNode {
         v.visit(this);
     }
     
+    @Override
+    public String toString() {
+        return label.toString() + "[" + malloc.toString() + "]";
+    }
 }

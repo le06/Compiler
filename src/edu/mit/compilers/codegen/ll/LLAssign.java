@@ -37,4 +37,8 @@ public class LLAssign implements LLNode {
                            asmLocation + "\n"
                           );
     }*/
+    
+    public String toString() {
+        return loc.toString() + " = " + expr.toString();
+    }
 }

@@ -81,4 +81,8 @@ public class LLVarLocation implements LLExpression, LLLocation {
         // want to put it on the stack
     }*/
 	
+	@Override
+    public String toString() {
+        return label;
+    }
 }

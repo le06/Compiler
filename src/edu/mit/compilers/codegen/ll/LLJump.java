@@ -68,4 +68,9 @@ public class LLJump implements LLNode {
     public void writeASM(Writer outputStream) throws IOException {
         outputStream.write(getOpcode() + "\t" + label.getName());
     }*/
+    
+    @Override
+    public String toString() {
+        return getOpcode() + " " + label.toString();
+    }
 }

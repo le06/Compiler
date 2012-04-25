@@ -40,4 +40,8 @@ public class LLUnaryNeg implements LLExpression {
         outputStream.write("imul $-1, ");
     }*/
 	
+    @Override
+    public String toString() {
+        return "-" + negated_expr.toString();
+    }
 }

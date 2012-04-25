@@ -47,4 +47,9 @@ public class LLStringLiteral implements LLExpression {
         // irrelevant. address is already implied by label.
     }
     
+    @Override
+    public String toString() {
+        return label.toString() + ": " + literal; 
+    }
+    
 }

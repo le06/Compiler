@@ -53,4 +53,17 @@ public class LLCallout implements LLExpression {
         temp_location = addr;
     }
 
+    @Override
+    public String toString() {
+        StringBuilder out = new StringBuilder();
+        out.append(fn_name + "(");
+        
+        for (LLExpression e : params) {
+            out.append(e.toString() + ",");
+        }
+        
+        out.append(")");
+        
+        return out.toString();
+    }
 }

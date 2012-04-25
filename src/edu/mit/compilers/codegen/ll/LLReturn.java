@@ -26,4 +26,12 @@ public class LLReturn implements LLNode {
         v.visit(this);
     }
 
+    @Override
+    public String toString() {
+        if (has_return_value) {
+            return "ret " + ret_val.toString();
+        } else {
+            return "ret";
+        }
+    }
 }

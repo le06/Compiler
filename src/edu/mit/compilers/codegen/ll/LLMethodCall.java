@@ -61,4 +61,18 @@ public class LLMethodCall implements LLExpression {
     public void setAddress(String addr) {
         this.temp_location = addr;
     }
+    
+    @Override
+    public String toString() {
+        StringBuilder out = new StringBuilder();
+        out.append(method + "(");
+        
+        for (LLExpression e : params) {
+            out.append(e.toString() + ",");
+        }
+        
+        out.append(")");
+        
+        return out.toString();
+    }
 }

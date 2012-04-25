@@ -34,7 +34,15 @@ public class LLBinaryOp implements LLExpression {
 	public LLExpression getRhs() {
 		return rhs;
 	}
+	
+	public void setLhs(LLExpression l) {
+	    lhs = l;
+	}
 
+	public void setRhs(LLExpression r) {
+        rhs = r;
+    }
+	
 	public IrBinOperator getOp() {
 		return op;
 	}
@@ -58,4 +66,8 @@ public class LLBinaryOp implements LLExpression {
         address_of_result = addr;
     }
 
+    @Override
+    public String toString() {
+        return lhs.toString() + " " + op.toString() + " " + rhs.toString();
+    }
 }

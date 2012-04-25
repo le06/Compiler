@@ -80,5 +80,10 @@ public class LLArrayLocation implements LLExpression, LLLocation {
 	public void setLocation(String address) {
 		label = address;
 	}
+	
+	@Override
+	public String toString() {
+	    return label + "[" + index.toString() + "]";
+	}
 
 }

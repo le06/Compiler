@@ -17,4 +17,8 @@ public class LLMalloc implements LLNode {
 		v.visit(this);
 	}
 
+	@Override
+    public String toString() {
+        return Long.toString(size); 
+    }
 }

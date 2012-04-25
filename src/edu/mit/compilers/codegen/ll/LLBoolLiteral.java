@@ -32,5 +32,9 @@ public class LLBoolLiteral implements LLExpression {
     public void setAddress(String addr) {
         address_of_result = addr;
     }
-
+    
+    @Override
+    public String toString() {
+        return Boolean.toString(val);
+    }
 }

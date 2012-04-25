@@ -36,4 +36,9 @@ public class LLLabel implements LLNode {
         
         outputStream.write(name + ":\n");
     }*/
+    
+    @Override
+    public String toString() {
+        return label; 
+    }
 }

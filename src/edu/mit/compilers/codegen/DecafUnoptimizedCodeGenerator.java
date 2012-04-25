@@ -10,6 +10,7 @@ import edu.mit.compilers.checker.DecafChecker;
 import edu.mit.compilers.checker.Ir.Ir;
 import edu.mit.compilers.checker.Ir.IrNode;
 import edu.mit.compilers.codegen.ll.LLFile;
+import edu.mit.compilers.codegen.ll.LLNode;
 import edu.mit.compilers.codegen.LabelNamer;
 
 public class DecafUnoptimizedCodeGenerator {
@@ -45,17 +46,20 @@ public class DecafUnoptimizedCodeGenerator {
         }
         HashMap<String, Integer> localCounts = checker.getLocalCounts();
 
-        //System.out.println(1);
         ir = checker.getIr();                   // Get Ir
-        //System.out.println(2);
         file = (LLFile)ir.getllRep(null, null); // Convert to LL
-        //System.out.println(3);
         lNamer.name(file);                      // Make labels unique
-        //System.out.println(4);
+        
+        if (debug) {
+            CfgGen g = new CfgGen();
+            g.generateCFG(file);
+            for (LLNode n : g.getInstructions()) {
+                System.out.println(n.toString());
+            }
+        }
+        
         aAssign.setLocalCounts(localCounts);	// Pass info about locals
-        //System.out.println(5);
         aAssign.assign(file);                   // Assign temp var addresses
-        //System.out.println(6);
         generator.outputASM(stream, file);      // Write actual ASM to stream
     }
     
