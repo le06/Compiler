@@ -21,6 +21,10 @@ public class BasicBlock {
         children.add(b);
     }
     
+    public ArrayList<BasicBlock> getChildren() {
+    	return children;
+    }
+    
     public ArrayList<LLNode> getInstructions() {
     	return instructions;
     }

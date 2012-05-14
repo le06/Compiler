@@ -1,0 +1,18 @@
+class Program
+{
+    void main () 
+    {
+        int i1, a, b;
+        a = 20;
+        b = 3; 
+        i1 = 8 / 4;
+        callout("printf","div should yeild 2, is: %d\n",i1);
+        i1 = a % b;
+  	callout("printf","20 mod 3 = 2, is: %d\n",i1);
+        a = a / b;	
+        callout("printf","20 div 3 = 6, is: %d\n",a); 
+        a = a / -b;
+        callout("printf","6 div -3 = -2, is: %d\n",a); 
+    }
+}
+

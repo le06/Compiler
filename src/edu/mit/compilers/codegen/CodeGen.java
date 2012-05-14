@@ -181,8 +181,7 @@ public class CodeGen implements LLNodeVisitor {
             } else if (node.getExpr() instanceof LLIntLiteral) {
             	source = "$" + ((LLIntLiteral)node.getExpr()).getValue();
             	
-            	println("\tmov " + source + ", " + R10);
-            	println("\tmov " + R10 + ", " + loc_addr);
+            	println("\tmovq " + source + ", " + loc_addr);
             } else if (node.getExpr() instanceof LLBinaryOp) {
             	node.getExpr().accept(this);
             	source = R11;
@@ -193,6 +192,11 @@ public class CodeGen implements LLNodeVisitor {
             	source = RAX;
             	
             	println("\tmov " + source + ", " + loc_addr);
+            } else if (node.getExpr() instanceof LLUnaryNeg) {
+            	LLVarLocation rhs = (LLVarLocation)((LLUnaryNeg)node.getExpr()).getExpr();
+            	println("\tmovq " + rhs.addressOfResult() + ", " + R10);
+            	println("\tneg " + R10);
+            	println("\tmovq " + R10 + ", " + loc_addr);
             } else {
             	throw new RuntimeException("Unimplemented in CodeGen, LLAssign");
             }
@@ -352,14 +356,38 @@ public class CodeGen implements LLNodeVisitor {
         	println("\timul " + R10 + ", " + R11);
         	break;
         case DIV:
-        	println("\tmov " + lhs + ", " + R10);
-            println("\tmov " + rhs + ", " + R11);
-        	println("\tidiv " + R10 + ", " + R11);
+        	if (r instanceof LLIntLiteral) {
+        		if (((LLIntLiteral)r).getValue() == 0) {
+        			println("jmp "); // TODO: Add in jmp ARRAY_OOB
+        			break;
+        		}
+        	} else {
+	        	println("\tcmp $0, " + rhs);
+	        	// TODO: Add in jne ARRAY_OOB
+        	}
+        	println("\tmovq " + lhs + ", " + RAX);
+            println("\tmovq " + RAX + ", " + RDX);
+            println("\tsarq " + "$63" + ", " + RDX);
+            println("\tmovq " + rhs + ", " + R11);
+        	println("\tidivq " + R11);
+        	println("\tmovq " + RAX + ", " + R11);
         	break;
         case MOD:
-        	println("\tmov " + lhs + ", " + R10);
-            println("\tmov " + rhs + ", " + R11);
-        	println("\tidiv " + R10 + ", " + R11);
+        	if (r instanceof LLIntLiteral) {
+        		if (((LLIntLiteral)r).getValue() == 0) {
+        			println("jmp "); // TODO: Add in jmp ARRAY_OOB
+        			break;
+        		}
+        	} else {
+	        	println("\tcmp $0, " + rhs);
+	        	// TODO: Add in jne ARRAY_OOB
+        	}
+        	println("\tmovq " + lhs + ", " + RAX);
+            println("\tmovq " + RAX + ", " + RDX);
+            println("\tsarq " + "$63" + ", " + RDX);
+            println("\tmovq " + rhs + ", " + R11);
+        	println("\tidivq " + R11);
+        	println("\tmovq " + RDX + ", " + R11);
         	break;
         default:
         	throw new RuntimeException("BinOp not yet implemented in codegen");	
@@ -391,8 +419,7 @@ public class CodeGen implements LLNodeVisitor {
 
     @Override
     public void visit(LLJump node) {
-        // TODO Auto-generated method stub
-        
+        println("\t" + node.getOpcode() + " ." + node.getLabel());
     }
 
     @Override
@@ -407,8 +434,9 @@ public class CodeGen implements LLNodeVisitor {
 
     @Override
     public void visit(LLCmp node) {
-        // TODO Auto-generated method stub
-        
+        println("\tmov " + node.getL().addressOfResult() + ", " + R10);
+        println("\tmov " + node.getR().addressOfResult() + ", " + R11);
+        println("\tcmp " + R10 + ", " + R11);
     }
 
     @Override
@@ -429,6 +457,10 @@ public class CodeGen implements LLNodeVisitor {
                 } else {
                     // Do nothing, it is already in RAX
                 }
+            } else if (node.getExpr() instanceof LLIntLiteral) {
+            	println("\tmov $" + ((LLIntLiteral)node.getExpr()).getValue() + ", " + RAX);
+            } else {
+            	throw new RuntimeException("Unexpected return type in CodeGen");
             }
         } else { // Return 0
             println("\tmov $0, " + RAX);

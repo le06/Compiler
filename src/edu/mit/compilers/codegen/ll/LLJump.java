@@ -55,6 +55,10 @@ public class LLJump implements LLNode {
         	return "jl";
         case GT:
         	return "jg";
+        case LEQ:
+        	return "jle";
+        case GEQ:
+        	return "jge";
         default:
             return null;
         }

@@ -2,11 +2,24 @@ package edu.mit.compilers.codegen.ll;
 
 public class LLCmp implements LLNode {
 
-    private LLVarLocation l, r;
+    private LLExpression l, r;
     
-    public LLCmp(LLVarLocation left, LLVarLocation right) {
+    public LLCmp(LLExpression left, LLExpression right) {
         l = left;
         r = right;
+    }
+    
+    public LLCmp(LLVarLocation right) {
+    	l = new LLIntLiteral(0);
+    	r = right;
+    }
+    
+    public LLExpression getL() {
+    	return l;
+    }
+    
+    public LLExpression getR() {
+    	return r;
     }
     
     @Override

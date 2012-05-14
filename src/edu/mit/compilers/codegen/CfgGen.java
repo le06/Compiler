@@ -7,12 +7,16 @@ import edu.mit.compilers.checker.Ir.IrBinOperator;
 import edu.mit.compilers.codegen.ll.*;
 import edu.mit.compilers.codegen.ll.LLExpression.Type;
 import edu.mit.compilers.codegen.ll.LLJump.JumpType;
+import edu.mit.compilers.codegen.ll.LLCmp;
 
 public class CfgGen implements LLNodeVisitor {
     private BasicBlock currentBlock, head;
     private ArrayList<LLNode> instructions;
     private String TEMP = "t";
     private int currentTemp = 0;
+    
+    private String SS = "short_circuit";
+    private int currentSS = 0;
     
     private ArrayList<BasicBlock> blockCache;
     private ArrayList<String> targetCache;
@@ -60,6 +64,10 @@ public class CfgGen implements LLNodeVisitor {
 
     private String getNextTemp() {
         return TEMP + currentTemp++;
+    }
+    
+    private String getNextSS() {
+    	return SS + currentSS++;
     }
     
     @Override
@@ -234,13 +242,86 @@ public class CfgGen implements LLNodeVisitor {
         // Should not have to do anything
     }
 
+    private void writeCmp(LLBinaryOp op, LLLabel target) {
+    	LLCmp cmp;
+    	LLJump jmp;
+    	
+    	switch (op.getOp()) {
+    	case EQ:
+            cmp = new LLCmp(op.getRhs(), op.getLhs());
+            jmp = new LLJump(JumpType.EQUAL, target);
+            break;
+        case NEQ:
+        	cmp = new LLCmp(op.getRhs(), op.getLhs());
+            jmp = new LLJump(JumpType.NOT_EQUAL, target);
+            break;
+        case GEQ:
+        	cmp = new LLCmp(op.getRhs(), op.getLhs());
+        	jmp = new LLJump(JumpType.GEQ, target);
+            break;
+        case GT:
+	        cmp = new LLCmp(op.getRhs(), op.getLhs());
+	        jmp = new LLJump(JumpType.GT, target);
+            break;
+        case LEQ:
+        	cmp = new LLCmp(op.getRhs(), op.getLhs());
+            jmp = new LLJump(JumpType.LEQ, target);
+            break;
+        case LT:
+        	cmp = new LLCmp(op.getRhs(), op.getLhs());
+            jmp = new LLJump(JumpType.LT, target);
+            break;
+        default:
+        	throw new RuntimeException("Shouldn't be here");
+    	}
+    	
+        instructions.add(cmp);
+        currentBlock.addInstruction(cmp);
+        instructions.add(jmp);
+        currentBlock.addInstruction(jmp);
+    }
+    
+    private void reduceBooleanExpression(LLExpression cond, LLLabel jmpPoint) {
+        if (cond instanceof LLBinaryOp) {
+        	LLBinaryOp op = (LLBinaryOp)cond;
+        	switch (op.getOp()) {
+        	case EQ:
+            case NEQ:
+            case GEQ:
+            case GT:
+            case LEQ:
+            case LT:
+            	writeCmp(op, jmpPoint);
+                break;
+            case AND:
+            	
+            	break;
+                
+            case OR:
+            	
+            	break;
+        	}
+        	
+        } else if (cond instanceof LLVarLocation) {
+        	LLCmp cmp = new LLCmp((LLVarLocation)cond);
+        	LLJump jmp = new LLJump(JumpType.NOT_EQUAL, jmpPoint);
+        	
+        	instructions.add(cmp);
+            currentBlock.addInstruction(cmp);
+            instructions.add(jmp);
+            currentBlock.addInstruction(jmp);
+        } 
+    }
+    
     @Override
     public void visit(LLJump node) {
-        //reduceExpression(node.getCond());
-        reduceBooleanExpression(node.getCond());
-        
-        currentBlock.addInstruction(node);
-        instructions.add(node);
+    	if (node.getCond() == null) {
+    		instructions.add(node);
+            currentBlock.addInstruction(node);
+    	} else {
+    		reduceBooleanExpression(node.getCond(), node.getLabel());
+    	}
+    
         
         BasicBlock newBlock = new BasicBlock();
         // At a jump, the current basic block splits to have two children:
@@ -332,11 +413,27 @@ public class CfgGen implements LLNodeVisitor {
     }
     
     private LLVarLocation reduceFnCall(LLMethodCall m) {
+    	LLMethodCall m2 = new LLMethodCall(m.getMethodName(), m.getType());
+    	
+    	for (LLExpression param : m.getParams()) {
+    		m2.addParam(reduceExpression(param));
+    	}
+    	
         LLVarLocation out = new LLVarLocation(1, getNextTemp());
-        
-        LLAssign ass = new LLAssign(out, m);
+        LLAssign ass = new LLAssign(out, m2);
         
         // Add this instruction to the output
+        instructions.add(ass);
+        currentBlock.addInstruction(ass);
+        
+        return out;
+    }
+    
+    private LLVarLocation reduceUnaryNeg(LLUnaryNeg n) {
+    	LLVarLocation out = new LLVarLocation(1, getNextTemp());
+    	LLUnaryNeg neg = new LLUnaryNeg(reduceExpression(n.getExpr()));
+        LLAssign ass = new LLAssign(out, neg);
+        
         instructions.add(ass);
         currentBlock.addInstruction(ass);
         
@@ -355,6 +452,8 @@ public class CfgGen implements LLNodeVisitor {
             l = (LLVarLocation)node.getLhs();
         } else if (node.getLhs() instanceof LLIntLiteral) {
             l = node.getLhs();
+        } else if (node.getLhs() instanceof LLUnaryNeg) {
+        	l = reduceUnaryNeg((LLUnaryNeg)node.getLhs());
         } else {
             throw new RuntimeException("Unexpected type in bin op: " + node.getLhs().getClass());
         }
@@ -367,6 +466,8 @@ public class CfgGen implements LLNodeVisitor {
             r = (LLVarLocation)node.getRhs();
         } else if (node.getRhs() instanceof LLIntLiteral) {
             r = node.getRhs();
+        } else if (node.getRhs() instanceof LLUnaryNeg) {
+        	r = reduceUnaryNeg((LLUnaryNeg)node.getRhs());
         } else {
             throw new RuntimeException("Unexpected type in bin op: " + node.getRhs().getClass());
         }
@@ -385,11 +486,46 @@ public class CfgGen implements LLNodeVisitor {
         return out;
     }
     
+    @Override
+	public void visit(LLCmp node) {
+		// Do nothing
+	}
+    
+/*    // Used in conditionals
+    private void reduceBooleanExpression(LLExpression e, LLLabel jmpLoc) {
+        if (e instanceof LLBinaryOp) {
+        	
+        } else if (e instanceof LLVarLocation) {
+        	LLCmp cmp = new LLCmp((LLVarLocation)e);
+        	LLJump jmp = new LLJump(JumpType.NOT_EQUAL, jmpLoc);
+        	
+        	instructions.add(cmp);
+            currentBlock.addInstruction(cmp);
+            instructions.add(jmp);
+            currentBlock.addInstruction(jmp);
+        }
+    }*/
+    
+    // Used in statements
     private LLExpression reduceBooleanExpression(LLExpression e) {
-        return e;
+    	if (e instanceof LLBinaryOp) {
+        	return e; // TODO
+        } else if (e instanceof LLVarLocation) {
+        	return e;
+        } else {
+        	return e;
+        }
     }
+    
+    
+    
+}
 
-/*    private LLExpression reduceBooleanExpression(LLExpression e, LLLabel exitLabel, boolean invert) {
+	
+    
+
+
+ /*   private LLExpression reduceBooleanExpression(LLExpression e, LLLabel exitLabel, boolean invert) {
         if (e instanceof LLBinaryOp) {
             return reduceBooleanBinOp((LLBinaryOp)e, exitLabel, invert);
             // TODO: Literals, unary not
@@ -535,7 +671,7 @@ public class CfgGen implements LLNodeVisitor {
         return null;
     }*/
 
-    @Override
+   /* @Override
     public void visit(LLCmp node) {
         // Do nothing at this stage
     }
@@ -585,5 +721,5 @@ public class CfgGen implements LLNodeVisitor {
         String inst_line = formatLine(inst, "$0x80");
         writeLine(inst_line);
         
-    }*/
-}
+    }
+}*/

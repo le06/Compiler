@@ -6,11 +6,13 @@ import java.util.HashMap;
 import edu.mit.compilers.codegen.ll.LLAssign;
 import edu.mit.compilers.codegen.ll.LLBinaryOp;
 import edu.mit.compilers.codegen.ll.LLCallout;
+import edu.mit.compilers.codegen.ll.LLCmp;
 import edu.mit.compilers.codegen.ll.LLExpression;
 import edu.mit.compilers.codegen.ll.LLMethodCall;
 import edu.mit.compilers.codegen.ll.LLMethodDecl;
 import edu.mit.compilers.codegen.ll.LLNode;
 import edu.mit.compilers.codegen.ll.LLReturn;
+import edu.mit.compilers.codegen.ll.LLUnaryNeg;
 import edu.mit.compilers.codegen.ll.LLVarLocation;
 
 public class AddressAssign {
@@ -91,6 +93,10 @@ public class AddressAssign {
                         	rhs.setAddress(currentAssigments.get(rhs.getLabel()));
                 		}
                 	}
+                } else if (((LLAssign)node).getExpr() instanceof LLUnaryNeg) {
+                	LLExpression ex = ((LLUnaryNeg)((LLAssign)node).getExpr()).getExpr();
+                	LLVarLocation rhs = (LLVarLocation)ex;
+                	rhs.setAddress(currentAssigments.get(rhs.getLabel()));
                 }
             } else if (node instanceof LLCallout) {
             	LLCallout fn = (LLCallout)node;
@@ -115,6 +121,17 @@ public class AddressAssign {
             			LLVarLocation rhs = (LLVarLocation)rn.getExpr();
                     	rhs.setAddress(currentAssigments.get(rhs.getLabel()));
             		}
+            	}
+            } else if (node instanceof LLCmp) {
+            	LLCmp cmp = (LLCmp)node;
+            	if (cmp.getL() instanceof LLVarLocation) {
+            		LLVarLocation lhs = (LLVarLocation)cmp.getL();
+                	lhs.setAddress(currentAssigments.get(lhs.getLabel()));
+            	}
+            	
+            	if (cmp.getR() instanceof LLVarLocation) {
+            		LLVarLocation rhs = (LLVarLocation)cmp.getR();
+                	rhs.setAddress(currentAssigments.get(rhs.getLabel()));
             	}
             }
         }

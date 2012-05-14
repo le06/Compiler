@@ -89,7 +89,7 @@ public class IrForStmt extends IrStatement {
         
         LLExpression test = new LLBinaryOp((LLExpression)var,
                                          (LLExpression)myStop_value.getllRep(null, null),
-                                         IrBinOperator.LT,
+                                         IrBinOperator.GEQ,
                                          LLExpression.Type.INT);
         
         LLEnvironment block = (LLEnvironment)myBlock.getllRep(for_end, for_begin);
