@@ -6,6 +6,7 @@ import java.util.ArrayList;
 
 import edu.mit.compilers.checker.Ir.IrBinOperator;
 
+import edu.mit.compilers.codegen.ll.LLCmp;
 import edu.mit.compilers.codegen.ll.LLLocation;
 import edu.mit.compilers.codegen.ll.LLMalloc;
 import edu.mit.compilers.codegen.ll.LLArrayLocation;
@@ -1100,6 +1101,12 @@ public class CodeGenerator implements LLNodeVisitor {
 
     @Override
     public void visit(LLNop node) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void visit(LLCmp node) {
         // TODO Auto-generated method stub
         
     }

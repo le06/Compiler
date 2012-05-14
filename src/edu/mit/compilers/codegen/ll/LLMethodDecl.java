@@ -1,5 +1,7 @@
 package edu.mit.compilers.codegen.ll;
 
+import java.util.ArrayList;
+
 import edu.mit.compilers.codegen.ll.LLExpression.Type;
 
 public class LLMethodDecl implements LLNode {
@@ -9,6 +11,7 @@ public class LLMethodDecl implements LLNode {
     private int num_args;
     private int num_temps;
     private Type type;
+    private ArrayList<LLVarLocation> args = new ArrayList<LLVarLocation>();
     
     public LLMethodDecl(String name, Type t, int num_args) {
         method_name = name;
@@ -21,6 +24,14 @@ public class LLMethodDecl implements LLNode {
         method_code = code;
         type = t;
         this.num_args = num_args;
+    }
+    
+    public void addArg(String name) {
+    	args.add(new LLVarLocation(0, name));
+    }
+    
+    public ArrayList<LLVarLocation> getArgs() {
+    	return args;
     }
     
     public String getName() {

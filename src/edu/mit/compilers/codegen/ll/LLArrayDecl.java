@@ -1,8 +1,5 @@
 package edu.mit.compilers.codegen.ll;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class LLArrayDecl implements LLNode {
 
     private LLLabel label;

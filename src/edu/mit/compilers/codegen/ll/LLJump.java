@@ -18,6 +18,11 @@ public class LLJump implements LLNode {
         cond = expr;
         jmp_when = bool;
         label = loc;
+        if (bool) {
+            type = JumpType.NOT_EQUAL;
+        } else {
+            type = JumpType.EQUAL;
+        }
     }
     
     public static enum JumpType {

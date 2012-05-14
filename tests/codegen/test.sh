@@ -43,7 +43,7 @@ for file in `dirname $0`/input/*.dcf; do
     fi
     echo $msg
   fi
-#  rm -f $diffout $output $binary $asm;
+  rm -f $diffout $output $binary $asm;
 done
 
 exit $fail;

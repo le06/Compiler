@@ -1,0 +1,17 @@
+// test shortcircuit and other stuff
+
+class Program
+{
+  void main()
+  {
+    int a, b, c, d;
+    a = 13;
+    b = 15;
+    c = 12;
+    d = 20;
+
+    if (a < b && (b < c || c < d)) {
+      a = 20;
+    }
+  }
+}

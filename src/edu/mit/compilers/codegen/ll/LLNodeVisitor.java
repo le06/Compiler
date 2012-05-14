@@ -26,6 +26,7 @@ public interface LLNodeVisitor {
     public void visit(LLJump node);
     public void visit(LLLabel node);
     public void visit(LLMov node);
+    public void visit(LLCmp node);
     public void visit(LLReturn node);
     
     public void visit(LLNop node);

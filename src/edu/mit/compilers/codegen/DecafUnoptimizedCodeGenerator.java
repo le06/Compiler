@@ -1,6 +1,7 @@
 package edu.mit.compilers.codegen;
 
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import antlr.RecognitionException;
@@ -26,8 +27,9 @@ public class DecafUnoptimizedCodeGenerator {
     public DecafUnoptimizedCodeGenerator(DecafChecker dc) {
         checker = dc;
         lNamer = new LabelNamer();
-        aAssign = new AddressAssigner();
-        generator = new CodeGenerator();
+/*        aAssign = new AddressAssigner();
+        generator = new CodeGenerator();*/
+        
     }
     
     public void setTrace(boolean doDebug) {
@@ -44,23 +46,31 @@ public class DecafUnoptimizedCodeGenerator {
             wasError = true;
             return;
         }
-        HashMap<String, Integer> localCounts = checker.getLocalCounts();
-
+        
         ir = checker.getIr();                   // Get Ir
         file = (LLFile)ir.getllRep(null, null); // Convert to LL
         lNamer.name(file);                      // Make labels unique
         
+        CfgGen g = new CfgGen();
+        g.generateCFG(file);
+        ArrayList<BasicBlock> blocks = g.getBlocksInOrder();
+        
+        ArrayList<LLNode> instrs = new ArrayList<LLNode>();
+        
+        for (BasicBlock b : blocks) {
+        	instrs.addAll(b.getInstructions());
+        }
+        
         if (debug) {
-            CfgGen g = new CfgGen();
-            g.generateCFG(file);
-            for (LLNode n : g.getInstructions()) {
+            for (LLNode n : instrs) {
                 System.out.println(n.toString());
             }
         }
-        
-        aAssign.setLocalCounts(localCounts);	// Pass info about locals
-        aAssign.assign(file);                   // Assign temp var addresses
-        generator.outputASM(stream, file);      // Write actual ASM to stream
+
+        AddressAssign a = new AddressAssign();
+        HashMap<String, Integer> methodMap = a.assign(instrs);
+        CodeGen c = new CodeGen();
+        c.gen(instrs, methodMap, stream);
     }
     
     public boolean getError() {

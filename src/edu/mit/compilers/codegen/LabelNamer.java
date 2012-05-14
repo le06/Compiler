@@ -184,4 +184,10 @@ public class LabelNamer implements LLNodeVisitor {
         
     }
 
+    @Override
+    public void visit(LLCmp node) {
+        // TODO Auto-generated method stub
+        
+    }
+
 }

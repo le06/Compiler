@@ -20,7 +20,8 @@ public class LLIntLiteral implements LLExpression {
 
 	@Override
 	public String addressOfResult() {
-		return address_of_result;
+		//return address_of_result;
+		return "$" + value;
 	}
 
 	@Override

@@ -256,4 +256,10 @@ public class LLVisualize implements LLNodeVisitor{
         writeNodeInfo(name, "NOP");
     }
 
+    @Override
+    public void visit(LLCmp node) {
+        // TODO Auto-generated method stub
+        
+    }
+
 }

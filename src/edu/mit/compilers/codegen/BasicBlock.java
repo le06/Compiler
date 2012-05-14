@@ -20,4 +20,8 @@ public class BasicBlock {
     public void addChild(BasicBlock b) {
         children.add(b);
     }
+    
+    public ArrayList<LLNode> getInstructions() {
+    	return instructions;
+    }
 }

@@ -9,6 +9,7 @@ import edu.mit.compilers.codegen.ll.LLAssign;
 import edu.mit.compilers.codegen.ll.LLBinaryOp;
 import edu.mit.compilers.codegen.ll.LLBoolLiteral;
 import edu.mit.compilers.codegen.ll.LLCallout;
+import edu.mit.compilers.codegen.ll.LLCmp;
 import edu.mit.compilers.codegen.ll.LLEnvironment;
 import edu.mit.compilers.codegen.ll.LLExpression;
 import edu.mit.compilers.codegen.ll.LLFile;
@@ -229,6 +230,12 @@ public class AddressAssigner implements LLNodeVisitor {
 
     @Override
     public void visit(LLNop node) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void visit(LLCmp node) {
         // TODO Auto-generated method stub
         
     }
