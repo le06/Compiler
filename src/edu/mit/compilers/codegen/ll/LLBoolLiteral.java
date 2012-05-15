@@ -20,7 +20,13 @@ public class LLBoolLiteral implements LLExpression {
 
 	@Override
 	public String addressOfResult() {
-		return address_of_result;
+		if (val) {
+			return "$1";
+		} else {
+			return "$0";
+		}
+		
+		//return address_of_result;
 	}
 
 	@Override

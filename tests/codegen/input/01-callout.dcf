@@ -2,8 +2,7 @@ class Program
 {
     void main()
     {
-        int a, b, c;
-        callout("printf", "Hello, World.\n", a + b * c);
+        callout("printf", "Hello, World.\n");
     }
 }
 

@@ -43,6 +43,26 @@ public class CodeGen implements LLNodeVisitor {
         for (LLNode instr : instrs) {
             instr.accept(this);
         }
+        
+		println(".ARRAY_OUT_OF_BOUNDS:");
+		println("\tmov $.error, %rdi");
+		println("\tmov $0, %rax");
+		println("\tcall printf");
+		println("\tmov $1, %rax");
+		println("\tint $0x80");
+		println(".MISSING_RETURN:");
+		println("\tmov $.error_1, %rdi");
+		println("\tmov $0, %rax");
+		println("\tcall printf");
+		println("\tmov $1, %rax");
+		println("\tint $0x80");
+		println(".DIVIDE_BY_ZERO:");
+		println("\tmov $.error_2, %rdi");
+		println("\tmov $0, %rax");
+		println("\tcall printf");
+		println("\tmov $1, %rax");
+		println("\tint $0x80");
+
     }
     
     private void println(String s) {
@@ -54,7 +74,7 @@ public class CodeGen implements LLNodeVisitor {
     }
     
     private void writeHead() {
-        println(".globl main");
+        //println(".globl main");
     }
     
     private void initRegMap() {
@@ -79,12 +99,12 @@ public class CodeGen implements LLNodeVisitor {
     @Override
     public void visit(LLGlobalDecl node) {
         println("." + node.getLabel() + ":");
-        println(".space 8");
+        println("\t.space 8");
     }
 
     @Override
     public void visit(LLArrayDecl node) {
-        println(".data");
+        println("\t.data");
         println("." + node.getLabel() + ":");
         println("\t.space (8 * " + String.valueOf(node.getMalloc().getSize())
                                 + ")");
@@ -95,14 +115,20 @@ public class CodeGen implements LLNodeVisitor {
         // Do nothing
     }
 
+    boolean first_method = true;
+    
     @Override
     public void visit(LLMethodDecl node) {
+    	if (first_method) {
+    		println("\t.globl main");
+    		first_method = false;
+    	}
+    	
         println(node.getName() + ":");
         println("\tenter $(8 * " + 
         		methodSizeMap.get(node.getName()) + 
         		"), $0");
         
-        // TODO - get args
         ArrayList<LLVarLocation> args = node.getArgs();
 		for (int i = 0; i < args.size(); i++) {
 			loadArgument(i, args.get(i));
@@ -168,41 +194,50 @@ public class CodeGen implements LLNodeVisitor {
         		loc_addr = loc.addressOfResult();
         	}
         	
-        	if (node.getExpr() instanceof LLVarLocation) {
-            	LLVarLocation src = (LLVarLocation)node.getExpr();
-            	if (currentLocs.containsKey(src.getLabel())) {
-            		source = currentLocs.get(src.getLabel());
-            	} else {
-            		source = src.addressOfResult();
-            	}
-            	
-            	println("\tmov " + source + ", " + R10);
-            	println("\tmov " + R10 + ", " + loc_addr);
-            } else if (node.getExpr() instanceof LLIntLiteral) {
-            	source = "$" + ((LLIntLiteral)node.getExpr()).getValue();
-            	
-            	println("\tmovq " + source + ", " + loc_addr);
-            } else if (node.getExpr() instanceof LLBinaryOp) {
-            	node.getExpr().accept(this);
-            	source = R11;
-            	
-            	println("\tmov " + source + ", " + loc_addr);
-            } else if (node.getExpr() instanceof LLMethodCall) {
-            	writeMethodCall((LLMethodCall)node.getExpr());
-            	source = RAX;
-            	
-            	println("\tmov " + source + ", " + loc_addr);
-            } else if (node.getExpr() instanceof LLUnaryNeg) {
-            	LLVarLocation rhs = (LLVarLocation)((LLUnaryNeg)node.getExpr()).getExpr();
-            	println("\tmovq " + rhs.addressOfResult() + ", " + R10);
-            	println("\tneg " + R10);
-            	println("\tmovq " + R10 + ", " + loc_addr);
-            } else {
-            	throw new RuntimeException("Unimplemented in CodeGen, LLAssign");
-            }
+        } else if (node.getLoc() instanceof LLArrayLocation) {
+        	LLArrayLocation loc = (LLArrayLocation)node.getLoc();
+        	loc_addr = prepareArrayLocation(loc);
         } else {
         	throw new RuntimeException("Unimplemented in CodeGen, LLAssign");
         }
+        	
+    	if (node.getExpr() instanceof LLVarLocation) {
+        	LLVarLocation src = (LLVarLocation)node.getExpr();
+        	if (currentLocs.containsKey(src.getLabel())) {
+        		source = currentLocs.get(src.getLabel());
+        	} else {
+        		source = src.addressOfResult();
+        	}
+        	
+        	println("\tmov " + source + ", " + R10);
+        	println("\tmov " + R10 + ", " + loc_addr);
+        } else if (node.getExpr() instanceof LLIntLiteral) {
+        	source = "$" + ((LLIntLiteral)node.getExpr()).getValue();
+        	
+        	println("\tmovq " + source + ", " + loc_addr);
+        } else if (node.getExpr() instanceof LLBinaryOp) {
+        	node.getExpr().accept(this);
+        	source = R11;
+        	println("\tmov " + source + ", " + loc_addr);
+        } else if (node.getExpr() instanceof LLMethodCall) {
+        	writeMethodCall((LLMethodCall)node.getExpr());
+        	source = RAX;
+        	
+        	println("\tmov " + source + ", " + loc_addr);
+        } else if (node.getExpr() instanceof LLUnaryNeg) {
+        	LLVarLocation rhs = (LLVarLocation)((LLUnaryNeg)node.getExpr()).getExpr();
+        	println("\tmovq " + rhs.addressOfResult() + ", " + R10);
+        	println("\tneg " + R10);
+        	println("\tmovq " + R10 + ", " + loc_addr);
+        } else if (node.getExpr() instanceof LLArrayLocation) {
+        	LLArrayLocation dest = (LLArrayLocation)node.getExpr();
+        	source = prepareArrayLocation(dest);
+        	println("\tmovq " + source + ", " + R11);
+        	println("\tmovq " + R11 + ", " + loc_addr);
+        } else {
+        	throw new RuntimeException("Unimplemented in CodeGen, LLAssign");
+        }
+
         
         
     }
@@ -305,14 +340,35 @@ public class CodeGen implements LLNodeVisitor {
 
     @Override
     public void visit(LLVarLocation node) {
-        // TODO Auto-generated method stub
-        
+        // Shouldn't occur
     }
 
     @Override
     public void visit(LLArrayLocation node) {
-        // TODO Auto-generated method stub
-        
+        // Shouldn't occur
+    }
+    
+    private String prepareArrayLocation(LLArrayLocation a) {
+    	if (a.getIndexExpr() instanceof LLIntLiteral) {
+    		long val = ((LLIntLiteral)a.getIndexExpr()).getValue();
+    		if (val < 0 || val >= a.getSize()) {
+    			println("\tjmp .ARRAY_OUT_OF_BOUNDS");
+    		}
+    		println("\tmov $" + val + ", " + R11);
+    	} else if (a.getIndexExpr() instanceof LLVarLocation) {
+    		LLVarLocation src = (LLVarLocation)a.getIndexExpr();
+    		println("\tmovq " + src.addressOfResult() + ", " + R11);
+    		println("\tmovq $0, " + R10);
+    		println("\tcmp " + R10 + ", " + R11); // If index less than 0, jump AOOB
+    		println("\tjl  .ARRAY_OUT_OF_BOUNDS");
+    		println("\tmovq $" + a.getSize() + ", " + R10);
+    		println("\tcmp " + R10 + ", " + R11);
+    		println("\tjge  .ARRAY_OUT_OF_BOUNDS"); // If index >= size of array, jump AOOB
+    	} else {
+    		throw new RuntimeException("Unexpected array index expression");
+    	}
+    	println("\timulq $8, " + R11);
+    	return a.getLocation() + "(" + R10 + ")";
     }
 
     @Override
@@ -358,12 +414,12 @@ public class CodeGen implements LLNodeVisitor {
         case DIV:
         	if (r instanceof LLIntLiteral) {
         		if (((LLIntLiteral)r).getValue() == 0) {
-        			println("jmp "); // TODO: Add in jmp ARRAY_OOB
+        			println("jmp .DIVIDE_BY_ZERO");
         			break;
         		}
         	} else {
 	        	println("\tcmp $0, " + rhs);
-	        	// TODO: Add in jne ARRAY_OOB
+	        	println("je .DIVIDE_BY_ZERO");
         	}
         	println("\tmovq " + lhs + ", " + RAX);
             println("\tmovq " + RAX + ", " + RDX);
@@ -375,12 +431,12 @@ public class CodeGen implements LLNodeVisitor {
         case MOD:
         	if (r instanceof LLIntLiteral) {
         		if (((LLIntLiteral)r).getValue() == 0) {
-        			println("jmp "); // TODO: Add in jmp ARRAY_OOB
+        			println("jmp .DIVIDE_BY_ZERO");
         			break;
         		}
         	} else {
 	        	println("\tcmp $0, " + rhs);
-	        	// TODO: Add in jne ARRAY_OOB
+	        	println("je .DIVIDE_BY_ZERO");
         	}
         	println("\tmovq " + lhs + ", " + RAX);
             println("\tmovq " + RAX + ", " + RDX);

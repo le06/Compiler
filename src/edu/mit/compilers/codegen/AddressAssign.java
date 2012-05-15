@@ -2,12 +2,16 @@ package edu.mit.compilers.codegen;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 
+import edu.mit.compilers.codegen.ll.LLArrayLocation;
 import edu.mit.compilers.codegen.ll.LLAssign;
 import edu.mit.compilers.codegen.ll.LLBinaryOp;
 import edu.mit.compilers.codegen.ll.LLCallout;
 import edu.mit.compilers.codegen.ll.LLCmp;
 import edu.mit.compilers.codegen.ll.LLExpression;
+import edu.mit.compilers.codegen.ll.LLGlobalDecl;
 import edu.mit.compilers.codegen.ll.LLMethodCall;
 import edu.mit.compilers.codegen.ll.LLMethodDecl;
 import edu.mit.compilers.codegen.ll.LLNode;
@@ -25,6 +29,8 @@ public class AddressAssign {
         LLVarLocation currentVar;
         String currentMethod = null;
         
+        ArrayList<String> globals = new ArrayList<String>();
+        
         for (LLNode node : instructions) {
             if (node instanceof LLMethodDecl) {
             	if (currentMethod != null) {
@@ -35,6 +41,10 @@ public class AddressAssign {
             	currentMethod = ((LLMethodDecl)node).getName();
                 currentAssigments = new HashMap<String, String>();
                 currentOffset = BASE_OFFSET;
+                
+                for (String global : globals) {
+                	currentAssigments.put(global, "." + global);
+                }
                 
                 for (LLVarLocation arg : ((LLMethodDecl)node).getArgs()) {
                 	String addr = getAddr(currentOffset);
@@ -59,6 +69,12 @@ public class AddressAssign {
                         currentAssigments.put(currentVar.getLabel(), addr);
                         currentOffset += BASE_OFFSET;
                     }
+                } else if (((LLAssign)node).getLoc() instanceof LLArrayLocation) {
+                	LLArrayLocation a = (LLArrayLocation)((LLAssign)node).getLoc();
+                	if (a.getIndexExpr() instanceof LLVarLocation) {
+                		LLVarLocation rhs = (LLVarLocation)a.getIndexExpr();
+                    	rhs.setAddress(currentAssigments.get(rhs.getLabel()));
+                	}
                 }
                 
                 // Assign stuff to RHS, too
@@ -97,6 +113,12 @@ public class AddressAssign {
                 	LLExpression ex = ((LLUnaryNeg)((LLAssign)node).getExpr()).getExpr();
                 	LLVarLocation rhs = (LLVarLocation)ex;
                 	rhs.setAddress(currentAssigments.get(rhs.getLabel()));
+                } else if (((LLAssign)node).getExpr() instanceof LLArrayLocation) {
+                	LLArrayLocation a = (LLArrayLocation)((LLAssign)node).getExpr();
+                	if (a.getIndexExpr() instanceof LLVarLocation) {
+                		LLVarLocation rhs = (LLVarLocation)a.getIndexExpr();
+                    	rhs.setAddress(currentAssigments.get(rhs.getLabel()));
+                	}
                 }
             } else if (node instanceof LLCallout) {
             	LLCallout fn = (LLCallout)node;
@@ -133,6 +155,9 @@ public class AddressAssign {
             		LLVarLocation rhs = (LLVarLocation)cmp.getR();
                 	rhs.setAddress(currentAssigments.get(rhs.getLabel()));
             	}
+            } else if (node instanceof LLGlobalDecl) {
+            	String name = ((LLGlobalDecl)node).getLabel().getName();
+            	globals.add(name);
             }
         }
         

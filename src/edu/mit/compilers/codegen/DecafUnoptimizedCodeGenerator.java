@@ -71,6 +71,9 @@ public class DecafUnoptimizedCodeGenerator {
         HashMap<String, Integer> methodMap = a.assign(instrs);
         CodeGen c = new CodeGen();
         c.gen(instrs, methodMap, stream);
+        
+/*        CodeGenerator g2 = new CodeGenerator();
+        g2.outputASM(stream, file);*/
     }
     
     public boolean getError() {
