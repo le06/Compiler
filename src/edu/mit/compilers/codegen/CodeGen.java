@@ -345,7 +345,7 @@ public class CodeGen implements LLNodeVisitor {
 
     @Override
     public void visit(LLArrayLocation node) {
-        // Shouldn't occur
+        // S
     }
     
     private String prepareArrayLocation(LLArrayLocation a) {
@@ -368,7 +368,7 @@ public class CodeGen implements LLNodeVisitor {
     		throw new RuntimeException("Unexpected array index expression");
     	}
     	println("\timulq $8, " + R11);
-    	return a.getLocation() + "(" + R10 + ")";
+    	return "." + a.getLocation() + "(" + R11 + ")";
     }
 
     @Override

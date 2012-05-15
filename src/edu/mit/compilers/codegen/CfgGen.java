@@ -148,7 +148,7 @@ public class CfgGen implements LLNodeVisitor {
     public void visit(LLAssign node) {
         LLAssign newAss;
         
-        if (node.getExpr().getType() == Type.INT) {
+        if (!(node.getExpr().getType() == Type.BOOLEAN)) {
             newAss = new LLAssign(node.getLoc(), 
                                   reduceExpression(node.getExpr()));
         } else {
