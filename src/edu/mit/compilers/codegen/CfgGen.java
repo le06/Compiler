@@ -228,8 +228,7 @@ public class CfgGen implements LLNodeVisitor {
 
     @Override
     public void visit(LLUnaryNot node) {
-        // TODO Auto-generated method stub
-        
+        // Should not occur
     }
 
     @Override
@@ -242,37 +241,58 @@ public class CfgGen implements LLNodeVisitor {
         // Should not have to do anything
     }
 
-    private void writeCmp(LLBinaryOp op, LLLabel target) {
+    private void writeCmp(LLBinaryOp op, boolean jmpIf, LLLabel target) {
     	LLCmp cmp;
     	LLJump jmp;
     	
+    	cmp = new LLCmp(reduceExpression(op.getRhs()), 
+    			        reduceExpression(op.getLhs()));
+    	
     	switch (op.getOp()) {
     	case EQ:
-            cmp = new LLCmp(op.getRhs(), op.getLhs());
-            jmp = new LLJump(JumpType.EQUAL, target);
+            if (jmpIf) {
+            	jmp = new LLJump(JumpType.EQUAL, target);
+            } else {
+            	jmp = new LLJump(JumpType.NOT_EQUAL, target);
+            }
             break;
         case NEQ:
-        	cmp = new LLCmp(op.getRhs(), op.getLhs());
-            jmp = new LLJump(JumpType.NOT_EQUAL, target);
+        	if (jmpIf) {
+            	jmp = new LLJump(JumpType.NOT_EQUAL, target);
+            } else {
+            	jmp = new LLJump(JumpType.EQUAL, target);
+            }
             break;
-        case GEQ:
-        	cmp = new LLCmp(op.getRhs(), op.getLhs());
-        	jmp = new LLJump(JumpType.GEQ, target);
-            break;
-        case GT:
-	        cmp = new LLCmp(op.getRhs(), op.getLhs());
-	        jmp = new LLJump(JumpType.GT, target);
-            break;
-        case LEQ:
-        	cmp = new LLCmp(op.getRhs(), op.getLhs());
-            jmp = new LLJump(JumpType.LEQ, target);
-            break;
-        case LT:
-        	cmp = new LLCmp(op.getRhs(), op.getLhs());
-            jmp = new LLJump(JumpType.LT, target);
-            break;
+		case GEQ:
+			if (jmpIf) {
+				jmp = new LLJump(JumpType.GEQ, target);
+			} else {
+				jmp = new LLJump(JumpType.LT, target);
+			}
+			break;
+		case GT:
+			if (jmpIf) {
+				jmp = new LLJump(JumpType.GT, target);
+			} else {
+				jmp = new LLJump(JumpType.LEQ, target);
+			}
+			break;
+		case LEQ:
+			if (jmpIf) {
+				jmp = new LLJump(JumpType.LEQ, target);
+			} else {
+				jmp = new LLJump(JumpType.GT, target);
+			}
+			break;
+		case LT:
+			if (jmpIf) {
+				jmp = new LLJump(JumpType.LT, target);
+			} else {
+				jmp = new LLJump(JumpType.GEQ, target);
+			}
+			break;
         default:
-        	throw new RuntimeException("Shouldn't be here");
+        	throw new RuntimeException("Shouldn't be here in writeCmp");
     	}
     	
         instructions.add(cmp);
@@ -281,7 +301,7 @@ public class CfgGen implements LLNodeVisitor {
         currentBlock.addInstruction(jmp);
     }
     
-    private void reduceBooleanExpression(LLExpression cond, LLLabel jmpPoint) {
+    private void reduceBooleanExpression(LLExpression cond, boolean jmpIf, LLLabel jmpPoint) {
         if (cond instanceof LLBinaryOp) {
         	LLBinaryOp op = (LLBinaryOp)cond;
         	switch (op.getOp()) {
@@ -291,14 +311,39 @@ public class CfgGen implements LLNodeVisitor {
             case GT:
             case LEQ:
             case LT:
-            	writeCmp(op, jmpPoint);
+            	writeCmp(op, jmpIf, jmpPoint);
                 break;
             case AND:
-            	
+            	// ReduceLeft
+            	// If false, jump to ss
+            	// ReduceRight
+            	// If false, jump to ss
+            	// jump jmpPoint
+            	// .ss
+            	LLLabel ssAnd = new LLLabel(getNextSS());
+            	LLJump andSuccess = new LLJump(JumpType.UNCONDITIONAL, jmpPoint);
+            	reduceBooleanExpression(op.getLhs(), false, ssAnd);
+            	reduceBooleanExpression(op.getRhs(), false, ssAnd);
+            	instructions.add(andSuccess);
+            	currentBlock.addInstruction(andSuccess);
+            	instructions.add(ssAnd);
+            	currentBlock.addInstruction(ssAnd);
             	break;
-                
             case OR:
-            	
+            	// ReduceLeft
+            	// If true, jump to ss
+            	// ReduceRight
+            	// If true, jump to ss
+            	// jump jmpPoint
+            	// .ss
+            	LLLabel ssOr = new LLLabel(getNextSS());
+            	LLJump orSuccess = new LLJump(JumpType.UNCONDITIONAL, jmpPoint);
+            	reduceBooleanExpression(op.getLhs(), true, jmpPoint);
+            	reduceBooleanExpression(op.getRhs(), true, jmpPoint);
+/*            	instructions.add(orSuccess);
+            	currentBlock.addInstruction(orSuccess);
+            	instructions.add(ssOr);
+            	currentBlock.addInstruction(ssOr);*/
             	break;
         	}
         	
@@ -310,7 +355,17 @@ public class CfgGen implements LLNodeVisitor {
             currentBlock.addInstruction(cmp);
             instructions.add(jmp);
             currentBlock.addInstruction(jmp);
-        } 
+        } else if (cond instanceof LLMethodCall) {
+        	LLCmp cmp = new LLCmp((LLVarLocation)reduceExpression(cond));
+        	LLJump jmp = new LLJump(JumpType.NOT_EQUAL, jmpPoint);
+        	
+        	instructions.add(cmp);
+            currentBlock.addInstruction(cmp);
+            instructions.add(jmp);
+            currentBlock.addInstruction(jmp);
+        } else {
+        	throw new RuntimeException("Unimplemented in CfgGen, reduceBoolean");
+        }
     }
     
     @Override
@@ -319,7 +374,7 @@ public class CfgGen implements LLNodeVisitor {
     		instructions.add(node);
             currentBlock.addInstruction(node);
     	} else {
-    		reduceBooleanExpression(node.getCond(), node.getLabel());
+    		reduceBooleanExpression(node.getCond(), true, node.getLabel());
     	}
     
         
@@ -391,8 +446,12 @@ public class CfgGen implements LLNodeVisitor {
             return reduceArrayLocation((LLArrayLocation)e);
         } else if (e instanceof LLIntLiteral) {
             return e;
+        } else if (e instanceof LLBoolLiteral) {
+            return e;
         } else if (e instanceof LLUnaryNeg) {
             return null;
+        } else if (e instanceof LLCallout) {
+        	return reduceCallout((LLCallout)e);
         } else {
             throw new RuntimeException("Illegal expr type in assign");
         }
@@ -408,6 +467,27 @@ public class CfgGen implements LLNodeVisitor {
 
         instructions.add(node);
         currentBlock.addInstruction(node);
+        
+        return out;
+    }
+    
+    private LLVarLocation reduceCallout(LLCallout m) {
+    	LLCallout newCall = new LLCallout(m.getFnName());
+        
+        
+        for (LLExpression p : m.getParams()) {
+            if (p instanceof LLStringLiteral) {
+                newCall.addParam(p);
+            } else {
+                newCall.addParam(reduceExpression(p));
+            }
+        }
+        
+        LLVarLocation out = new LLVarLocation(1, getNextTemp());
+        LLAssign ass = new LLAssign(out, newCall);
+        
+        instructions.add(ass);
+        currentBlock.addInstruction(ass);
         
         return out;
     }
@@ -520,206 +600,3 @@ public class CfgGen implements LLNodeVisitor {
     
     
 }
-
-	
-    
-
-
- /*   private LLExpression reduceBooleanExpression(LLExpression e, LLLabel exitLabel, boolean invert) {
-        if (e instanceof LLBinaryOp) {
-            return reduceBooleanBinOp((LLBinaryOp)e, exitLabel, invert);
-            // TODO: Literals, unary not
-        } else if (e instanceof LLBoolLiteral) {
-            return e;
-        }else {
-            return e;
-        }
-    }
-    
-    private void reduceAnd(LLBinaryOp e) {
-        
-    }
-    
-    private void reduceOr(LLBinaryOp e) {
-        
-    }
-    
-    private void reduceCmp(LLBinaryOp e, LLLabel exitLabel, boolean invert) {
-        switch (e.getOp()) {
-        case EQ:
-            if (invert) {
-                instructions.add(new LLJump(JumpType.NOT_EQUAL, exitLabel));
-            } else {
-                instructions.add(new LLJump(JumpType.EQUAL, exitLabel));
-            }
-            break;
-            
-        case NEQ:
-            if (invert) {
-                instructions.add(new LLJump(JumpType.EQUAL, exitLabel));
-            } else {
-                instructions.add(new LLJump(JumpType.NOT_EQUAL, exitLabel));
-            }
-            break;
-        case GEQ:
-            if (invert) {
-                instructions.add(new LLJump(JumpType.LT, exitLabel));
-            } else {
-                instructions.add(new LLJump(JumpType.GEQ, exitLabel));
-            }
-            break;
-        case GT:
-            if (invert) {
-                instructions.add(new LLJump(JumpType.LEQ, exitLabel));
-            } else {
-                instructions.add(new LLJump(JumpType.GT, exitLabel));
-            }
-            break;
-        case LEQ:
-            if (invert) {
-                instructions.add(new LLJump(JumpType.GT, exitLabel));
-            } else {
-                instructions.add(new LLJump(JumpType.LEQ, exitLabel));
-            }
-            break;
-        case LT:
-            if (invert) {
-                instructions.add(new LLJump(JumpType.GEQ, exitLabel));
-            } else {
-                instructions.add(new LLJump(JumpType.LT, exitLabel));
-            }
-            break;
-        default:
-            throw new RuntimeException("Non bool type in bool expression");
-        }
-    }
-    
-    private LLExpression reduceBooleanBinOp(LLBinaryOp e, LLLabel exitLabel, boolean invert) {
-        LLLabel ssLabel = e.getLabel();
-        
-        if (e.getOp() == IrBinOperator.OR) {
-         // TODO: short circuit logic
-            
-            
-        } else if (e.getOp() == IrBinOperator.AND) {
-            LLExpression l = reduceBooleanExpression(e.getLhs(), ssLabel, true);
-            LLBinaryOp ss_op = new LLBinaryOp(l, new LLIntLiteral(0), IrBinOperator.EQ, Type.BOOLEAN);
-            LLJump newJmp = new LLJump(JumpType.EQUAL, ssLabel);
-            
-            
-        } else {
-            return e;
-        }
-        
-        
-        switch (e.getOp()) {
-        case OR:
-            
-            break;
-            
-        case AND:
-            
-            break;
-            
-        case EQ:
-            if (invert) {
-                instructions.add(new LLJump(JumpType.NOT_EQUAL, exitLabel));
-            } else {
-                instructions.add(new LLJump(JumpType.EQUAL, exitLabel));
-            }
-            break;
-            
-        case NEQ:
-            if (invert) {
-                instructions.add(new LLJump(JumpType.EQUAL, exitLabel));
-            } else {
-                instructions.add(new LLJump(JumpType.NOT_EQUAL, exitLabel));
-            }
-            break;
-        case GEQ:
-            if (invert) {
-                instructions.add(new LLJump(JumpType.LT, exitLabel));
-            } else {
-                instructions.add(new LLJump(JumpType.GEQ, exitLabel));
-            }
-            break;
-        case GT:
-            if (invert) {
-                instructions.add(new LLJump(JumpType.LEQ, exitLabel));
-            } else {
-                instructions.add(new LLJump(JumpType.GT, exitLabel));
-            }
-            break;
-        case LEQ:
-            if (invert) {
-                instructions.add(new LLJump(JumpType.GT, exitLabel));
-            } else {
-                instructions.add(new LLJump(JumpType.LEQ, exitLabel));
-            }
-            break;
-        case LT:
-            if (invert) {
-                instructions.add(new LLJump(JumpType.GEQ, exitLabel));
-            } else {
-                instructions.add(new LLJump(JumpType.LT, exitLabel));
-            }
-            break;
-        default:
-            throw new RuntimeException("Non bool type in bool expression");
-        }
-        
-        return null;
-    }*/
-
-   /* @Override
-    public void visit(LLCmp node) {
-        // Do nothing at this stage
-    }
-    
-    
-/*    
-     * ASM run-time error methods.
-     
-    private void error_array_oob(LLFile node) {
-        LLLabel l = new LLLabel("ARRAY_OUT_OF_BOUNDS");
-        //array_oob_label.accept(this);
-        
-        tab_level++;        
-        LLCallout print_error = node.getArrayOobCallout();
-        print_error.accept(this);
-        writeASMExit(1);
-        tab_level--;
-    }
-    
-    private void error_missing_return(LLFile node) {
-        missing_return_label.accept(this);
-        
-        tab_level++;        
-        LLCallout print_error = node.getMissingReturnCallout();
-        print_error.accept(this);
-        writeASMExit(2);
-        tab_level--;
-    }
-    
-    private void error_div_by_zero(LLFile node) {
-        div_by_zero_label.accept(this);
-        
-        tab_level++;        
-        LLCallout print_error = node.getDivByZeroCallout();
-        print_error.accept(this);
-        writeASMExit(3);
-        tab_level--;
-    }
-    
-    private void writeASMExit(int error) {
-        // system call for exit.
-        LLMov mov_exit = new LLMov("$1", RAX);
-        mov_exit.accept(this);
-        
-        // interrupt to kernel.
-        String inst = "int";
-        String inst_line = formatLine(inst, "$0x80");
-        writeLine(inst_line);
-        
-    }
-}*/

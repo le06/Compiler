@@ -234,6 +234,16 @@ public class CodeGen implements LLNodeVisitor {
         	source = prepareArrayLocation(dest);
         	println("\tmovq " + source + ", " + R11);
         	println("\tmovq " + R11 + ", " + loc_addr);
+        } else if (node.getExpr() instanceof LLCallout) {
+        	LLCallout c = (LLCallout)node.getExpr();
+        	writeCalloutCall(c);
+        	println("\tmovq " + RAX + ", " + loc_addr);
+        } else if (node.getExpr() instanceof LLBoolLiteral) { 
+        	if (((LLBoolLiteral)node.getExpr()).getValue()) {
+        		println("\tmovq $1, " + loc_addr);
+        	} else {
+        		println("\tmovq $0, " + loc_addr);
+        	}
         } else {
         	throw new RuntimeException("Unimplemented in CodeGen, LLAssign");
         }
@@ -515,7 +525,14 @@ public class CodeGen implements LLNodeVisitor {
                 }
             } else if (node.getExpr() instanceof LLIntLiteral) {
             	println("\tmov $" + ((LLIntLiteral)node.getExpr()).getValue() + ", " + RAX);
-            } else {
+            } else if (node.getExpr() instanceof LLBoolLiteral) {
+            	LLBoolLiteral lit = (LLBoolLiteral)node.getExpr();
+            	if (lit.getValue()) {
+            		println("\tmov $1, " + RAX);
+            	} else {
+            		println("\tmov $0, " + RAX);
+            	}
+        	} else {
             	throw new RuntimeException("Unexpected return type in CodeGen");
             }
         } else { // Return 0

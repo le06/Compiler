@@ -26,4 +26,9 @@ public class LLCmp implements LLNode {
     public void accept(LLNodeVisitor v) {
         v.visit(this);
     }
+    
+    @Override
+    public String toString() {
+    	return "cmp " + l.toString() + ", " + r.toString();
+    }
 }
