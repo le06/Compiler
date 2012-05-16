@@ -697,6 +697,50 @@ public class CfgGen implements LLNodeVisitor {
     	}
     }
     
+    private LLExpression reduceBinOpAlgbr(LLBinaryOp node) {
+    	LLVarLocation var;
+    	LLIntLiteral lit;
+    	boolean varOnLeft;
+    	
+    	if (node.getLhs() instanceof LLVarLocation) {
+    		var = (LLVarLocation)node.getLhs();
+    		lit = (LLIntLiteral)node.getRhs();
+    		varOnLeft = true;
+    	} else {
+    		var = (LLVarLocation)node.getRhs();
+    		lit = (LLIntLiteral)node.getLhs();
+    		varOnLeft = false;
+    	}
+    	
+    	// Apply individual optimizations:
+    	if (lit.getValue() == 0) {
+    		if (node.getOp() == IrBinOperator.PLUS) {
+    			return var;
+    		} else if (node.getOp() == IrBinOperator.MINUS) {
+    			if (varOnLeft) {
+    				return var;
+    			} else {
+    				return new LLUnaryNeg(var);
+    			}
+    		} else if (node.getOp() == IrBinOperator.MOD && varOnLeft) {
+    			return new LLIntLiteral(0);
+    		}
+    	} else if (lit.getValue() == 1) {
+    		if (node.getOp() == IrBinOperator.MUL) {
+    			return var;
+    		} else if (node.getOp() == IrBinOperator.DIV && varOnLeft) {
+    			return var;
+    		} else if (node.getOp() == IrBinOperator.MOD && varOnLeft) {
+    			return new LLIntLiteral(1);
+    		} else if (node.getOp() == IrBinOperator.MOD && !varOnLeft) {
+    			return new LLIntLiteral(0);
+    		}
+    	}
+    	
+    	// If no simplifications were found:
+    	return node;
+    }
+    
     private LLExpression reduceBinOp(LLBinaryOp node) {
         LLExpression l, r; 
         LLVarLocation out;
@@ -735,17 +779,25 @@ public class CfgGen implements LLNodeVisitor {
             throw new RuntimeException("Unexpected type in bin op: " + node.getRhs().getClass());
         }
         
+        LLExpression outExpression;
+        
         if (l instanceof LLIntLiteral && r instanceof LLIntLiteral) {
         	LLBinaryOp n = new LLBinaryOp(l, r, node.getOp(), node.getType());
-        	return reduceIntBinOp(n);
+        	outExpression = reduceIntBinOp(n);
+        } else if ((l instanceof LLIntLiteral && r instanceof LLVarLocation) ||
+        		   (r instanceof LLIntLiteral && l instanceof LLVarLocation)) {
+        	LLBinaryOp n = new LLBinaryOp(l, r, node.getOp(), node.getType());
+        	outExpression = reduceBinOpAlgbr(n);
+        } else {
+        	outExpression = new LLBinaryOp(l, r, node.getOp(), node.getType());
         }
         
         out = new LLVarLocation(1, getNextTemp());
         
         // out = l *op* r
-        node.setLhs(l);
-        node.setRhs(r);
-        LLAssign ass = new LLAssign(out, node);
+/*        node.setLhs(l);
+        node.setRhs(r);*/
+        LLAssign ass = new LLAssign(out, outExpression);
         
         // Add this instruction to the output
         instructions.add(ass);

@@ -6,12 +6,14 @@ import java.util.ArrayList;
 import java.util.HashSet;
 
 public class CSE implements Optimization, LLNodeVisitor {
-	ArrayList<HashSet<LLExpression>> IN, OUT, GEN, KILL;
+	ArrayList<ArrayList<LLAssign>> IN, OUT, GEN, KILL;
+	ArrayList<LLAssign> currentGen, currentKill;
 	
 	@Override
 	public void optimize(BasicBlock method) {
-		// TODO Auto-generated method stub
-		
+		for (LLNode instr : method.getInstructions()) {
+			instr.accept(this);
+		}
 	}
 
 	@Override
@@ -152,4 +154,39 @@ public class CSE implements Optimization, LLNodeVisitor {
 		
 	}
 	
+	public boolean kills(LLAssign current, LLAssign past) {
+		if (current.getLoc() instanceof LLVarLocation) {
+			if (!(past.getLoc() instanceof LLVarLocation)) {
+				return false;
+			} else {
+				return ((LLVarLocation)current.getLoc()).addressOfResult()
+				                     .equals(
+				       ((LLVarLocation)past.getLoc()).addressOfResult());
+			}
+		} else if (current.getLoc() instanceof LLArrayLocation) {
+			if (!(past.getLoc() instanceof LLArrayLocation)) {
+				return false;
+			} else {
+				LLArrayLocation c = ((LLArrayLocation)current.getLoc());
+				LLArrayLocation p = ((LLArrayLocation)past.getLoc());
+				boolean same =  c.getLabel()
+				                     .equals(
+				                p.getLabel());
+				
+				if (c.getIndexExpr() instanceof LLVarLocation) {
+					return same && (((LLVarLocation)c.getIndexExpr()).addressOfResult()
+                            				.equals(
+                            		((LLVarLocation)p.getIndexExpr()).addressOfResult()));
+				} else if (c.getIndexExpr() instanceof LLIntLiteral) {
+					return same && (((LLIntLiteral)c.getIndexExpr()).getValue()
+					                                  ==
+								   ((LLIntLiteral)p.getIndexExpr()).getValue());
+				} else {
+					throw new RuntimeException("Unexpected array index type");
+				}                 
+			}
+		} else {
+			throw new RuntimeException("Unexpected assigned type");
+		}
+	}
 }
