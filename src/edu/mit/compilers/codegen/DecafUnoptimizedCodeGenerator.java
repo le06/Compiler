@@ -58,7 +58,6 @@ public class DecafUnoptimizedCodeGenerator {
         ArrayList<LLNode> instrs = new ArrayList<LLNode>();
         
         for (BasicBlock b : blocks) {
-        	System.out.println(b.getNum());
         	instrs.addAll(b.getInstructions());
         }
         
@@ -72,9 +71,6 @@ public class DecafUnoptimizedCodeGenerator {
         HashMap<String, Integer> methodMap = a.assign(instrs);
         CodeGen c = new CodeGen();
         c.gen(instrs, methodMap, stream);
-        
-/*        CodeGenerator g2 = new CodeGenerator();
-        g2.outputASM(stream, file);*/
     }
     
     public boolean getError() {

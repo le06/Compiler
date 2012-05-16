@@ -7,11 +7,13 @@ import edu.mit.compilers.codegen.ll.LLNode;
 public class BasicBlock {
     private ArrayList<LLNode> instructions;
     private ArrayList<BasicBlock> children;
+    private ArrayList<BasicBlock> parents;
     private int num;
     
     public BasicBlock() {
         instructions = new ArrayList<LLNode>();
         children = new ArrayList<BasicBlock>();
+        parents = new ArrayList<BasicBlock>();
     }
     
     public void addInstruction(LLNode n) {
@@ -26,8 +28,16 @@ public class BasicBlock {
         children.add(b);
     }
     
+    public void addParent(BasicBlock b) {
+        parents.add(b);
+    }
+    
     public ArrayList<BasicBlock> getChildren() {
     	return children;
+    }
+    
+    public ArrayList<BasicBlock> getParents() {
+    	return parents;
     }
     
     public int getNum() {

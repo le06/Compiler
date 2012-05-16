@@ -47,9 +47,11 @@ public class CfgGen implements LLNodeVisitor {
         
         // Apply relationships in cache
         for (int i = 0; i < blockCache.size(); i++) {
-            blockCache.get(i)
-                     .addChild(
-                          blockTable.get(targetCache.get(i)));
+        	BasicBlock parent, child;
+        	parent = blockCache.get(i);
+        	child = blockTable.get(targetCache.get(i));
+        	
+            parent.addChild(child);
         }
     }
     
