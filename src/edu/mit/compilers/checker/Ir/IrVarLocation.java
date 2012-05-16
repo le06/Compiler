@@ -18,6 +18,10 @@ public class IrVarLocation extends IrLocation {
 		return id;
 	}
 	
+    public String getSymbol() {
+        return symbol;
+    }
+	
 	public void setSymbol(String symbol) {
 	    this.symbol = symbol;
 	}

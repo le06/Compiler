@@ -45,6 +45,10 @@ public class IrForStmt extends IrStatement {
         return for_block;
     }
     
+    public String getCounterSymbol(String symbol) {
+        return counter_symbol;
+    }
+    
     public void setCounterSymbol(String symbol) {
         counter_symbol = symbol;
     }
