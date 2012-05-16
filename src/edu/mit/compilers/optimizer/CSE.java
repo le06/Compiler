@@ -9,10 +9,9 @@ import java.util.HashSet;
 
 public class CSE implements Optimization, LLNodeVisitor {
     private class DataflowBlock {
-        public BasicBlock block;
+        BasicBlock block;
         
         HashSet<String> gen;
-        HashMap<String, String> genInverse;
         HashSet<String> kill;
         HashSet<String> in;
         HashSet<String> out;
@@ -23,8 +22,9 @@ public class CSE implements Optimization, LLNodeVisitor {
 	ArrayList<LLAssign> currentGen, currentKill;
 	
 	HashSet<String> allPossibleExprs;
+	HashSet<String> allPossibleLocs;
 	HashSet<Integer> checkedBlocks;
-	HashSet<BasicBlock> reachableBlocks;
+	HashMap<Integer, DataflowBlock> dataflowBlocks;
 	
 	HashMap<String, String> exprToTemp;
 
@@ -52,13 +52,33 @@ public class CSE implements Optimization, LLNodeVisitor {
 	    // use block.getNum() as an array index to update blocks.
 	    // this process should only need to be done once.
 	    
+	    // step 1: collect all CSE exprs and the locs these exprs are assigned to.
 	    allPossibleExprs = new HashSet<String>();
+	    allPossibleLocs = new HashSet<String>();
 	    checkedBlocks = new HashSet<Integer>();
-	    reachableBlocks = new HashSet<BasicBlock>();
+	    dataflowBlocks = new HashMap<Integer, DataflowBlock>();
 	    collectExprs(method);
 	    
+	    // step 2: map each expr to a temp, which will be used every time the expr is available.
+	    int counter = 1;
+	    String temp_prefix = "new_t";
+	    String temp_name = temp_prefix + counter;
+	    for (String key : allPossibleExprs) {
+	        while (allPossibleLocs.contains(temp_name)) {
+	            counter++;
+	            temp_name = temp_prefix + counter;
+	        }
+	        exprToTemp.put(key, temp_name);
+	        counter++;
+	    }
 	    
+	    // step 3: initialize gen-kill data structures.
+	    for (DataflowBlock b : dataflowBlocks.values()) {
+	        // TODO: put stuff here
+	    }
 	    
+	    // step 4: start the gen-kill algorithm.
+	    // step 5: eliminate CSEs based on available expressions.
 	    
 		for (LLNode instr : method.getInstructions()) {
 			instr.accept(this);
@@ -72,7 +92,9 @@ public class CSE implements Optimization, LLNodeVisitor {
 	        return;
 	    }
 	    checkedBlocks.add(id);
-	    reachableBlocks.add(b);
+	    DataflowBlock newB = new DataflowBlock();
+	    newB.block = b;
+	    dataflowBlocks.put(id, newB);
 	    
 	    // check the block contents.
         for (LLNode instr : b.getInstructions()) {
@@ -86,7 +108,7 @@ public class CSE implements Optimization, LLNodeVisitor {
         }
 	}
 	
-	// returns true iff allPossibleExprs was modified.
+	// returns true if allPossibleExprs or allPossibleLocs is modified.
 	private boolean extractExpr(LLAssign a) {
 	    LLExpression rhs = a.getExpr();
 	    
@@ -117,10 +139,20 @@ public class CSE implements Optimization, LLNodeVisitor {
 	        LLExpression left = binExpr.getLhs();
 	        LLExpression right = binExpr.getRhs();
 	        
-	        String key = genExpressionRep(left, op, right);
-	        if (key != null && !allPossibleExprs.contains(key)) {
-	            allPossibleExprs.add(key);
-	            return true;
+	        String leftRep = genExpressionRep(left);
+	        String rightRep = genExpressionRep(right);
+	        
+	        if (leftRep == null || rightRep == null) {
+	            return false;
+	        }
+	        
+	        String key = leftRep + op + rightRep;
+	        if (key != null) {
+	            boolean modified = false;
+	            String loc = a.getLoc().getLabel();
+	            modified |= allPossibleExprs.add(key);
+	            modified |= allPossibleLocs.add(loc);
+	            return modified;
 	        }
 	        return false;
 	    }
@@ -128,52 +160,29 @@ public class CSE implements Optimization, LLNodeVisitor {
 	    return false;
 	}
 	
-	private String genExpressionRep(LLExpression left, String op, LLExpression right) {
-	    String leftRep = null, rightRep = null;
+	private String genExpressionRep(LLExpression expr) {
+	    String rep = null;
 	    
-        if (left instanceof LLVarLocation) {
-            leftRep = ((LLVarLocation)left).getLabel();
-        } else if (left instanceof LLArrayLocation) {
-            LLArrayLocation loc = (LLArrayLocation)left;
+        if (expr instanceof LLVarLocation) {
+            rep = ((LLVarLocation)expr).getLabel();
+        } else if (expr instanceof LLArrayLocation) {
+            LLArrayLocation loc = (LLArrayLocation)expr;
             String arrayLabel = loc.getLabel();
             String indexLabel;
             LLExpression indexExpr = loc.getIndexExpr();
             if (indexExpr instanceof LLVarLocation) {
                 indexLabel = ((LLVarLocation)indexExpr).getLabel();
-                leftRep = arrayLabel + "[" + indexLabel + "]";
+                rep = arrayLabel + "[" + indexLabel + "]";
             } else {
                 // throw some error
             }
-        } else if (left instanceof LLIntLiteral) {
-            leftRep = String.valueOf(((LLIntLiteral)left).getValue());
-        } else {
-            // throw some error.
-        }
-	    
-        if (right instanceof LLVarLocation) {
-            rightRep = ((LLVarLocation)right).getLabel();
-        } else if (right instanceof LLArrayLocation) {
-            LLArrayLocation loc = (LLArrayLocation)right;
-            String arrayLabel = loc.getLabel();
-            String indexLabel;
-            LLExpression indexExpr = loc.getIndexExpr();
-            if (indexExpr instanceof LLVarLocation) {
-                indexLabel = ((LLVarLocation)indexExpr).getLabel();
-                rightRep = arrayLabel + "[" + indexLabel + "]";
-            } else {
-                // throw some error
-            }
-        } else if (right instanceof LLIntLiteral) {
-            rightRep = String.valueOf(((LLIntLiteral)right).getValue());
+        } else if (expr instanceof LLIntLiteral) {
+            rep = String.valueOf(((LLIntLiteral)expr).getValue());
         } else {
             // throw some error.
         }
         
-        if (leftRep != null && rightRep != null) {
-            return leftRep + op + rightRep;
-        }
-        
-	    return null;
+        return rep;
 	}
 	
 	@Override
