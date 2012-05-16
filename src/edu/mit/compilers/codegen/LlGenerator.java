@@ -13,6 +13,7 @@ import edu.mit.compilers.checker.Ir.IrBreakStmt;
 import edu.mit.compilers.checker.Ir.IrCalloutStmt;
 import edu.mit.compilers.checker.Ir.IrClassDecl;
 import edu.mit.compilers.checker.Ir.IrContinueStmt;
+import edu.mit.compilers.checker.Ir.IrExpression;
 import edu.mit.compilers.checker.Ir.IrFieldDecl;
 import edu.mit.compilers.checker.Ir.IrForStmt;
 import edu.mit.compilers.checker.Ir.IrGlobalDecl;
@@ -35,6 +36,7 @@ import edu.mit.compilers.checker.Ir.IrVarLocation;
 import edu.mit.compilers.checker.Ir.IrWhileStmt;
 import edu.mit.compilers.codegen.ll2.*;
 import edu.mit.compilers.codegen.ll2.LlExpression.Type;
+import edu.mit.compilers.codegen.ll2.LlJmp.JumpType;
 
 public class LlGenerator implements IrNodeVisitor {
 
@@ -43,8 +45,8 @@ public class LlGenerator implements IrNodeVisitor {
     
     // the state of the LL generator as it walks the IR tree.
     private LlNode parent;
-    private LlLabel break_point;
-    private LlLabel continue_point;
+    private LlLabel breakPoint;
+    private LlLabel continuePoint;
     private Type currentType;
     
     private int currentTemp = 1;
@@ -99,7 +101,7 @@ public class LlGenerator implements IrNodeVisitor {
     @Override
     public void visit(IrMethodDecl node) {
         LlProgram program = (LlProgram)parent; // the old parent.
-        LlEnvironment method_code = new LlEnvironment();
+        LlEnv method_code = new LlEnv();
         
         parent = (LlNode)method_code; // the new parent.
         node.getBlock().accept(this);
@@ -118,6 +120,7 @@ public class LlGenerator implements IrNodeVisitor {
             break;
         case VOID:
             m = new LlMethodDecl(Type.VOID, name, num_args, method_code);
+            // TODO: add return(0) to env here, once LlReturn is implemented.
             break;
         default:
             throw new RuntimeException("Cannot have a method with mixed type");
@@ -186,32 +189,40 @@ public class LlGenerator implements IrNodeVisitor {
         LlExpression expr = new LlIntLiteral(0);
         LlAssign a = new LlAssign(loc, expr);
         
-        LlEnvironment env = (LlEnvironment)parent;
+        LlEnv env = (LlEnv)parent;
         env.addNode(a);
     }
 
     @Override
     public void visit(IrBlockStmt node) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void visit(IrContinueStmt node) {
-        // TODO Auto-generated method stub
-
+        node.getBlock().accept(this);
     }
 
     @Override
     public void visit(IrBreakStmt node) {
-        // TODO Auto-generated method stub
-
+        LlEnv env = (LlEnv)parent;
+        env.addNode(new LlJmp(JumpType.UNCONDITIONAL, breakPoint));
+    }    
+    
+    @Override
+    public void visit(IrContinueStmt node) {
+        LlEnv env = (LlEnv)parent;
+        env.addNode(new LlJmp(JumpType.UNCONDITIONAL, continuePoint));
     }
 
     @Override
     public void visit(IrReturnStmt node) {
-        // TODO Auto-generated method stub
-
+        IrExpression expr = node.getReturnExpr();
+        LlReturn r;
+        if (expr == null) {
+            r = new LlReturn();
+        } else {
+            // TODO: add code to determine if return expr is a single loc, expr (that needs to be flattened), or constant
+            r = null;
+        }
+        
+        LlEnv env = (LlEnv)parent;
+        env.addNode(r);
     }
 
     @Override

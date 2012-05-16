@@ -10,9 +10,9 @@ public class LlMethodDecl implements LlNode {
     private String method_name;
     private ArrayList<LlTempLoc> args;
     private int num_args;
-    private LlEnvironment method_code;
+    private LlEnv method_code;
     
-    public LlMethodDecl(Type t, String name, int num_args, LlEnvironment code) {
+    public LlMethodDecl(Type t, String name, int num_args, LlEnv code) {
         type = t;
         method_name = name;
         args = new ArrayList<LlTempLoc>();
@@ -40,7 +40,7 @@ public class LlMethodDecl implements LlNode {
         return num_args;
     }
     
-    public LlEnvironment getEnv() {
+    public LlEnv getEnv() {
         return method_code;
     }
 
