@@ -1,5 +1,6 @@
 package edu.mit.compilers.checker.Ir;
 
+import edu.mit.compilers.checker.SemanticChecker;
 import edu.mit.compilers.codegen.ll.LLArrayLocation;
 import edu.mit.compilers.codegen.ll.LLExpression;
 import edu.mit.compilers.codegen.ll.LLLabel;
@@ -7,14 +8,15 @@ import edu.mit.compilers.codegen.ll.LLLocation;
 import edu.mit.compilers.codegen.ll.LLNode;
 
 public class IrArrayLocation extends IrLocation {
+    private IrIdentifier id;
+    private String symbol;
+    private IrExpression index;
+    private long array_size = 0;
+    
     public IrArrayLocation(IrIdentifier name, IrExpression expr) {
         id = name;
         index = expr;
     }
-    
-	private IrIdentifier id;
-	private IrExpression index;
-	private long array_size = 0;
 	
 	public IrIdentifier getId() {
 		return id;
@@ -22,9 +24,13 @@ public class IrArrayLocation extends IrLocation {
 	public IrExpression getIndex() {
 		return index;
 	}
+
+	public void setSymbol(String symbol) {
+	    this.symbol = symbol;
+	}
 	
 	@Override
-	public IrType getExprType(IrNodeChecker c) {
+	public IrType getExprType(SemanticChecker c) {
 		return c.lookupArrayType(id);
 	}
 	@Override

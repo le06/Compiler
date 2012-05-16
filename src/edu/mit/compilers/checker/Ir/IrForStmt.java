@@ -15,33 +15,38 @@ import edu.mit.compilers.codegen.ll.LLVarLocation;
 public class IrForStmt extends IrStatement {
     public IrForStmt(IrIdentifier counter, IrExpression start_value,
             IrExpression stop_value, IrBlock block) {
-        myCounter = counter;
-        myStart_value = start_value;
-        myStop_value = stop_value;
-        myBlock = block;
+        this.counter = counter;
+        this.start_value = start_value;
+        this.stop_value = stop_value;
+        this.for_block = block;
     }
 
-    private IrIdentifier myCounter;
-    private IrExpression myStart_value;
-    private IrExpression myStop_value;
-    private IrBlock myBlock;
-
+    private IrIdentifier counter;
+    private String counter_symbol;
+    private IrExpression start_value;
+    private IrExpression stop_value;
+    private IrBlock for_block;
+    
     private int counter_bp_offset;
     
     public IrIdentifier getCounter() {
-        return myCounter;
+        return counter;
     }
 
     public IrExpression getStartValue() {
-        return myStart_value;
+        return start_value;
     }
 
     public IrExpression getStopValue() {
-        return myStop_value;
+        return stop_value;
     }
 
     public IrBlock getBlock() {
-        return myBlock;
+        return for_block;
+    }
+    
+    public void setCounterSymbol(String symbol) {
+        counter_symbol = symbol;
     }
     
     @Override
@@ -59,10 +64,10 @@ public class IrForStmt extends IrStatement {
             out.append(" ");
         }
         out.append("FOR:\n");
-        out.append(myCounter.toString(s + 1).concat("\n"));
-        out.append(myStart_value.toString(s + 1).concat("\n"));
-        out.append(myStop_value.toString(s + 1).concat("\n"));
-        out.append(myBlock.toString(s + 1).concat("\n"));
+        out.append(counter.toString(s + 1).concat("\n"));
+        out.append(start_value.toString(s + 1).concat("\n"));
+        out.append(stop_value.toString(s + 1).concat("\n"));
+        out.append(for_block.toString(s + 1).concat("\n"));
 
         return out.toString();
     }
@@ -75,11 +80,11 @@ public class IrForStmt extends IrStatement {
         
         //LLVarDecl dec = new LLVarDecl(myCounter.getId());
         LLLocation var = (LLLocation)(new LLVarLocation(counter_bp_offset,
-                                                        myCounter.getId(),
+                                                        counter.getId(),
                                                         LLExpression.Type.INT));
         
         LLAssign init = new LLAssign(var,
-                                    (LLExpression)myStart_value.getllRep(null, null));
+                                    (LLExpression)start_value.getllRep(null, null));
         
         LLAssign incr = new LLAssign(var,
                                (LLExpression)(new LLBinaryOp((LLExpression)var,
@@ -88,11 +93,11 @@ public class IrForStmt extends IrStatement {
                                                           LLExpression.Type.INT)));
         
         LLExpression test = new LLBinaryOp((LLExpression)var,
-                                         (LLExpression)myStop_value.getllRep(null, null),
+                                         (LLExpression)stop_value.getllRep(null, null),
                                          IrBinOperator.LT,
                                          LLExpression.Type.INT);
         
-        LLEnvironment block = (LLEnvironment)myBlock.getllRep(for_end, for_begin);
+        LLEnvironment block = (LLEnvironment)for_block.getllRep(for_end, for_begin);
         
         LLJump jump_end = new LLJump(test, false, for_end);
         LLJump jump_begin = new LLJump(JumpType.UNCONDITIONAL, for_begin);

@@ -2,6 +2,7 @@ package edu.mit.compilers.checker.Ir;
 
 import java.util.ArrayList;
 
+import edu.mit.compilers.checker.SemanticChecker;
 import edu.mit.compilers.codegen.ll.LLExpression;
 import edu.mit.compilers.codegen.ll.LLLabel;
 import edu.mit.compilers.codegen.ll.LLMethodCall;
@@ -35,7 +36,7 @@ public class IrMethodCallStmt extends IrInvokeStmt {
 	}
 	
 	@Override
-	public IrType getExprType(IrNodeChecker c) {
+	public IrType getExprType(SemanticChecker c) {
 	    type = c.lookupMethodType(method_name);
 		return type;
 	}

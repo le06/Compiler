@@ -2,6 +2,7 @@ package edu.mit.compilers.checker.Ir;
 
 import java.util.ArrayList;
 
+import edu.mit.compilers.checker.SemanticChecker;
 import edu.mit.compilers.codegen.ll.LLCallout;
 import edu.mit.compilers.codegen.ll.LLExpression;
 import edu.mit.compilers.codegen.ll.LLLabel;
@@ -33,7 +34,7 @@ public class IrCalloutStmt extends IrInvokeStmt {
 	}
 
 	@Override
-	public IrType getExprType(IrNodeChecker c) {
+	public IrType getExprType(SemanticChecker c) {
 		return new IrType(IrType.Type.INT); // callouts always return int.
 	}
 	

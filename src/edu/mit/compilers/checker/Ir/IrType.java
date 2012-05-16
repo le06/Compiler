@@ -11,7 +11,7 @@ public class IrType extends Ir {
         myType = type;
     }
     
-    Type myType;
+    public Type myType;
     
     public enum Type {
         VOID, BOOLEAN, INT, MIXED;
