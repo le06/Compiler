@@ -53,6 +53,7 @@ public class LlGenerator implements IrNodeVisitor {
     private LlLocation currentLoc; // a location in memory. for example: the LHS in some assign statement.
     private LlExpression currentLit; // an integer literal or a boolean literal.
     private int currently_evaluating_expr = 0; // "true" if non-zero. like a semaphore.
+    private LlEnv expr_env; // the series of instructions required to fully evaluate an entire expression.
     private Type currentType;
     private int currentTemp = 1;
     
@@ -244,7 +245,7 @@ public class LlGenerator implements IrNodeVisitor {
         env.addNode(r);
     }
 
-    // Expression evaluation and optimizations.
+    // The basic building blocks of an expression.
     
     @Override
     public void visit(IrIdentifier node) {
@@ -283,21 +284,22 @@ public class LlGenerator implements IrNodeVisitor {
         currentLit = new LlBoolLiteral(boolVal);
     }
     
+    // These exprs may or may not require evaluation of subexprs.
+    
     @Override
     public void visit(IrArrayLocation node) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void visit(IrBinopExpr node) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void visit(IrUnopExpr node) {
-        // TODO Auto-generated method stub
+        String symbol = node.getSymbol();
+        IrExpression expr = node.getIndex();
+        expr.accept(this);
+        if (currentLoc != null) {
+            LlLocation offset_loc = currentLoc;
+            currentLoc = new LlArrayLoc(symbol, offset_loc);
+        } else if (currentLit != null) {
+            long offset = ((IrIntLiteral)currentLit).getIntRep();
+            currentLoc = new LlArrayLoc(symbol, offset);
+        } else {
+            throw new RuntimeException("Unable to process array index");
+        }
 
     }
     
@@ -312,7 +314,20 @@ public class LlGenerator implements IrNodeVisitor {
         // TODO Auto-generated method stub
 
     }
+
+    // These exprs guarantee the generation of temp vars, except in certain optimized cases.
     
+    @Override
+    public void visit(IrBinopExpr node) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void visit(IrUnopExpr node) {
+        // TODO Auto-generated method stub
+
+    }
     
     @Override
     public void visit(IrWhileStmt node) {
