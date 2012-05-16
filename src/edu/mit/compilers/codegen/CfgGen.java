@@ -25,6 +25,8 @@ public class CfgGen implements LLNodeVisitor {
     
     private ArrayList<BasicBlock> blocksInOrder;
     
+    private int currentBlockNum = 0;
+    
     public void generateCFG(LLFile file) {
         instructions = new ArrayList<LLNode>();
         blockTable = new HashMap<String, BasicBlock>();
@@ -35,6 +37,7 @@ public class CfgGen implements LLNodeVisitor {
         blocksInOrder = new ArrayList<BasicBlock>();
         
         currentBlock = new BasicBlock();
+        currentBlock.setNum(currentBlockNum++);
         blocksInOrder.add(currentBlock);
         head = currentBlock;
         
@@ -125,6 +128,7 @@ public class CfgGen implements LLNodeVisitor {
     @Override
     public void visit(LLMethodDecl node) {
         currentBlock = new BasicBlock();
+        currentBlock.setNum(currentBlockNum++);
         blocksInOrder.add(currentBlock);
         head.addChild(currentBlock);
         
@@ -506,6 +510,7 @@ public class CfgGen implements LLNodeVisitor {
     
     public void updateControlFlow(LLLabel l) {
     	BasicBlock newBlock = new BasicBlock();
+    	newBlock.setNum(currentBlockNum++);
         // At a jump, the current basic block splits to have two children:
         // taking the jump and not taking the jump
         currentBlock.addChild(newBlock);
@@ -528,29 +533,14 @@ public class CfgGen implements LLNodeVisitor {
             
             updateControlFlow(node.getLabel());
     	} else {
-    		//reduceBooleanExpression(node.getCond(), true, node.getLabel());
     		reduceBooleanExpression(node.getCond(), node.getJumpValue(), node.getLabel());
     	}
-    
-        
-        /*BasicBlock newBlock = new BasicBlock();
-        // At a jump, the current basic block splits to have two children:
-        // taking the jump and not taking the jump
-        currentBlock.addChild(newBlock);
-
-        // As the label may not be in the table yet, cache this relationship
-        // and apply it at the end
-        blockCache.add(currentBlock);
-        targetCache.add(node.getLabel().getName());
-        
-        // Following instructions are in own basic block
-        currentBlock = newBlock; 
-        blocksInOrder.add(currentBlock);*/
     }
 
     @Override
     public void visit(LLLabel node) {
         BasicBlock newBlock = new BasicBlock();
+        newBlock.setNum(currentBlockNum++);
         newBlock.addInstruction(node);
         instructions.add(node);
         
