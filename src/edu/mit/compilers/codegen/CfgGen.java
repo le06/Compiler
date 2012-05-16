@@ -148,11 +148,29 @@ public class CfgGen implements LLNodeVisitor {
     public void visit(LLAssign node) {
         LLAssign newAss;
         
+        LLLocation loc = node.getLoc();
+        
+        if (loc instanceof LLArrayLocation) {
+        	LLArrayLocation a = (LLArrayLocation)loc;
+    /*    	LLExpression newExpr = reduceExpression(a.getIndexExpr());
+        	
+        	LLVarLocation newI = new LLVarLocation(1, getNextTemp());
+            
+            LLAssign ass = new LLAssign(newI, newExpr);
+
+            instructions.add(ass);
+            currentBlock.addInstruction(ass);
+            */
+        	LLArrayLocation out = new LLArrayLocation(a.getLabel(), a.getType(), a.getSize(),
+        			               reduceExpression(a.getIndexExpr()));
+        	loc = out;
+        }
+        
         if (!(node.getExpr().getType() == Type.BOOLEAN)) {
-            newAss = new LLAssign(node.getLoc(), 
+            newAss = new LLAssign(loc, 
                                   reduceExpression(node.getExpr()));
         } else {
-            newAss = new LLAssign(node.getLoc(), 
+            newAss = new LLAssign(loc, 
                                   reduceBooleanExpression(node.getExpr()));
         }
         
@@ -424,7 +442,8 @@ public class CfgGen implements LLNodeVisitor {
             
             updateControlFlow(node.getLabel());
     	} else {
-    		reduceBooleanExpression(node.getCond(), true, node.getLabel());
+    		//reduceBooleanExpression(node.getCond(), true, node.getLabel());
+    		reduceBooleanExpression(node.getCond(), node.getJumpValue(), node.getLabel());
     	}
     
         
@@ -587,6 +606,8 @@ public class CfgGen implements LLNodeVisitor {
             l = node.getLhs();
         } else if (node.getLhs() instanceof LLUnaryNeg) {
         	l = reduceUnaryNeg((LLUnaryNeg)node.getLhs());
+        } else if (node.getLhs() instanceof LLArrayLocation) { 
+        	l = reduceArrayLocation((LLArrayLocation)node.getLhs());
         } else {
             throw new RuntimeException("Unexpected type in bin op: " + node.getLhs().getClass());
         }
@@ -601,6 +622,8 @@ public class CfgGen implements LLNodeVisitor {
             r = node.getRhs();
         } else if (node.getRhs() instanceof LLUnaryNeg) {
         	r = reduceUnaryNeg((LLUnaryNeg)node.getRhs());
+        } else if (node.getRhs() instanceof LLArrayLocation) { 
+        	r = reduceArrayLocation((LLArrayLocation)node.getRhs());
         } else {
             throw new RuntimeException("Unexpected type in bin op: " + node.getRhs().getClass());
         }

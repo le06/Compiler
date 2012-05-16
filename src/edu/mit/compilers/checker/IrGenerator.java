@@ -375,6 +375,14 @@ public class IrGenerator {
                     this_block.addStatement((IrStatement)node);
                 } else if (node instanceof IrVarDecl) {
                     this_block.addDecl((IrVarDecl)node);
+                } else if (node instanceof IrBlock) {
+                	IrBlock b = (IrBlock)node;
+                	for (IrStatement s : b.getStatements()) {
+                		this_block.addStatement(s);
+                	}
+                	for (IrVarDecl s : b.getVarDecls()) {
+                		this_block.addDecl(s);
+                	}
                 } else {
                     throw new RuntimeException("Illegal line in block");
                 }
