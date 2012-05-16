@@ -2,17 +2,21 @@ package edu.mit.compilers.codegen.ll2;
 
 import java.util.ArrayList;
 
-import edu.mit.compilers.codegen.ll2.LlExpression.Type;
-
 public class LlMethodDecl implements LlNode {
-
-    private Type type;
+    
+    public enum MethodType {
+        VOID,
+        INT,
+        BOOLEAN
+    }
+    
+    private MethodType type;
     private String method_name;
     private ArrayList<LlTempLoc> args;
     private int num_args;
     private LlEnv method_code;
     
-    public LlMethodDecl(Type t, String name, int num_args, LlEnv code) {
+    public LlMethodDecl(MethodType t, String name, int num_args, LlEnv code) {
         type = t;
         method_name = name;
         args = new ArrayList<LlTempLoc>();
@@ -20,7 +24,7 @@ public class LlMethodDecl implements LlNode {
         method_code = code;
     }
     
-    public Type getType() {
+    public MethodType getType() {
         return type;
     }
     

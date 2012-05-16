@@ -1,6 +1,6 @@
 package edu.mit.compilers.codegen.ll2;
 
-public class LlBoolLiteral implements LlExpression {
+public class LlBoolLiteral implements LlConstant {
 
     private boolean val;
     

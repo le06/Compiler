@@ -1,8 +1,8 @@
 package edu.mit.compilers.codegen.ll2;
 
-public interface LlExpression extends LlNode {
+public interface LlConstant extends LlNode {
     public static enum Type {
-        VOID, BOOLEAN, INT;
+        BOOLEAN, INT, STRING
     }
     public Type getType();
 }
