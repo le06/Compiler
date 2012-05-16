@@ -1,6 +1,6 @@
 package edu.mit.compilers.checker.Ir;
 
-import edu.mit.compilers.checker.Ir.IrNodeChecker.Type;
+import edu.mit.compilers.checker.SemanticChecker;
 import edu.mit.compilers.codegen.ll.LLBinaryOp;
 import edu.mit.compilers.codegen.ll.LLExpression;
 import edu.mit.compilers.codegen.ll.LLLabel;
@@ -36,7 +36,7 @@ public class IrBinopExpr extends Ir implements IrExpression {
     }
 
 	@Override
-	public IrType getExprType(IrNodeChecker c) {
+	public IrType getExprType(SemanticChecker c) {
 		IrType lhs_type = lhs.getExprType(c);
 		IrType rhs_type = rhs.getExprType(c);
 		

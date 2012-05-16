@@ -1,5 +1,6 @@
 package edu.mit.compilers.checker.Ir;
 
+import edu.mit.compilers.checker.SemanticChecker;
 import edu.mit.compilers.codegen.ll.LLBoolLiteral;
 import edu.mit.compilers.codegen.ll.LLLabel;
 import edu.mit.compilers.codegen.ll.LLNode;
@@ -12,7 +13,7 @@ public class IrBoolLiteral extends Ir implements IrExpression {
     private boolean literal;
 
 	@Override
-	public IrType getExprType(IrNodeChecker c) {
+	public IrType getExprType(SemanticChecker c) {
 		return new IrType(IrType.Type.BOOLEAN);
 	}
 

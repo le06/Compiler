@@ -1,5 +1,6 @@
 package edu.mit.compilers.checker.Ir;
 
+import edu.mit.compilers.checker.SemanticChecker;
 import edu.mit.compilers.codegen.ll.LLIntLiteral;
 import edu.mit.compilers.codegen.ll.LLLabel;
 import edu.mit.compilers.codegen.ll.LLNode;
@@ -36,7 +37,7 @@ public class IrCharLiteral extends Ir implements IrExpression {
 	}
 
 	@Override
-	public IrType getExprType(IrNodeChecker c) {
+	public IrType getExprType(SemanticChecker c) {
 		return new IrType(IrType.Type.INT); // chars are converted to ints.
 	}
 

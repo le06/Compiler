@@ -1,23 +1,29 @@
 package edu.mit.compilers.checker.Ir;
 
+import edu.mit.compilers.checker.SemanticChecker;
 import edu.mit.compilers.codegen.ll.LLLabel;
 import edu.mit.compilers.codegen.ll.LLNode;
 import edu.mit.compilers.codegen.ll.LLVarLocation;
 
 public class IrVarLocation extends IrLocation {
+    private IrIdentifier id;
+    private String symbol;
+    private int bp_offset;
+    
     public IrVarLocation(IrIdentifier var) {
         id = var;
     }
-    
-	private IrIdentifier id;
-	private int bp_offset;
 
 	public IrIdentifier getId() {
 		return id;
 	}
 	
+	public void setSymbol(String symbol) {
+	    this.symbol = symbol;
+	}
+	
 	@Override
-	public IrType getExprType(IrNodeChecker c) {
+	public IrType getExprType(SemanticChecker c) {
 		return c.lookupVarType(id);
 	}
 

@@ -5,15 +5,21 @@ import edu.mit.compilers.codegen.ll.LLLabel;
 import edu.mit.compilers.codegen.ll.LLNode;
 
 public class IrBaseDecl extends IrGlobalDecl {
+    private IrIdentifier id;
+    private String symbol;
+    
     public IrBaseDecl(IrIdentifier name) {
         id =  name;
     }
-    
-	private IrIdentifier id;
 	
 	public IrIdentifier getId() {
 		return id;
 	}
+	
+	public void setSymbol(String symbol) {
+	    this.symbol = symbol;
+	}
+	
 	@Override
 	public void accept(IrNodeVisitor v) {
 		v.visit(this);

@@ -1,5 +1,6 @@
 package edu.mit.compilers.checker.Ir;
 
+import edu.mit.compilers.checker.SemanticChecker;
 import edu.mit.compilers.codegen.ll.LLExpression;
 import edu.mit.compilers.codegen.ll.LLLabel;
 import edu.mit.compilers.codegen.ll.LLNode;
@@ -32,7 +33,7 @@ public class IrUnopExpr extends Ir implements IrExpression {
 	}
 	
 	@Override
-	public IrType getExprType(IrNodeChecker c) {
+	public IrType getExprType(SemanticChecker c) {
 		IrType exprType = expr.getExprType(c);
 		
 		if (operator == IrUnaryOperator.NOT &&

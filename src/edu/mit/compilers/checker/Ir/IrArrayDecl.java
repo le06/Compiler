@@ -10,6 +10,7 @@ import edu.mit.compilers.codegen.ll.LLNop;
 
 public class IrArrayDecl extends IrGlobalDecl {
 	private IrIdentifier id;
+	private String symbol;
 	private IrIntLiteral array_size;
 	
 	public IrArrayDecl(IrIdentifier name, IrIntLiteral size) {
@@ -28,6 +29,10 @@ public class IrArrayDecl extends IrGlobalDecl {
 		return array_size;
 	}
 
+	public void setSymbol(String symbol) {
+	    this.symbol = symbol;
+	}
+	
 	@Override
 	public void accept(IrNodeVisitor v) {
 		v.visit(this);
