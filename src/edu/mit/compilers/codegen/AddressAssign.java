@@ -17,6 +17,7 @@ import edu.mit.compilers.codegen.ll.LLMethodDecl;
 import edu.mit.compilers.codegen.ll.LLNode;
 import edu.mit.compilers.codegen.ll.LLReturn;
 import edu.mit.compilers.codegen.ll.LLUnaryNeg;
+import edu.mit.compilers.codegen.ll.LLUnaryNot;
 import edu.mit.compilers.codegen.ll.LLVarLocation;
 
 public class AddressAssign {
@@ -117,6 +118,12 @@ public class AddressAssign {
                 	LLArrayLocation a = (LLArrayLocation)((LLAssign)node).getExpr();
                 	if (a.getIndexExpr() instanceof LLVarLocation) {
                 		LLVarLocation rhs = (LLVarLocation)a.getIndexExpr();
+                    	rhs.setAddress(currentAssigments.get(rhs.getLabel()));
+                	}
+                } else if (((LLAssign)node).getExpr() instanceof LLUnaryNot) {
+                	LLUnaryNot n = (LLUnaryNot)((LLAssign)node).getExpr();
+                	if (n.getExpr() instanceof LLVarLocation) {
+                		LLVarLocation rhs = (LLVarLocation)n.getExpr();
                     	rhs.setAddress(currentAssigments.get(rhs.getLabel()));
                 	}
                 }

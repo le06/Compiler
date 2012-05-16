@@ -244,6 +244,16 @@ public class CodeGen implements LLNodeVisitor {
         	} else {
         		println("\tmovq $0, " + loc_addr);
         	}
+        } else if (node.getExpr() instanceof LLUnaryNot) {
+        	LLUnaryNot n = (LLUnaryNot)node.getExpr();
+        	if (n.getExpr() instanceof LLVarLocation) {
+        		LLVarLocation src = (LLVarLocation)n.getExpr();
+        		println("\tmovq " + src.addressOfResult() + ", " + R11);
+        		println("\tnot " + R11);
+        		println("\tmovq " + R11 + ", " + loc_addr);
+        	} else {
+            	throw new RuntimeException("Unimplemented in CodeGen, LLAssign");
+            }
         } else {
         	throw new RuntimeException("Unimplemented in CodeGen, LLAssign");
         }
@@ -392,6 +402,12 @@ public class CodeGen implements LLNodeVisitor {
         	lhs = ((LLVarLocation)l).addressOfResult();
         } else if (l instanceof LLIntLiteral) {
         	lhs = "$" + ((LLIntLiteral)l).getValue();
+        } else if (l instanceof LLBoolLiteral) {
+        	if (((LLBoolLiteral)l).getValue()) {
+        		lhs = "$1";
+        	} else {
+        		lhs = "$0";
+        	}
         } else {
         	throw new RuntimeException("Not yet implemented in codegen (BinOp)");
         }
@@ -401,6 +417,12 @@ public class CodeGen implements LLNodeVisitor {
         	rhs = ((LLVarLocation)r).addressOfResult();
         } else if (r instanceof LLIntLiteral) {
         	rhs = "$" + ((LLIntLiteral)r).getValue();
+        } else if (r instanceof LLBoolLiteral) {
+        	if (((LLBoolLiteral)r).getValue()) {
+        		rhs = "$1";
+        	} else {
+        		rhs = "$0";
+        	}
         } else {
         	throw new RuntimeException("Not yet implemented in codegen (BinOp)");
         }
@@ -455,6 +477,15 @@ public class CodeGen implements LLNodeVisitor {
         	println("\tidivq " + R11);
         	println("\tmovq " + RDX + ", " + R11);
         	break;
+        case EQ:
+        	println("\tmov " + rhs + ", " + R10);
+            println("\tmov " + lhs + ", " + R11);
+        	println("\tcmp " + R10 + ", " + R11);
+        	println("\tmov $1, " + R10);
+        	println("\tmov $0, " + R11);
+        	println("\tcmove " + R10 + ", " + R11);
+        	break;
+        	//TODO
         default:
         	throw new RuntimeException("BinOp not yet implemented in codegen");	
         }

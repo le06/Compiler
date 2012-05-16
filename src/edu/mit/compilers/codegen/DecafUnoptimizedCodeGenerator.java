@@ -55,6 +55,14 @@ public class DecafUnoptimizedCodeGenerator {
         g.generateCFG(file);
         ArrayList<BasicBlock> blocks = g.getBlocksInOrder();
         
+/*        for (int i = 0; i < blocks.size(); i++) {
+        	if (blocks.get(i).getChildren().size() == 0 &&
+        		blocks.get(i).getInstructions().size() == 0) {
+        		
+        		blocks.remove(i--);
+        	}
+        }*/
+        
         ArrayList<LLNode> instrs = new ArrayList<LLNode>();
         
         for (BasicBlock b : blocks) {

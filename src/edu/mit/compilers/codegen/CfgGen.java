@@ -244,9 +244,22 @@ public class CfgGen implements LLNodeVisitor {
     private void writeCmp(LLBinaryOp op, boolean jmpIf, LLLabel target) {
     	LLCmp cmp;
     	LLJump jmp;
+    	LLExpression l, r;
     	
-    	cmp = new LLCmp(reduceExpression(op.getRhs()), 
-    			        reduceExpression(op.getLhs()));
+    	if (op.getRhs().getType() == Type.BOOLEAN) {
+    		r = reduceBooleanExpression(op.getRhs());
+    	} else {
+    		r = reduceExpression(op.getRhs());
+    	}
+    	
+    	if (op.getLhs().getType() == Type.BOOLEAN) {
+    		l = reduceBooleanExpression(op.getLhs());
+    	} else {
+    		l = reduceExpression(op.getLhs());
+    	}
+    	
+    	cmp = new LLCmp(reduceExpression(r), 
+    			        reduceExpression(l));
     	
     	switch (op.getOp()) {
     	case EQ:
@@ -299,6 +312,8 @@ public class CfgGen implements LLNodeVisitor {
         currentBlock.addInstruction(cmp);
         instructions.add(jmp);
         currentBlock.addInstruction(jmp);
+        
+        updateControlFlow(target);
     }
     
     private void reduceBooleanExpression(LLExpression cond, boolean jmpIf, LLLabel jmpPoint) {
@@ -326,8 +341,13 @@ public class CfgGen implements LLNodeVisitor {
             	reduceBooleanExpression(op.getRhs(), false, ssAnd);
             	instructions.add(andSuccess);
             	currentBlock.addInstruction(andSuccess);
+            	
+            	updateControlFlow(jmpPoint);
+            	
             	instructions.add(ssAnd);
             	currentBlock.addInstruction(ssAnd);
+            	
+            	ssAnd.accept(this);
             	break;
             case OR:
             	// ReduceLeft
@@ -336,14 +356,10 @@ public class CfgGen implements LLNodeVisitor {
             	// If true, jump to ss
             	// jump jmpPoint
             	// .ss
-            	LLLabel ssOr = new LLLabel(getNextSS());
-            	LLJump orSuccess = new LLJump(JumpType.UNCONDITIONAL, jmpPoint);
+/*            	LLLabel ssOr = new LLLabel(getNextSS());
+            	LLJump orSuccess = new LLJump(JumpType.UNCONDITIONAL, jmpPoint);*/
             	reduceBooleanExpression(op.getLhs(), true, jmpPoint);
             	reduceBooleanExpression(op.getRhs(), true, jmpPoint);
-/*            	instructions.add(orSuccess);
-            	currentBlock.addInstruction(orSuccess);
-            	instructions.add(ssOr);
-            	currentBlock.addInstruction(ssOr);*/
             	break;
         	}
         	
@@ -355,6 +371,8 @@ public class CfgGen implements LLNodeVisitor {
             currentBlock.addInstruction(cmp);
             instructions.add(jmp);
             currentBlock.addInstruction(jmp);
+            
+            updateControlFlow(jmpPoint);
         } else if (cond instanceof LLMethodCall) {
         	LLCmp cmp = new LLCmp((LLVarLocation)reduceExpression(cond));
         	LLJump jmp = new LLJump(JumpType.NOT_EQUAL, jmpPoint);
@@ -363,9 +381,29 @@ public class CfgGen implements LLNodeVisitor {
             currentBlock.addInstruction(cmp);
             instructions.add(jmp);
             currentBlock.addInstruction(jmp);
+            
+            updateControlFlow(jmpPoint);
+        } else if (cond instanceof LLUnaryNot) { 
+        	reduceBooleanExpression(((LLUnaryNot) cond).getExpr(), !jmpIf, jmpPoint);
         } else {
         	throw new RuntimeException("Unimplemented in CfgGen, reduceBoolean");
         }
+    }
+    
+    public void updateControlFlow(LLLabel l) {
+    	BasicBlock newBlock = new BasicBlock();
+        // At a jump, the current basic block splits to have two children:
+        // taking the jump and not taking the jump
+        currentBlock.addChild(newBlock);
+
+        // As the label may not be in the table yet, cache this relationship
+        // and apply it at the end
+        blockCache.add(currentBlock);
+        targetCache.add(l.getName());
+        
+        // Following instructions are in own basic block
+        currentBlock = newBlock; 
+        blocksInOrder.add(currentBlock);
     }
     
     @Override
@@ -373,12 +411,14 @@ public class CfgGen implements LLNodeVisitor {
     	if (node.getCond() == null) {
     		instructions.add(node);
             currentBlock.addInstruction(node);
+            
+            updateControlFlow(node.getLabel());
     	} else {
     		reduceBooleanExpression(node.getCond(), true, node.getLabel());
     	}
     
         
-        BasicBlock newBlock = new BasicBlock();
+        /*BasicBlock newBlock = new BasicBlock();
         // At a jump, the current basic block splits to have two children:
         // taking the jump and not taking the jump
         currentBlock.addChild(newBlock);
@@ -390,7 +430,7 @@ public class CfgGen implements LLNodeVisitor {
         
         // Following instructions are in own basic block
         currentBlock = newBlock; 
-        blocksInOrder.add(currentBlock);
+        blocksInOrder.add(currentBlock);*/
     }
 
     @Override
@@ -452,6 +492,9 @@ public class CfgGen implements LLNodeVisitor {
             return null;
         } else if (e instanceof LLCallout) {
         	return reduceCallout((LLCallout)e);
+        } else if (e instanceof LLUnaryNot) { 
+        	LLUnaryNot n = new LLUnaryNot(reduceBooleanExpression(((LLUnaryNot) e).getExpr()));
+        	return n;
         } else {
             throw new RuntimeException("Illegal expr type in assign");
         }
@@ -589,9 +632,53 @@ public class CfgGen implements LLNodeVisitor {
     // Used in statements
     private LLExpression reduceBooleanExpression(LLExpression e) {
     	if (e instanceof LLBinaryOp) {
-        	return e; // TODO
+        	LLBinaryOp b = (LLBinaryOp)e;
+        	LLExpression l, r;
+        	
+        	switch (b.getOp()) {
+        	case AND:
+        	case OR:
+        		l = reduceBooleanExpression(b.getLhs());
+        		r = reduceBooleanExpression(b.getRhs());
+        		break;
+        	case EQ:
+        	case NEQ:
+        	case LT:
+        	case GT:
+        	case LEQ:
+        	case GEQ:
+        		l = reduceExpression(b.getLhs());
+        		r = reduceExpression(b.getRhs());
+        		break;
+        	default:
+        		throw new RuntimeException("Unexpected type in bool expr");
+        	}
+        	
+        	return new LLBinaryOp(l, r, b.getOp(), b.getType());
         } else if (e instanceof LLVarLocation) {
         	return e;
+        } else if (e instanceof LLUnaryNot) {
+        	// Double not optimization
+        	if (((LLUnaryNot)e).getExpr() instanceof LLUnaryNot) { 
+        		LLUnaryNot inner = (LLUnaryNot)((LLUnaryNot)e).getExpr();
+        		return reduceBooleanExpression(inner.getExpr());
+        	}
+        	
+        	LLExpression expr = reduceBooleanExpression(((LLUnaryNot)e).getExpr());
+        	LLVarLocation tmp = new LLVarLocation(1, getNextTemp());
+        	LLAssign ass = new LLAssign(tmp, expr); 
+        	
+        	instructions.add(ass);
+        	currentBlock.addInstruction(ass);
+        	
+        	LLUnaryNot n = new LLUnaryNot(tmp);
+        	LLVarLocation tmp2 = new LLVarLocation(1, getNextTemp());
+        	LLAssign ass2 = new LLAssign(tmp2, n); 
+        	
+        	instructions.add(ass2);
+        	currentBlock.addInstruction(ass2);
+        	
+        	return tmp2;
         } else {
         	return e;
         }
