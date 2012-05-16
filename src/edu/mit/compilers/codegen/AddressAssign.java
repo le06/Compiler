@@ -22,15 +22,17 @@ import edu.mit.compilers.codegen.ll.LLVarLocation;
 
 public class AddressAssign {
     private static final int BASE_OFFSET = -8;
+    private HashMap<String, String> currentAssigments;
+    ArrayList<String> globals;
     
     public HashMap<String, Integer> assign(ArrayList<LLNode> instructions) {
-        HashMap<String, String> currentAssigments = new HashMap<String, String>();
+        currentAssigments = new HashMap<String, String>();
         HashMap<String, Integer> methodMap = new HashMap<String, Integer>();
         int currentOffset = BASE_OFFSET;
         LLVarLocation currentVar;
         String currentMethod = null;
         
-        ArrayList<String> globals = new ArrayList<String>();
+        globals = new ArrayList<String>();
         
         for (LLNode node : instructions) {
             if (node instanceof LLMethodDecl) {
@@ -174,6 +176,13 @@ public class AddressAssign {
         
         return methodMap;
     }
+    
+/*    public void label(LLVarLocation v) {
+    	v.setAddress(currentAssigments.get(v.getLabel()));
+    	if (globals.contains(v.getLabel())) {
+    		
+    	}
+    }*/
     
     private String getAddr(int currentOffset) {
         return currentOffset + "(%rbp)";
