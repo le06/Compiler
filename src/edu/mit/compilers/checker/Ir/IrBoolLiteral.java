@@ -12,6 +12,10 @@ public class IrBoolLiteral extends Ir implements IrExpression {
     
     private boolean literal;
 
+    public boolean getValue() {
+        return literal;
+    }
+    
 	@Override
 	public IrType getExprType(SemanticChecker c) {
 		return new IrType(IrType.Type.BOOLEAN);
@@ -19,8 +23,7 @@ public class IrBoolLiteral extends Ir implements IrExpression {
 
 	@Override
 	public void accept(IrNodeVisitor v) {
-		// TODO Auto-generated method stub
-		// no need to visit; the parser guarantees validity.
+		v.visit(this);
 	}
 	
 	public String toString() {

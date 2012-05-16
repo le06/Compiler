@@ -16,6 +16,17 @@ public class LlReturn implements LlNode {
         type = ReturnType.VOID;
     }
     
+    public LlReturn(LlLocation loc) {
+        this.loc = loc;
+        type = ReturnType.VARIABLE;
+    }
+    
+    // note that locations are also expressions.
+    public LlReturn(LlExpression expr) {
+        this.expr = expr;
+        type = ReturnType.CONSTANT;
+    }
+    
     public ReturnType getReturnType() {
         return type;
     }

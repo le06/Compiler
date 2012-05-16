@@ -28,8 +28,8 @@ public class LlMethodDecl implements LlNode {
         return method_name;
     }
     
-    public void addArg(Type t, String name) {
-        args.add(new LlTempLoc(t, name));
+    public void addArg(String name) {
+        args.add(new LlTempLoc(name));
     }
     
     public ArrayList<LlTempLoc> getArgs() {

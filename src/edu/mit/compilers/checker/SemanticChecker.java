@@ -13,6 +13,7 @@ import edu.mit.compilers.checker.Ir.IrBinOperator;
 import edu.mit.compilers.checker.Ir.IrBinopExpr;
 import edu.mit.compilers.checker.Ir.IrBlock;
 import edu.mit.compilers.checker.Ir.IrBlockStmt;
+import edu.mit.compilers.checker.Ir.IrBoolLiteral;
 import edu.mit.compilers.checker.Ir.IrBreakStmt;
 import edu.mit.compilers.checker.Ir.IrCalloutArg;
 import edu.mit.compilers.checker.Ir.IrCalloutStmt;
@@ -1094,6 +1095,12 @@ public class SemanticChecker implements IrNodeVisitor {
     	} else {
     		return Type.MIXED; // only for binary exprs. invalid type.
     	}
+    }
+
+    @Override
+    public void visit(IrBoolLiteral node) {
+        // TODO Auto-generated method stub
+        // no need to do anything here.
     }
 
 }

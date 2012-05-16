@@ -9,6 +9,7 @@ import edu.mit.compilers.checker.Ir.IrBaseDecl;
 import edu.mit.compilers.checker.Ir.IrBinopExpr;
 import edu.mit.compilers.checker.Ir.IrBlock;
 import edu.mit.compilers.checker.Ir.IrBlockStmt;
+import edu.mit.compilers.checker.Ir.IrBoolLiteral;
 import edu.mit.compilers.checker.Ir.IrBreakStmt;
 import edu.mit.compilers.checker.Ir.IrCalloutStmt;
 import edu.mit.compilers.checker.Ir.IrClassDecl;
@@ -43,12 +44,16 @@ public class LlGenerator implements IrNodeVisitor {
     private Ir ir;
     private LlNode ll;
     
-    // the state of the LL generator as it walks the IR tree.
+    /*
+     * The state of the LL generator as it walks the IR tree.
+     */
     private LlNode parent;
     private LlLabel breakPoint;
     private LlLabel continuePoint;
+    private LlLocation currentLoc; // a location in memory. for example: the LHS in some assign statement.
+    private LlExpression currentLit; // an integer literal or a boolean literal.
+    private int currently_evaluating_expr = 0; // "true" if non-zero. like a semaphore.
     private Type currentType;
-    
     private int currentTemp = 1;
     
     // expects the root node as input.
@@ -103,6 +108,7 @@ public class LlGenerator implements IrNodeVisitor {
         LlProgram program = (LlProgram)parent; // the old parent.
         LlEnv method_code = new LlEnv();
         
+        currentTemp = 1;
         parent = (LlNode)method_code; // the new parent.
         node.getBlock().accept(this);
         
@@ -120,7 +126,7 @@ public class LlGenerator implements IrNodeVisitor {
             break;
         case VOID:
             m = new LlMethodDecl(Type.VOID, name, num_args, method_code);
-            // TODO: add return(0) to env here, once LlReturn is implemented.
+            method_code.addNode(new LlReturn(new LlIntLiteral(0)));
             break;
         default:
             throw new RuntimeException("Cannot have a method with mixed type");
@@ -128,6 +134,8 @@ public class LlGenerator implements IrNodeVisitor {
         
         // add the method params.
         for (IrParameterDecl p : node.getParams()) {
+            m.addArg(p.getId().getSymbol());
+            /*
             switch (p.getType().myType) {
             case BOOLEAN:
                 m.addArg(Type.BOOLEAN, p.getId().getSymbol());
@@ -138,7 +146,7 @@ public class LlGenerator implements IrNodeVisitor {
             default:
                 throw new RuntimeException("Unrecognized param type");
             }
-            
+            */
         }
         
         if (name == "main") {
@@ -185,7 +193,7 @@ public class LlGenerator implements IrNodeVisitor {
     @Override
     public void visit(IrLocalDecl node) {        
         String symbol = node.getSymbol();
-        LlLocation loc = new LlTempLoc(currentType, symbol);
+        LlLocation loc = new LlTempLoc(symbol);
         LlExpression expr = new LlIntLiteral(0);
         LlAssign a = new LlAssign(loc, expr);
         
@@ -218,13 +226,94 @@ public class LlGenerator implements IrNodeVisitor {
             r = new LlReturn();
         } else {
             // TODO: add code to determine if return expr is a single loc, expr (that needs to be flattened), or constant
-            r = null;
+            // if expr needs evaluation, add that code to the env also.
+            expr.accept(this);
+            if (currentLoc != null) {
+                r = new LlReturn(currentLoc);
+            }
+            else if (currentLit != null){
+                r = new LlReturn(currentLit);
+            } else {
+                throw new RuntimeException("Cannot have a method with mixed type");
+            }
+            currentLoc = null;
+            currentLit = null;
         }
         
         LlEnv env = (LlEnv)parent;
         env.addNode(r);
     }
 
+    // Expression evaluation and optimizations.
+    
+    @Override
+    public void visit(IrIdentifier node) {
+        processVarLocation(node.getSymbol());
+    }
+    
+    @Override
+    public void visit(IrVarLocation node) {
+        processVarLocation(node.getSymbol());
+    }
+
+    private void processVarLocation(String symbol) {
+        char prefix = symbol.charAt(0);
+        switch (prefix) {
+        case 'g':
+            currentLoc = new LlGlobalLoc(symbol);
+            break;
+        case 'v':
+        case 't':
+            currentLoc = new LlTempLoc(symbol);
+            break;
+        default:
+            throw new RuntimeException("Unrecognized symbol, expected single variable");
+        }
+    }
+    
+    @Override
+    public void visit(IrIntLiteral node) {
+        long intVal = node.getIntRep();
+        currentLit = new LlIntLiteral(intVal);
+    }
+
+    @Override
+    public void visit(IrBoolLiteral node) {
+        boolean boolVal = node.getValue();
+        currentLit = new LlBoolLiteral(boolVal);
+    }
+    
+    @Override
+    public void visit(IrArrayLocation node) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void visit(IrBinopExpr node) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void visit(IrUnopExpr node) {
+        // TODO Auto-generated method stub
+
+    }
+    
+    @Override
+    public void visit(IrMethodCallStmt node) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void visit(IrCalloutStmt node) {
+        // TODO Auto-generated method stub
+
+    }
+    
+    
     @Override
     public void visit(IrWhileStmt node) {
         // TODO Auto-generated method stub
@@ -244,18 +333,6 @@ public class LlGenerator implements IrNodeVisitor {
     }
 
     @Override
-    public void visit(IrMethodCallStmt node) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void visit(IrCalloutStmt node) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
     public void visit(IrAssignStmt node) {
         // TODO Auto-generated method stub
 
@@ -269,42 +346,6 @@ public class LlGenerator implements IrNodeVisitor {
 
     @Override
     public void visit(IrMinusAssignStmt node) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void visit(IrVarLocation node) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void visit(IrArrayLocation node) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void visit(IrBinopExpr node) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void visit(IrUnopExpr node) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void visit(IrIntLiteral node) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void visit(IrIdentifier node) {
         // TODO Auto-generated method stub
 
     }
