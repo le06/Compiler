@@ -74,7 +74,7 @@ public class CodeGen implements LLNodeVisitor {
     }
     
     private void writeHead() {
-        //println(".globl main");
+        println(".data");
     }
     
     private void initRegMap() {
