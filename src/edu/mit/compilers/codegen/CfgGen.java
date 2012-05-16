@@ -276,6 +276,92 @@ public class CfgGen implements LLNodeVisitor {
     		l = reduceExpression(op.getLhs());
     	}
     	
+    	// Optimize if both literals:
+    	if (l instanceof LLIntLiteral && r instanceof LLIntLiteral) {
+    		long l1 = ((LLIntLiteral)l).getValue();
+    		long l2 = ((LLIntLiteral)r).getValue();
+    		
+    		switch (op.getOp()) {
+        	case EQ:
+                if (jmpIf) {
+                	if (l1 == l2) {
+                		jmp = new LLJump(JumpType.UNCONDITIONAL, target);
+                	} else { jmp = null; }
+                } else {
+                	if (l1 != l2) {
+                		jmp = new LLJump(JumpType.UNCONDITIONAL, target);
+                	} else { jmp = null; }
+                }
+                break;
+            case NEQ:
+            	if (jmpIf) {
+                	if (l1 != l2) {
+                		jmp = new LLJump(JumpType.UNCONDITIONAL, target);
+                	} else { jmp = null; }
+                } else {
+                	if (l1 == l2) {
+                		jmp = new LLJump(JumpType.UNCONDITIONAL, target);
+                	} else { jmp = null; }
+                }
+                break;
+    		case GEQ:
+    			if (jmpIf) {
+                	if (l1 >= l2) {
+                		jmp = new LLJump(JumpType.UNCONDITIONAL, target);
+                	} else { jmp = null; }
+                } else {
+                	if (l1 < l2) {
+                		jmp = new LLJump(JumpType.UNCONDITIONAL, target);
+                	} else { jmp = null; }
+                }
+    			break;
+    		case GT:
+    			if (jmpIf) {
+                	if (l1 > l2) {
+                		jmp = new LLJump(JumpType.UNCONDITIONAL, target);
+                	} else { jmp = null; }
+                } else {
+                	if (l1 <= l2) {
+                		jmp = new LLJump(JumpType.UNCONDITIONAL, target);
+                	} else { jmp = null; }
+                }
+    			break;
+    		case LEQ:
+    			if (jmpIf) {
+                	if (l1 <= l2) {
+                		jmp = new LLJump(JumpType.UNCONDITIONAL, target);
+                	} else { jmp = null; }
+                } else {
+                	if (l1 > l2) {
+                		jmp = new LLJump(JumpType.UNCONDITIONAL, target);
+                	} else { jmp = null; }
+                }
+    			break;
+    		case LT:
+    			if (jmpIf) {
+                	if (l1 < l2) {
+                		jmp = new LLJump(JumpType.UNCONDITIONAL, target);
+                	} else { jmp = null; }
+                } else {
+                	if (l1 >= l2) {
+                		jmp = new LLJump(JumpType.UNCONDITIONAL, target);
+                	} else { jmp = null; }
+                }
+    			break;
+            default:
+            	throw new RuntimeException("Shouldn't be here in writeCmp");
+        	}
+    		
+    		if (jmp != null) {
+    			instructions.add(jmp);
+    	        currentBlock.addInstruction(jmp);
+    	        
+    	        updateControlFlow(target);
+    		}
+    		
+    		return;
+    	}
+    	
     	cmp = new LLCmp(reduceExpression(r), 
     			        reduceExpression(l));
     	
@@ -592,9 +678,30 @@ public class CfgGen implements LLNodeVisitor {
         return out;
     }
     
+    private LLExpression reduceIntBinOp(LLBinaryOp node) {
+    	long l = ((LLIntLiteral)node.getLhs()).getValue();
+    	long r = ((LLIntLiteral)node.getRhs()).getValue();
+    	switch (node.getOp()) {
+    	case PLUS:
+    		return new LLIntLiteral(l + r);
+    	case MINUS:
+    		return new LLIntLiteral(l - r);
+    	case DIV:
+    		return new LLIntLiteral(l / r);
+    	case MUL:
+    		return new LLIntLiteral(l * r);
+    	case MOD:
+    		return new LLIntLiteral(l % r);
+    	default:
+    		throw new RuntimeException("Cannot simplify this op in reduceIntBinOp");
+    	}
+    }
+    
     private LLExpression reduceBinOp(LLBinaryOp node) {
         LLExpression l, r; 
         LLVarLocation out;
+        
+        
         
         if (node.getLhs() instanceof LLBinaryOp) {
             l = reduceBinOp((LLBinaryOp)node.getLhs());
@@ -626,6 +733,11 @@ public class CfgGen implements LLNodeVisitor {
         	r = reduceArrayLocation((LLArrayLocation)node.getRhs());
         } else {
             throw new RuntimeException("Unexpected type in bin op: " + node.getRhs().getClass());
+        }
+        
+        if (l instanceof LLIntLiteral && r instanceof LLIntLiteral) {
+        	LLBinaryOp n = new LLBinaryOp(l, r, node.getOp(), node.getType());
+        	return reduceIntBinOp(n);
         }
         
         out = new LLVarLocation(1, getNextTemp());

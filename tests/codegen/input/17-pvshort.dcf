@@ -13,5 +13,9 @@ class Program
     if (a < b && (b < c || c < d)) {
       a = 20;
     }
+
+    if (4 < 2 && 7 != 8) {
+      d = 40;
+    } 
   }
 }
