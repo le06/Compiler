@@ -53,6 +53,7 @@ public class CSE implements Optimization, LLNodeVisitor {
 	    // this process should only need to be done once.
 	    
 	    // step 1: collect all CSE exprs and the locs these exprs are assigned to.
+	    //         simultaneously calculate GEN and KILL for each dataflow block.
 	    allPossibleExprs = new HashSet<String>();
 	    allPossibleLocs = new HashSet<String>();
 	    checkedBlocks = new HashSet<Integer>();
@@ -72,8 +73,10 @@ public class CSE implements Optimization, LLNodeVisitor {
 	        counter++;
 	    }
 	    
-	    // step 3: initialize gen-kill data structures.
+	    Integer entry = method.getNum();
+	    // step 3: initialize IN and OUT.
 	    for (DataflowBlock b : dataflowBlocks.values()) {
+
 	        // TODO: put stuff here
 	    }
 	    
@@ -84,7 +87,7 @@ public class CSE implements Optimization, LLNodeVisitor {
 			instr.accept(this);
 		}
 	}
-
+	
 	private void collectExprs(BasicBlock b) {
 	    Integer id = b.getNum();
 	    // check each block at most once to prevent infinite loops.
@@ -99,7 +102,7 @@ public class CSE implements Optimization, LLNodeVisitor {
 	    // check the block contents.
         for (LLNode instr : b.getInstructions()) {
             if (instr instanceof LLAssign) {
-                extractExpr((LLAssign)instr);
+                processExpr((LLAssign)instr, newB);
             }
         }
         // then check the block successors.
@@ -109,7 +112,7 @@ public class CSE implements Optimization, LLNodeVisitor {
 	}
 	
 	// returns true if allPossibleExprs or allPossibleLocs is modified.
-	private boolean extractExpr(LLAssign a) {
+	private void processExpr(LLAssign a, DataflowBlock b) {
 	    LLExpression rhs = a.getExpr();
 	    
 	    if (rhs instanceof LLBinaryOp) {
@@ -133,7 +136,7 @@ public class CSE implements Optimization, LLNodeVisitor {
 	            op = "%";
 	            break;
             default:
-                return false; // ignore non-arithmetic expressions for now.
+                return; // ignore non-arithmetic expressions for now.
 	        }
 	        
 	        LLExpression left = binExpr.getLhs();
@@ -143,20 +146,43 @@ public class CSE implements Optimization, LLNodeVisitor {
 	        String rightRep = genExpressionRep(right);
 	        
 	        if (leftRep == null || rightRep == null) {
-	            return false;
+	            return;
 	        }
 	        
 	        String key = leftRep + op + rightRep;
 	        if (key != null) {
-	            boolean modified = false;
 	            String loc = a.getLoc().getLabel();
-	            modified |= allPossibleExprs.add(key);
-	            modified |= allPossibleLocs.add(loc);
-	            return modified;
+	            allPossibleExprs.add(key);
+	            allPossibleLocs.add(loc);
+	            // update KILL/GEN.
+	            killSet(b.gen, loc);
+	            b.kill.add(loc);
+	            // add the expr to GEN.
+	            b.gen.add(key);
 	        }
-	        return false;
+
 	    }
 	    
+	    return;
+	}
+	
+	private void killSet(HashSet<String> set, String loc) {
+	    for (String key : set) {
+	        if (locInExpr(loc, key)) {
+	            set.remove(key);
+	        }
+	    }
+	}
+	
+	private boolean locInExpr(String loc, String expr) {
+	    String opRegex = "[+-*/%]";
+	    
+	    String[] operands = expr.split(opRegex);
+	    for (String s : operands) {
+	        if (s.equals(loc)) {
+	            return true;
+	        }
+	    }
 	    return false;
 	}
 	
