@@ -2,10 +2,10 @@ package edu.mit.compilers.codegen.ll2;
 
 import java.util.ArrayList;
 
-public class LlEnvironment implements LlNode {
+public class LlEnv implements LlNode {
     private ArrayList<LlNode> subnodes;
     
-    public LlEnvironment() {
+    public LlEnv() {
         subnodes = new ArrayList<LlNode>();
     }
     

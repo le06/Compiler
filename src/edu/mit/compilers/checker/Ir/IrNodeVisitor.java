@@ -50,6 +50,8 @@ public interface IrNodeVisitor {
 	public void visit(IrUnopExpr node);
 
 	public void visit(IrIntLiteral node);
+	
+	public void visit(IrBoolLiteral node);
 
 	public void visit(IrIdentifier node);
 }
