@@ -365,7 +365,12 @@ public class CfgGen implements LLNodeVisitor {
         	
         } else if (cond instanceof LLVarLocation) {
         	LLCmp cmp = new LLCmp((LLVarLocation)cond);
-        	LLJump jmp = new LLJump(JumpType.NOT_EQUAL, jmpPoint);
+        	LLJump jmp ;
+        	if (jmpIf) {
+        		jmp = new LLJump(JumpType.NOT_EQUAL, jmpPoint);
+        	} else {
+        		jmp = new LLJump(JumpType.EQUAL, jmpPoint);
+        	}
         	
         	instructions.add(cmp);
             currentBlock.addInstruction(cmp);
@@ -375,7 +380,12 @@ public class CfgGen implements LLNodeVisitor {
             updateControlFlow(jmpPoint);
         } else if (cond instanceof LLMethodCall) {
         	LLCmp cmp = new LLCmp((LLVarLocation)reduceExpression(cond));
-        	LLJump jmp = new LLJump(JumpType.NOT_EQUAL, jmpPoint);
+        	LLJump jmp ;
+        	if (jmpIf) {
+        		jmp = new LLJump(JumpType.NOT_EQUAL, jmpPoint);
+        	} else {
+        		jmp = new LLJump(JumpType.EQUAL, jmpPoint);
+        	}
         	
         	instructions.add(cmp);
             currentBlock.addInstruction(cmp);

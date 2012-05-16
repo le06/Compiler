@@ -249,7 +249,10 @@ public class CodeGen implements LLNodeVisitor {
         	if (n.getExpr() instanceof LLVarLocation) {
         		LLVarLocation src = (LLVarLocation)n.getExpr();
         		println("\tmovq " + src.addressOfResult() + ", " + R11);
-        		println("\tnot " + R11);
+        		println("\tcmp $0, " + R11);
+        		println("\tmov $1, " + R10);
+            	println("\tmov $0, " + R11);
+            	println("\tcmove " + R10 + ", " + R11);
         		println("\tmovq " + R11 + ", " + loc_addr);
         	} else {
             	throw new RuntimeException("Unimplemented in CodeGen, LLAssign");
