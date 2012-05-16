@@ -13,7 +13,6 @@ public class CSE implements Optimization, LLNodeVisitor {
         
         HashSet<String> gen;
         HashSet<String> kill;
-        HashSet<String> in;
         HashSet<String> out;
         
     }
@@ -74,13 +73,24 @@ public class CSE implements Optimization, LLNodeVisitor {
 	    }
 	    
 	    Integer entry = method.getNum();
-	    // step 3: initialize IN and OUT.
+	    // step 3: initialize OUT.
 	    for (DataflowBlock b : dataflowBlocks.values()) {
-
-	        // TODO: put stuff here
+            if (b.block.getNum() == entry) {
+                for (String key : b.gen) {
+                    b.out.add(key);
+                }
+            } else {
+                for (String key : allPossibleExprs) {
+                    b.out.add(key);
+                }
+                for (String k : b.kill) {
+                    killSet(b.out, k);
+                }
+            }
 	    }
 	    
 	    // step 4: start the gen-kill algorithm.
+	    
 	    // step 5: eliminate CSEs based on available expressions.
 	    
 		for (LLNode instr : method.getInstructions()) {
