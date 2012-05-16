@@ -19,6 +19,10 @@ public class IrIdentifier extends Ir implements IrExpression {
 		return id;
 	}
 
+	public String getSymbol() {
+	    return symbol;
+	}
+	
 	public void setSymbol(String symbol) {
 	    this.symbol = symbol;
 	}

@@ -16,6 +16,10 @@ public class IrLocalDecl extends Ir {
 		return id;
 	}
 	
+	public String getSymbol() {
+	    return symbol;
+	}
+	
 	public void setSymbol(String symbol) {
 	    this.symbol = symbol;
 	}

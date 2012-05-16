@@ -29,6 +29,10 @@ public class IrArrayDecl extends IrGlobalDecl {
 		return array_size;
 	}
 
+	public String getSymbol() {
+	    return symbol;
+	}
+	
 	public void setSymbol(String symbol) {
 	    this.symbol = symbol;
 	}
