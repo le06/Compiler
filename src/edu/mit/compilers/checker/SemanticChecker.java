@@ -291,7 +291,6 @@ public class SemanticChecker implements IrNodeVisitor {
     		// visitor will add id regardless of current_type's validity.
     		field_table.put(id, current_type);
     		String symbol = "g" + String.valueOf(global_counter);
-    		System.out.println(symbol);
     		symbol_table.put(id, symbol);
     		node.setSymbol(symbol);
     		global_counter++;
@@ -328,7 +327,6 @@ public class SemanticChecker implements IrNodeVisitor {
     				array_types.put(id, current_type);
     				array_sizes.put(id, array_size);
     	            String symbol = "a" + String.valueOf(array_counter);
-    	            System.out.println(symbol);
     	            array_symbols.put(id, symbol);
     	            node.setSymbol(symbol);
     				array_counter++;
@@ -408,7 +406,6 @@ public class SemanticChecker implements IrNodeVisitor {
                 // params are treated as locals.
                 // thus, these need to be allocated during codegen phase.
                 String symbol = "v" + String.valueOf(local_counter);
-                System.out.println(symbol);
                 method_env.getSymbolTable().put(name, symbol);
     			local_counter++;
     		}
@@ -466,7 +463,6 @@ public class SemanticChecker implements IrNodeVisitor {
     		
     		// the local needs its own symbol during codegen.
             String symbol = "v" + String.valueOf(local_counter);
-            System.out.println(symbol);
             getCurrentEnv().getSymbolTable().put(id, symbol);
             node.setSymbol(symbol);
             local_counter++;
@@ -653,7 +649,6 @@ public class SemanticChecker implements IrNodeVisitor {
     	for_env.getFieldTable().put(id.getId(), Type.INT);
     	
         String symbol = "v" + String.valueOf(local_counter);
-        System.out.println(symbol);
         for_env.getSymbolTable().put(id.getId(), symbol);
         node.setCounterSymbol(symbol);
         
