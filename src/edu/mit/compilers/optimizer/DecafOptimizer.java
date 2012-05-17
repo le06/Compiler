@@ -8,6 +8,8 @@ public class DecafOptimizer {
 	
 	public DecafOptimizer() {
 		optimizations = new ArrayList<Optimization>();
+		RegAllocator rAlloc = new RegAllocator();
+		optimizations.add(rAlloc);
 	}
 	
 	public void optimize(BasicBlock methods) {

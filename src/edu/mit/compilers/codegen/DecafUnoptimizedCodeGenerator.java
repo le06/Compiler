@@ -13,6 +13,7 @@ import edu.mit.compilers.checker.Ir.IrNode;
 import edu.mit.compilers.codegen.ll.LLFile;
 import edu.mit.compilers.codegen.ll.LLNode;
 import edu.mit.compilers.codegen.LabelNamer;
+import edu.mit.compilers.optimizer.DecafOptimizer;
 
 public class DecafUnoptimizedCodeGenerator {
     private CodeGenerator generator;
@@ -69,6 +70,10 @@ public class DecafUnoptimizedCodeGenerator {
 
         AddressAssign a = new AddressAssign();
         HashMap<String, Integer> methodMap = a.assign(instrs);
+        
+/*        DecafOptimizer o = new DecafOptimizer();
+        o.optimize(blocks.get(0));*/
+        
         CodeGen c = new CodeGen();
         c.gen(instrs, methodMap, stream);
     }
