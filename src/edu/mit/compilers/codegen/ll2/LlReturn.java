@@ -9,7 +9,7 @@ public class LlReturn implements LlNode {
     }
     
     private LlLocation loc; // the address where the result is stored.
-    private LlExpression expr; // a literal constant.
+    private LlConstant lit; // a boolean or int constant.
     private ReturnType type;
     
     public LlReturn() {
@@ -22,8 +22,8 @@ public class LlReturn implements LlNode {
     }
     
     // note that locations are also expressions.
-    public LlReturn(LlExpression expr) {
-        this.expr = expr;
+    public LlReturn(LlConstant lit) {
+        this.lit = lit;
         type = ReturnType.CONSTANT;
     }
     
@@ -35,8 +35,8 @@ public class LlReturn implements LlNode {
         return loc;
     }
     
-    public LlExpression getExpression() {
-        return expr;
+    public LlConstant getLiteral() {
+        return lit;
     }
     
     @Override

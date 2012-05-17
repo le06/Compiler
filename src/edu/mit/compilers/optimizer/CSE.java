@@ -2,20 +2,358 @@ package edu.mit.compilers.optimizer;
 
 import edu.mit.compilers.codegen.BasicBlock;
 import edu.mit.compilers.codegen.ll.*;
+import edu.mit.compilers.checker.Ir.IrBinOperator;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 
 public class CSE implements Optimization, LLNodeVisitor {
+    private class DataflowBlock {
+        BasicBlock block;
+        
+        HashSet<String> gen;
+        HashSet<String> kill;
+        HashSet<String> in;
+        HashSet<String> out;
+        
+        public DataflowBlock(BasicBlock block) {
+            this.block = block;
+            
+            gen = new HashSet<String>();
+            kill = new HashSet<String>();
+            in = new HashSet<String>();
+            out = new HashSet<String>();
+        }
+    }
+    
 	ArrayList<ArrayList<LLAssign>> IN, OUT, GEN, KILL;
 	ArrayList<LLAssign> currentGen, currentKill;
 	
+	HashSet<String> allPossibleExprs;
+	HashSet<String> allPossibleLocs;
+	HashSet<Integer> checkedBlocks;
+	HashMap<Integer, DataflowBlock> dataflowBlocks;
+	
+	HashMap<String, String> exprToTemp;
+
+	/*
+	    Notes.
+	  
+	    0. initialize parents of each basic block belonging to method
+        1. generate set of all possible exprs (RHS).
+           decide on some rep. reuse LLAssign?
+        2. implement gen kill:
+           GEN(Integer, <representation of available expr>) = GEN[i]
+           etc.
+        3. make sure to reuse the same temp for the same expr!
+           global list of exprs->temps (calculated from step 1)
+        4. each basic block will have a set of available expressions
+        5. if expr is available, replace LLAssign with two LLAssigns
+        
+        ps. dead code elimination will obviously help!
+	*/
+	
 	@Override
 	public void optimize(BasicBlock method) {
-		for (LLNode instr : method.getInstructions()) {
-			instr.accept(this);
-		}
-	}
+	    // TODO: step 0 beforehand.
+	    // need the list of all basic blocks in the file.
+	    // use block.getNum() as an array index to update blocks.
+	    // this process should only need to be done once.
+	    
+	    // step 1: collect all CSE exprs and the locs these exprs are assigned to.
+	    //         simultaneously calculate GEN and KILL for each dataflow block.
+	    allPossibleExprs = new HashSet<String>();
+	    allPossibleLocs = new HashSet<String>();
+	    checkedBlocks = new HashSet<Integer>();
+	    dataflowBlocks = new HashMap<Integer, DataflowBlock>();
+	    collectExprs(method);
+	    
+	    // step 2: map each expr to a temp, which will be used every time the expr is available.
+	    int counter = 1;
+	    String temp_prefix = "new_t";
+	    String temp_name = temp_prefix + counter;
+	    for (String key : allPossibleExprs) {
+	        while (allPossibleLocs.contains(temp_name)) {
+	            counter++;
+	            temp_name = temp_prefix + counter;
+	        }
+	        exprToTemp.put(key, temp_name);
+	        counter++;
+	    }
+	    
+	    Integer entry = method.getNum();
+	    // step 3: initialize OUTs and changed.
+	    HashSet<Integer> changed = new HashSet<Integer>();
+	    for (DataflowBlock b : dataflowBlocks.values()) {
+            if (b.block.getNum() == entry) { // gen[n].
+                b.out = new HashSet<String>(b.gen);
 
+            } else { // E - kill[n].
+                changed.add(b.block.getNum());
+                
+                b.out = new HashSet<String>(allPossibleExprs);
+                for (String k : b.kill) {
+                    killSet(b.out, k);
+                }
+            }
+	    }
+	    
+	    HashSet<String> in;
+	    // step 4: start the gen-kill algorithm.
+	    while (!changed.isEmpty()) {
+	        Integer i = changed.iterator().next();
+	        changed.remove(i);
+	        DataflowBlock b = dataflowBlocks.get(i);
+
+	        // merge point operation is intersection.
+	        in = new HashSet<String>(allPossibleExprs);
+	        for (BasicBlock parent : b.block.getParents()) {
+	            Integer parentId = parent.getNum();
+	            in.retainAll(dataflowBlocks.get(parentId).out);
+	        }
+	        
+	        // IN - KILL
+	        for (String k : b.kill) {
+	            killSet(in, k);
+	        }
+	        
+	        in.addAll(b.gen);
+	        HashSet<String> newOut = new HashSet<String>(in);
+	        if (!newOut.equals(b.out)) {
+	            b.out = newOut;
+	            for (BasicBlock child : b.block.getChildren()) {
+	                changed.add(child.getNum());
+	            }
+	        }
+	    }
+	    
+	    // step 5: eliminate CSEs based on available expressions.
+	    for (DataflowBlock b : dataflowBlocks.values()) {
+	        if (b.block.getNum() != entry) {
+	            performCSE(b);
+	        }
+	    }
+	}
+	
+	private void performCSE(DataflowBlock b) {
+	    ArrayList<DataflowBlock> parents = new ArrayList<DataflowBlock>();
+	    // get all predecessors of b.
+	    for (BasicBlock p : b.block.getParents()) {
+	        parents.add(dataflowBlocks.get(p.getNum()));
+	    }
+	    // calculate IN.
+	    HashSet<String> in = new HashSet<String>(allPossibleExprs);
+	    for (DataflowBlock p : parents) {
+	        in.retainAll(p.out); // take the intersection.
+	    }
+	    // the result is the set of all available exprs at the beginning of b.
+	    for (LLNode instr : b.block.getInstructions()) {
+	        if (instr instanceof LLAssign) {
+	            LLAssign a = (LLAssign)instr;
+	            String expr = processExpr(a);
+	            if (in.contains(expr)) { // if true, perform CSE!
+	                String temp_name = exprToTemp.get(expr);
+	                // change the assignment in b to the temp location.
+	                instr = new LLAssign(a.getLoc(), new LLVarLocation(1, temp_name));
+	                // generate the temp location in all parent blocks.
+	                for (DataflowBlock p : parents) {
+	                    if(!changeAssign(p, expr, temp_name)) {
+	                        // something went wrong if returned false.
+	                    }
+	                }
+	            }
+	            killSet(in, a.getLoc().getLabel());
+	        }
+	    }
+	    
+	}
+	
+	private boolean changeAssign(DataflowBlock p, String expr, String temp_name) {
+	    // go backwards through the instructions and modify the first occurrence where expr is assigned.
+	    ArrayList<LLNode> instrs = p.block.getInstructions();
+	    for (int i = instrs.size()-1; i>=0; i--) {
+	        if (instrs.get(i) instanceof LLAssign) {
+	            LLAssign a = (LLAssign)instrs.get(i);
+	            String rhs = processExpr(a);
+	            if (rhs.equals(expr)) {
+	                LLExpression lhs = (LLExpression)a.getLoc();
+	                LLLocation tempLoc = new LLVarLocation(1, temp_name);
+	                LLAssign assignTemp = new LLAssign(tempLoc, lhs);
+	                // insert the temp assignment after the expr assignment.
+	                instrs.add(i+1, assignTemp);
+	                return true;
+	            }
+	        }
+	    }
+	    return false;
+	}
+	
+	private void collectExprs(BasicBlock b) {
+	    Integer id = b.getNum();
+	    // check each block at most once to prevent infinite loops.
+	    if (checkedBlocks.contains(id)) {
+	        return;
+	    }
+	    checkedBlocks.add(id);
+	    DataflowBlock newB = new DataflowBlock(b);
+	    dataflowBlocks.put(id, newB);
+	    
+	    // check the block contents.
+        for (LLNode instr : b.getInstructions()) {
+            if (instr instanceof LLAssign) {
+                processExpr((LLAssign)instr, newB);
+            }
+        }
+        // then check the block successors.
+        for (BasicBlock s : b.getChildren()) {
+            collectExprs(s);
+        }
+	}
+	
+	private String processExpr(LLAssign a) {
+	    LLExpression rhs = a.getExpr();
+        
+        if (rhs instanceof LLBinaryOp) {
+            LLBinaryOp binExpr = (LLBinaryOp)rhs;
+            
+            String op;
+            switch (binExpr.getOp()) {
+            case PLUS:
+                op = "+";
+                break;
+            case MINUS:
+                op = "-";
+                break;
+            case MUL:
+                op = "*";
+                break;
+            case DIV:
+                op = "/";
+                break;
+            case MOD:
+                op = "%";
+                break;
+            default:
+                return null; // ignore non-arithmetic expressions for now.
+            }
+            
+            LLExpression left = binExpr.getLhs();
+            LLExpression right = binExpr.getRhs();
+            
+            String leftRep = genExpressionRep(left);
+            String rightRep = genExpressionRep(right);
+            
+            if (leftRep == null || rightRep == null) {
+                return null;
+            }
+            
+            return leftRep + op + rightRep;
+
+        }
+        
+        return null;
+	}
+	
+	// returns true if allPossibleExprs or allPossibleLocs is modified.
+	private void processExpr(LLAssign a, DataflowBlock b) {
+	    LLExpression rhs = a.getExpr();
+	    
+	    if (rhs instanceof LLBinaryOp) {
+	        LLBinaryOp binExpr = (LLBinaryOp)rhs;
+	        
+	        String op;
+	        switch (binExpr.getOp()) {
+	        case PLUS:
+	            op = "+";
+	            break;
+	        case MINUS:
+	            op = "-";
+	            break;
+	        case MUL:
+	            op = "*";
+	            break;
+	        case DIV:
+	            op = "/";
+	            break;
+	        case MOD:
+	            op = "%";
+	            break;
+            default:
+                return; // ignore non-arithmetic expressions for now.
+	        }
+	        
+	        LLExpression left = binExpr.getLhs();
+	        LLExpression right = binExpr.getRhs();
+	        
+	        String leftRep = genExpressionRep(left);
+	        String rightRep = genExpressionRep(right);
+	        
+	        if (leftRep == null || rightRep == null) {
+	            return;
+	        }
+	        
+	        String key = leftRep + op + rightRep;
+	        if (key != null) {
+	            String loc = a.getLoc().getLabel();
+	            allPossibleExprs.add(key);
+	            allPossibleLocs.add(loc);
+	            // update KILL/GEN.
+	            killSet(b.gen, loc);
+	            b.kill.add(loc);
+	            // add the expr to GEN.
+	            b.gen.add(key);
+	        }
+
+	    }
+	    
+	    return;
+	}
+	
+	private void killSet(HashSet<String> set, String loc) {
+	    for (String key : set) {
+	        if (locInExpr(loc, key)) {
+	            set.remove(key);
+	        }
+	    }
+	}
+	
+	private boolean locInExpr(String loc, String expr) {
+	    String opRegex = "[+-*/%]";
+	    
+	    String[] operands = expr.split(opRegex);
+	    for (String s : operands) {
+	        if (s.equals(loc)) {
+	            return true;
+	        }
+	    }
+	    return false;
+	}
+	
+	private String genExpressionRep(LLExpression expr) {
+	    String rep = null;
+	    
+        if (expr instanceof LLVarLocation) {
+            rep = ((LLVarLocation)expr).getLabel();
+        } else if (expr instanceof LLArrayLocation) {
+            LLArrayLocation loc = (LLArrayLocation)expr;
+            String arrayLabel = loc.getLabel();
+            String indexLabel;
+            LLExpression indexExpr = loc.getIndexExpr();
+            if (indexExpr instanceof LLVarLocation) {
+                indexLabel = ((LLVarLocation)indexExpr).getLabel();
+                rep = arrayLabel + "[" + indexLabel + "]";
+            } else {
+                // throw some error
+            }
+        } else if (expr instanceof LLIntLiteral) {
+            rep = String.valueOf(((LLIntLiteral)expr).getValue());
+        } else {
+            // throw some error.
+        }
+        
+        return rep;
+	}
+	
 	@Override
 	public void visit(LLFile node) {
 		// TODO Auto-generated method stub

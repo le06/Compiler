@@ -1,6 +1,6 @@
 package edu.mit.compilers.codegen.ll2;
 
-public class LlIntLiteral implements LlExpression {
+public class LlIntLiteral implements LlConstant {
 
     private long value;
     

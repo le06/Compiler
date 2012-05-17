@@ -31,19 +31,22 @@ import edu.mit.compilers.checker.Ir.IrParameterDecl;
 import edu.mit.compilers.checker.Ir.IrPlusAssignStmt;
 import edu.mit.compilers.checker.Ir.IrReturnStmt;
 import edu.mit.compilers.checker.Ir.IrStatement;
+import edu.mit.compilers.checker.Ir.IrType;
 import edu.mit.compilers.checker.Ir.IrUnopExpr;
 import edu.mit.compilers.checker.Ir.IrVarDecl;
 import edu.mit.compilers.checker.Ir.IrVarLocation;
 import edu.mit.compilers.checker.Ir.IrWhileStmt;
 import edu.mit.compilers.codegen.ll2.*;
-import edu.mit.compilers.codegen.ll2.LlExpression.Type;
+import edu.mit.compilers.codegen.ll2.LlConstant.Type;
+import edu.mit.compilers.codegen.ll2.LlMethodDecl.MethodType;
+import edu.mit.compilers.codegen.ll2.LlReturn.ReturnType;
 import edu.mit.compilers.codegen.ll2.LlJmp.JumpType;
 
 public class LlGenerator implements IrNodeVisitor {
 
     private Ir ir;
     private LlNode ll;
-    
+        
     /*
      * The state of the LL generator as it walks the IR tree.
      */
@@ -51,7 +54,7 @@ public class LlGenerator implements IrNodeVisitor {
     private LlLabel breakPoint;
     private LlLabel continuePoint;
     private LlLocation currentLoc; // a location in memory. for example: the LHS in some assign statement.
-    private LlExpression currentLit; // an integer literal or a boolean literal.
+    private LlConstant currentLit; // an integer literal or a boolean literal.
     private int currently_evaluating_expr = 0; // "true" if non-zero. like a semaphore.
     private LlEnv expr_env; // the series of instructions required to fully evaluate an entire expression.
     private Type currentType;
@@ -120,13 +123,13 @@ public class LlGenerator implements IrNodeVisitor {
         // set the method's return type.
         switch (node.getReturnType().myType) {
         case BOOLEAN:
-            m = new LlMethodDecl(Type.BOOLEAN, name, num_args, method_code);
+            m = new LlMethodDecl(MethodType.BOOLEAN, name, num_args, method_code);
             break;
         case INT:
-            m = new LlMethodDecl(Type.INT, name, num_args, method_code);
+            m = new LlMethodDecl(MethodType.INT, name, num_args, method_code);
             break;
         case VOID:
-            m = new LlMethodDecl(Type.VOID, name, num_args, method_code);
+            m = new LlMethodDecl(MethodType.VOID, name, num_args, method_code);
             method_code.addNode(new LlReturn(new LlIntLiteral(0)));
             break;
         default:
@@ -195,11 +198,11 @@ public class LlGenerator implements IrNodeVisitor {
     public void visit(IrLocalDecl node) {        
         String symbol = node.getSymbol();
         LlLocation loc = new LlTempLoc(symbol);
-        LlExpression expr = new LlIntLiteral(0);
-        LlAssign a = new LlAssign(loc, expr);
+        LlConstant expr = new LlIntLiteral(0);
+        // TODO: fix. LlAssign a = new LlAssign(loc, expr);
         
         LlEnv env = (LlEnv)parent;
-        env.addNode(a);
+        //env.addNode(a);
     }
 
     @Override
@@ -226,9 +229,10 @@ public class LlGenerator implements IrNodeVisitor {
         if (expr == null) {
             r = new LlReturn();
         } else {
-            // TODO: add code to determine if return expr is a single loc, expr (that needs to be flattened), or constant
-            // if expr needs evaluation, add that code to the env also.
+            currently_evaluating_expr++;
             expr.accept(this);
+            currently_evaluating_expr--;
+            
             if (currentLoc != null) {
                 r = new LlReturn(currentLoc);
             }
@@ -290,7 +294,10 @@ public class LlGenerator implements IrNodeVisitor {
     public void visit(IrArrayLocation node) {
         String symbol = node.getSymbol();
         IrExpression expr = node.getIndex();
+        currently_evaluating_expr++;
         expr.accept(this);
+        currently_evaluating_expr--;
+        
         if (currentLoc != null) {
             LlLocation offset_loc = currentLoc;
             currentLoc = new LlArrayLoc(symbol, offset_loc);
@@ -305,8 +312,44 @@ public class LlGenerator implements IrNodeVisitor {
     
     @Override
     public void visit(IrMethodCallStmt node) {
-        // TODO Auto-generated method stub
-
+        LlMethodCall mc;
+        
+        switch (node.getType().myType) {
+        case BOOLEAN:
+            mc = new LlMethodCall(MethodType.BOOLEAN, node.getMethodName().getId());
+            break;
+        case INT:
+            mc = new LlMethodCall(MethodType.INT, node.getMethodName().getId());
+            break;
+        case VOID:
+            mc = new LlMethodCall(MethodType.VOID, node.getMethodName().getId());
+            break;
+        default:
+            throw new RuntimeException("Invalid return type");
+        }
+        
+        currently_evaluating_expr++;
+        for (IrExpression arg : node.getArgs()) {
+            currentLoc = null;
+            currentLit = null;
+            
+            arg.accept(this);
+            if (currentLoc != null) {
+                mc.addParam(currentLoc);
+            } else if (currentLit != null) {
+                mc.addParam(currentLit);
+            }
+        }
+        currently_evaluating_expr--;
+        currentLoc = null;
+        currentLit = null;
+        
+        LlEnv env = (LlEnv)parent;
+        if (currently_evaluating_expr > 0) {
+         // TODO: assign result of method call to a temp loc. or consider a different solution?
+        } else {
+            env.addNode(mc);
+        }
     }
 
     @Override
@@ -329,6 +372,8 @@ public class LlGenerator implements IrNodeVisitor {
 
     }
     
+    // Control flow.
+    
     @Override
     public void visit(IrWhileStmt node) {
         // TODO Auto-generated method stub
@@ -347,6 +392,8 @@ public class LlGenerator implements IrNodeVisitor {
 
     }
 
+    // Value assignment.
+    
     @Override
     public void visit(IrAssignStmt node) {
         // TODO Auto-generated method stub

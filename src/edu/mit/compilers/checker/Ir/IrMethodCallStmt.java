@@ -35,6 +35,11 @@ public class IrMethodCallStmt extends IrInvokeStmt {
 		v.visit(this);		
 	}
 	
+	// returns null if not initialized.
+	public IrType getType() {
+	    return type;
+	}
+	
 	@Override
 	public IrType getExprType(SemanticChecker c) {
 	    type = c.lookupMethodType(method_name);
