@@ -13,8 +13,17 @@ public class CSE implements Optimization, LLNodeVisitor {
         
         HashSet<String> gen;
         HashSet<String> kill;
+        HashSet<String> in;
         HashSet<String> out;
         
+        public DataflowBlock(BasicBlock block) {
+            this.block = block;
+            
+            gen = new HashSet<String>();
+            kill = new HashSet<String>();
+            in = new HashSet<String>();
+            out = new HashSet<String>();
+        }
     }
     
 	ArrayList<ArrayList<LLAssign>> IN, OUT, GEN, KILL;
@@ -73,29 +82,53 @@ public class CSE implements Optimization, LLNodeVisitor {
 	    }
 	    
 	    Integer entry = method.getNum();
-	    // step 3: initialize OUT.
+	    // step 3: initialize OUTs and changed.
+	    HashSet<Integer> changed = new HashSet<Integer>();
 	    for (DataflowBlock b : dataflowBlocks.values()) {
-            if (b.block.getNum() == entry) {
-                for (String key : b.gen) {
-                    b.out.add(key);
-                }
-            } else {
-                for (String key : allPossibleExprs) {
-                    b.out.add(key);
-                }
+            if (b.block.getNum() == entry) { // gen[n].
+                b.out = new HashSet<String>(b.gen);
+
+            } else { // E - kill[n].
+                changed.add(b.block.getNum());
+                
+                b.out = new HashSet<String>(allPossibleExprs);
                 for (String k : b.kill) {
                     killSet(b.out, k);
                 }
             }
 	    }
 	    
+	    HashSet<String> in;
 	    // step 4: start the gen-kill algorithm.
+	    while (!changed.isEmpty()) {
+	        Integer i = changed.iterator().next();
+	        changed.remove(i);
+	        DataflowBlock b = dataflowBlocks.get(i);
+
+	        // merge point operation is intersection.
+	        in = new HashSet<String>(allPossibleExprs);
+	        for (BasicBlock parent : b.block.getParents()) {
+	            Integer parentId = parent.getNum();
+	            in.retainAll(dataflowBlocks.get(parentId).out);
+	        }
+	        
+	        // IN - KILL
+	        for (String k : b.kill) {
+	            killSet(in, k);
+	        }
+	        
+	        in.addAll(b.gen);
+	        HashSet<String> newOut = new HashSet<String>(in);
+	        if (!newOut.equals(b.out)) {
+	            b.out = newOut;
+	            for (BasicBlock child : b.block.getChildren()) {
+	                changed.add(child.getNum());
+	            }
+	        }
+	    }
 	    
 	    // step 5: eliminate CSEs based on available expressions.
 	    
-		for (LLNode instr : method.getInstructions()) {
-			instr.accept(this);
-		}
 	}
 	
 	private void collectExprs(BasicBlock b) {
@@ -105,8 +138,7 @@ public class CSE implements Optimization, LLNodeVisitor {
 	        return;
 	    }
 	    checkedBlocks.add(id);
-	    DataflowBlock newB = new DataflowBlock();
-	    newB.block = b;
+	    DataflowBlock newB = new DataflowBlock(b);
 	    dataflowBlocks.put(id, newB);
 	    
 	    // check the block contents.
