@@ -128,7 +128,64 @@ public class CSE implements Optimization, LLNodeVisitor {
 	    }
 	    
 	    // step 5: eliminate CSEs based on available expressions.
+	    for (DataflowBlock b : dataflowBlocks.values()) {
+	        if (b.block.getNum() != entry) {
+	            performCSE(b);
+	        }
+	    }
+	}
+	
+	private void performCSE(DataflowBlock b) {
+	    ArrayList<DataflowBlock> parents = new ArrayList<DataflowBlock>();
+	    // get all predecessors of b.
+	    for (BasicBlock p : b.block.getParents()) {
+	        parents.add(dataflowBlocks.get(p.getNum()));
+	    }
+	    // calculate IN.
+	    HashSet<String> in = new HashSet<String>(allPossibleExprs);
+	    for (DataflowBlock p : parents) {
+	        in.retainAll(p.out); // take the intersection.
+	    }
+	    // the result is the set of all available exprs at the beginning of b.
+	    for (LLNode instr : b.block.getInstructions()) {
+	        if (instr instanceof LLAssign) {
+	            LLAssign a = (LLAssign)instr;
+	            String expr = processExpr(a);
+	            if (in.contains(expr)) { // if true, perform CSE!
+	                String temp_name = exprToTemp.get(expr);
+	                // change the assignment in b to the temp location.
+	                instr = new LLAssign(a.getLoc(), new LLVarLocation(1, temp_name));
+	                // generate the temp location in all parent blocks.
+	                for (DataflowBlock p : parents) {
+	                    if(!changeAssign(p, expr, temp_name)) {
+	                        // something went wrong if returned false.
+	                    }
+	                }
+	            }
+	            killSet(in, a.getLoc().getLabel());
+	        }
+	    }
 	    
+	}
+	
+	private boolean changeAssign(DataflowBlock p, String expr, String temp_name) {
+	    // go backwards through the instructions and modify the first occurrence where expr is assigned.
+	    ArrayList<LLNode> instrs = p.block.getInstructions();
+	    for (int i = instrs.size()-1; i>=0; i--) {
+	        if (instrs.get(i) instanceof LLAssign) {
+	            LLAssign a = (LLAssign)instrs.get(i);
+	            String rhs = processExpr(a);
+	            if (rhs.equals(expr)) {
+	                LLExpression lhs = (LLExpression)a.getLoc();
+	                LLLocation tempLoc = new LLVarLocation(1, temp_name);
+	                LLAssign assignTemp = new LLAssign(tempLoc, lhs);
+	                // insert the temp assignment after the expr assignment.
+	                instrs.add(i+1, assignTemp);
+	                return true;
+	            }
+	        }
+	    }
+	    return false;
 	}
 	
 	private void collectExprs(BasicBlock b) {
@@ -151,6 +208,50 @@ public class CSE implements Optimization, LLNodeVisitor {
         for (BasicBlock s : b.getChildren()) {
             collectExprs(s);
         }
+	}
+	
+	private String processExpr(LLAssign a) {
+	    LLExpression rhs = a.getExpr();
+        
+        if (rhs instanceof LLBinaryOp) {
+            LLBinaryOp binExpr = (LLBinaryOp)rhs;
+            
+            String op;
+            switch (binExpr.getOp()) {
+            case PLUS:
+                op = "+";
+                break;
+            case MINUS:
+                op = "-";
+                break;
+            case MUL:
+                op = "*";
+                break;
+            case DIV:
+                op = "/";
+                break;
+            case MOD:
+                op = "%";
+                break;
+            default:
+                return null; // ignore non-arithmetic expressions for now.
+            }
+            
+            LLExpression left = binExpr.getLhs();
+            LLExpression right = binExpr.getRhs();
+            
+            String leftRep = genExpressionRep(left);
+            String rightRep = genExpressionRep(right);
+            
+            if (leftRep == null || rightRep == null) {
+                return null;
+            }
+            
+            return leftRep + op + rightRep;
+
+        }
+        
+        return null;
 	}
 	
 	// returns true if allPossibleExprs or allPossibleLocs is modified.
