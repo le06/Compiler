@@ -69,6 +69,7 @@ public class RegAllocator implements LLNodeVisitor, Optimization {
 					out.remove(def);
 				}
 				in.addAll(out); //in = in U out | in = use, out = out - def
+				inMap.put(i, in);
 				
 				
 				// out[n] = U_{s \in succ[n]) in[s]
@@ -78,26 +79,45 @@ public class RegAllocator implements LLNodeVisitor, Optimization {
 				}
 				outMap.put(i, out);
 				
-				repeat = (inPrime.equals(in) && outPrime.equals(out) && !repeat);
+				if (!repeat) {
+					repeat = (!inPrime.equals(in) || !outPrime.equals(out));
+				}
 			}
 		} while (repeat);
 		
+		HashMap<String, HashSet<String>> graph = new HashMap<String, HashSet<String>>();
+		
 		// Get live ranges
-		for (int j : allBlocks.keySet()) {
-			j++;
+		for (HashSet<String> in : inMap.values()) {
+			for (String s1 : in) {
+				for (String s2 : in) {
+					if (!(s1.equals(s2))) {
+						// Builds graph such that every node points to the 
+						// set of its neighbors
+						if (!graph.containsKey(s1)) {
+							graph.put(s1, new HashSet<String>());
+						}
+						graph.get(s1).add(s2);
+					}
+				}
+			}
 		}
 	}
 	
 	private HashMap<Integer, BasicBlock> getBlocksInMethod(BasicBlock b) {
 		HashMap<Integer, BasicBlock> out = new HashMap<Integer, BasicBlock>();
+		getBlocksInMethod(b, out);
+		return out;
+	}
+	
+	private void getBlocksInMethod(BasicBlock b, HashMap<Integer, BasicBlock> out) {
 		out.put(b.getNum(), b);
 		for (BasicBlock c : b.getChildren()) {
 			if (!out.containsKey(c.getNum())) {
 				out.put(c.getNum(), c);
-				out.putAll(getBlocksInMethod(c));
+				getBlocksInMethod(c, out);
 			}
 		}
-		return out;
 	}
 	
 	private HashSet<String> getDef(BasicBlock b) {
@@ -162,6 +182,7 @@ public class RegAllocator implements LLNodeVisitor, Optimization {
 		} else {
 			node.getLoc().accept(this);
 		}
+		node.getExpr().accept(this);
 	}
 	@Override
 	public void visit(LLMethodCall node) {

@@ -71,8 +71,8 @@ public class DecafUnoptimizedCodeGenerator {
         AddressAssign a = new AddressAssign();
         HashMap<String, Integer> methodMap = a.assign(instrs);
         
-/*        DecafOptimizer o = new DecafOptimizer();
-        o.optimize(blocks.get(0));*/
+        DecafOptimizer o = new DecafOptimizer();
+        o.optimize(blocks.get(0));
         
         CodeGen c = new CodeGen();
         c.gen(instrs, methodMap, stream);
