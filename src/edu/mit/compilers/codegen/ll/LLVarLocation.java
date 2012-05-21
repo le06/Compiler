@@ -10,6 +10,7 @@ public class LLVarLocation implements LLExpression, LLLocation {
     private String temp_location;
     
     private int local_offset;
+    private boolean inRegister;
     
     // can be used as a location or an expression.
     public LLVarLocation(int offset, String label) {
@@ -18,6 +19,7 @@ public class LLVarLocation implements LLExpression, LLLocation {
     	this.type = null;
     	this.location = null;
     	this.temp_location = null;
+    	inRegister = false;
     }
     
     public LLVarLocation(int offset, String label, Type type) {
@@ -26,6 +28,7 @@ public class LLVarLocation implements LLExpression, LLLocation {
     	this.type = type;
     	this.location = null;
     	this.temp_location = null;
+    	inRegister = false;
     }
     
     public LLVarLocation(int offset, String label, Type type, String temp_location) {
@@ -34,6 +37,7 @@ public class LLVarLocation implements LLExpression, LLLocation {
     	this.type = type;
     	this.location = null;
     	this.temp_location = temp_location;
+    	inRegister = false;
     }
 
     @Override
@@ -73,6 +77,14 @@ public class LLVarLocation implements LLExpression, LLLocation {
 	@Override
 	public void setLocation(String address) {
 		location = address;
+	}
+	
+	public void putInRegister() {
+		inRegister = true;
+	}
+	
+	public boolean inRegister() {
+		return inRegister;
 	}
 	
 	/*@Override

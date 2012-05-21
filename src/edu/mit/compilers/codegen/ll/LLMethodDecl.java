@@ -1,6 +1,7 @@
 package edu.mit.compilers.codegen.ll;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import edu.mit.compilers.codegen.ll.LLExpression.Type;
 
@@ -12,11 +13,13 @@ public class LLMethodDecl implements LLNode {
     private int num_temps;
     private Type type;
     private ArrayList<LLVarLocation> args = new ArrayList<LLVarLocation>();
+    private HashSet<String> registersUsed;
     
     public LLMethodDecl(String name, Type t, int num_args) {
         method_name = name;
         type = t;
         this.num_args = num_args;
+        registersUsed = new HashSet<String>();
     }
     
     public LLMethodDecl(String name, Type t, int num_args, LLEnvironment code) {
@@ -24,6 +27,7 @@ public class LLMethodDecl implements LLNode {
         method_code = code;
         type = t;
         this.num_args = num_args;
+        registersUsed = new HashSet<String>();
     }
     
     public void addArg(String name) {
@@ -56,6 +60,14 @@ public class LLMethodDecl implements LLNode {
     
     public Type getType() {
     	return type;
+    }
+    
+    public void addReg(String reg) {
+    	registersUsed.add(reg);
+    }
+    
+    public boolean usesRegister(String reg) {
+    	return registersUsed.contains(reg);
     }
     
     @Override
