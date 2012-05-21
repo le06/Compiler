@@ -11,6 +11,10 @@ public class IrCharLiteral extends Ir implements IrExpression {
     }
     
 	private char literal;
+
+	public char getLiteral() {
+	    return literal;
+	}
 	
 	public static IrCharLiteral fromString(String inString) {
 	    if (inString.length() == 3) {
@@ -43,8 +47,8 @@ public class IrCharLiteral extends Ir implements IrExpression {
 
 	@Override
 	public void accept(IrNodeVisitor v) {
+	    v.visit(this);
 		// TODO Auto-generated method stub
-		// no need to visit; bad chars should be caught by the scanner.
 	}
 	
 	public String toString() {

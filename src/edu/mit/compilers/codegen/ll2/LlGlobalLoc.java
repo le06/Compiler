@@ -13,14 +13,17 @@ public class LlGlobalLoc implements LlLocation {
     public String getSymbol() {
         return symbol;
     }
+    
     @Override
     public String getLocation() {
         return location;
     }
+    
     @Override
     public void setLocation(String loc) {
         location = loc;
     }
+    
     @Override
     public void accept(LlNodeVisitor v) {
         // TODO Auto-generated method stub

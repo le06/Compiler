@@ -4,16 +4,15 @@ import java.util.ArrayList;
 
 import edu.mit.compilers.codegen.ll2.LlMethodDecl.MethodType;
 
-public class LlMethodCall implements LlNode {
-    MethodType type;
+public class LlCallout implements LlNode {
+    MethodType type = MethodType.INT;
     String name;
-    ArrayList<LlNode> params; // locations or int/bool literals.
-    
+    ArrayList<LlNode> params; // locations or int/bool/string literals.
+
     private LlLocation return_location;
     private final String RAX = "%rax"; // the return address of any callout or method call, if applicable.
     
-    public LlMethodCall(MethodType type, String name) {
-        this.type = type;
+    public LlCallout(String name) {
         this.name = name;
         params = new ArrayList<LlNode>();
         
@@ -47,7 +46,7 @@ public class LlMethodCall implements LlNode {
     @Override
     public void accept(LlNodeVisitor v) {
         // TODO Auto-generated method stub
-        
+
     }
 
 }

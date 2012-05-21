@@ -17,8 +17,10 @@ import edu.mit.compilers.checker.Ir.IrBoolLiteral;
 import edu.mit.compilers.checker.Ir.IrBreakStmt;
 import edu.mit.compilers.checker.Ir.IrCalloutArg;
 import edu.mit.compilers.checker.Ir.IrCalloutStmt;
+import edu.mit.compilers.checker.Ir.IrCharLiteral;
 import edu.mit.compilers.checker.Ir.IrClassDecl;
 import edu.mit.compilers.checker.Ir.IrContinueStmt;
+import edu.mit.compilers.checker.Ir.IrExprArg;
 import edu.mit.compilers.checker.Ir.IrExpression;
 import edu.mit.compilers.checker.Ir.IrFieldDecl;
 import edu.mit.compilers.checker.Ir.IrForStmt;
@@ -37,6 +39,8 @@ import edu.mit.compilers.checker.Ir.IrParameterDecl;
 import edu.mit.compilers.checker.Ir.IrPlusAssignStmt;
 import edu.mit.compilers.checker.Ir.IrReturnStmt;
 import edu.mit.compilers.checker.Ir.IrStatement;
+import edu.mit.compilers.checker.Ir.IrStringArg;
+import edu.mit.compilers.checker.Ir.IrStringLiteral;
 import edu.mit.compilers.checker.Ir.IrType;
 import edu.mit.compilers.checker.Ir.IrUnaryOperator;
 import edu.mit.compilers.checker.Ir.IrUnopExpr;
@@ -1101,6 +1105,42 @@ public class SemanticChecker implements IrNodeVisitor {
     public void visit(IrBoolLiteral node) {
         // TODO Auto-generated method stub
         // no need to do anything here.
+    }
+
+    @Override
+    public void visit(IrExprArg node) {
+        // TODO Auto-generated method stub
+        // ditto.
+    }
+    
+    @Override
+    public void visit(IrStringArg node) {
+        // TODO Auto-generated method stub
+        // ditto.
+    }
+
+    @Override
+    public void visit(IrCharLiteral irCharLiteral) {
+        // TODO Auto-generated method stub
+        // ditto.
+    }
+
+    @Override
+    public void visit(IrParameterDecl irParameterDecl) {
+        // TODO Auto-generated method stub
+        // ditto.
+    }
+
+    @Override
+    public void visit(IrStringLiteral irStringLiteral) {
+        // TODO Auto-generated method stub
+        // ditto.
+    }
+
+    @Override
+    public void visit(IrType irType) {
+        // TODO Auto-generated method stub
+        // ditto.
     }
 
 }

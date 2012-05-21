@@ -1,34 +1,28 @@
 package edu.mit.compilers.codegen.ll2;
 
 public class LlReturn implements LlNode {
-
-    public enum ReturnType {
-        VOID,
-        VARIABLE,
-        CONSTANT
-    }
     
     private LlLocation loc; // the address where the result is stored.
     private LlConstant lit; // a boolean or int constant.
-    private ReturnType type;
+    private boolean voidReturnType;
+    private boolean hasConstant;
     
     public LlReturn() {
-        type = ReturnType.VOID;
+        voidReturnType = true;
+        hasConstant = false;
     }
     
     public LlReturn(LlLocation loc) {
         this.loc = loc;
-        type = ReturnType.VARIABLE;
+        voidReturnType = false;
+        hasConstant = false;
     }
     
     // note that locations are also expressions.
     public LlReturn(LlConstant lit) {
         this.lit = lit;
-        type = ReturnType.CONSTANT;
-    }
-    
-    public ReturnType getReturnType() {
-        return type;
+        voidReturnType = false;
+        hasConstant = true;
     }
     
     public LlLocation getLocation() {

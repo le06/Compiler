@@ -35,6 +35,10 @@ public class IrBinopExpr extends Ir implements IrExpression {
         return lhs.toString() + " " + operator.toString() + " " + rhs.toString();
     }
 
+	public IrType getType() {
+	    return type;
+	}
+	
 	@Override
 	public IrType getExprType(SemanticChecker c) {
 		IrType lhs_type = lhs.getExprType(c);
