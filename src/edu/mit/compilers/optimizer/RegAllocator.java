@@ -1,30 +1,44 @@
 package edu.mit.compilers.optimizer;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Set;
+import java.util.Stack;
 
 import edu.mit.compilers.codegen.BasicBlock;
 import edu.mit.compilers.codegen.ll.*;
 
 public class RegAllocator implements LLNodeVisitor, Optimization {
-	private final String RAX = "%rax";
-    private final String RBP = "(%rbp)";    
+	//private final String RAX = "%rax";
+    //private final String RBP = "(%rbp)";    
     private final String RDI = "%rdi";
     private final String RSI = "%rsi";
     private final String RDX = "%rdx";
     private final String RCX = "%rcx";
     private final String R8  = "%r8";
     private final String R9  = "%r9";
-    private final String R10 = "%r10";
-    private final String R11 = "%r11";
+    //private final String R10 = "%r10";
+    //private final String R11 = "%r11";
+    private final String R12 = "%r12";
+    private final String R13 = "%r13";
+    private final String R14 = "%r14";
+    private final String R15 = "%r15";
+    
+    private final String[] registers = {RDI, RSI, RDX, RCX, R8, R9, R12, R13, R14, R15};
+    private final int NUM_REGS = 10;
     
     HashMap<Integer, HashSet<String>> inMap;
 	HashMap<Integer, HashSet<String>> outMap;
 	HashMap<Integer, HashSet<String>> useMap;
 	HashMap<Integer, HashSet<String>> defMap;
 	
+	HashMap<String, String> assignments;
+	
 	HashSet<String> currentSet;
 	private MODE currentMode;
+	
+	LLMethodDecl thisMethod;
 	
 	private enum MODE {
 		DEF,
@@ -102,6 +116,54 @@ public class RegAllocator implements LLNodeVisitor, Optimization {
 				}
 			}
 		}
+		
+		HashSet<String> nodes = new HashSet<String>();
+		for (String node : graph.keySet()) {
+			nodes.add(node);
+		}
+		
+		// Greedy alloc
+		Stack<String> stack = new Stack<String>();
+		Stack<String> spilled = new Stack<String>();
+		
+		ArrayList<String> removed = new ArrayList<String>();;
+		
+		while (nodes.size() > 0) {
+			for (String var : nodes) {
+				if (graph.get(var).size() < NUM_REGS) {
+					stack.push(var);
+					for (String neighbor : graph.get(var)) {
+						graph.get(neighbor).remove(var);
+					}
+					removed.add(var);
+				}
+			}
+			
+			for (int i = 0; i < removed.size(); i++) {
+				nodes.remove(removed.get(i));
+				removed.remove(i);
+			}
+			
+			// Spill a random var
+			for (String s : nodes) {
+				for (String neighbor : graph.get(s)) {
+					graph.get(neighbor).remove(s);
+				}
+				removed.add(s);
+				break;
+			}
+			
+			for (int i = 0; i < removed.size(); i++) {
+				nodes.remove(removed.get(i));
+				removed.remove(i);
+			}
+		}
+		
+		// Assign registers
+		
+		int x = 3;
+		x++;
+		stack.clear();
 	}
 	
 	private HashMap<Integer, BasicBlock> getBlocksInMethod(BasicBlock b) {
@@ -164,8 +226,9 @@ public class RegAllocator implements LLNodeVisitor, Optimization {
 	}
 	@Override
 	public void visit(LLMethodDecl node) {
-		// TODO Auto-generated method stub
-		
+		if (currentMode == MODE.DEF) {
+			thisMethod = node;
+		}
 	}
 	@Override
 	public void visit(LLEnvironment node) {
