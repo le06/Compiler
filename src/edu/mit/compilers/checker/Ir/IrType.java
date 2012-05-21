@@ -20,7 +20,7 @@ public class IrType extends Ir {
 	@Override
 	public void accept(IrNodeVisitor v) {
 		// TODO Auto-generated method stub
-		// do nothing! v never accepts this class.
+		v.visit(this);
 	}
 	
 	public String toString() {

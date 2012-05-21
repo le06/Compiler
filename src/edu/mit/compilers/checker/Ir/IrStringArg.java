@@ -11,9 +11,13 @@ public class IrStringArg extends IrCalloutArg {
     
 	private IrStringLiteral arg;
 
+	public IrStringLiteral getArg() {
+	    return arg;
+	}
+	
 	@Override
 	public void accept(IrNodeVisitor v) {
-		// no need to visit. scanner enforces correctness
+		v.visit(this);
 	}
 	
 	public String toString() {

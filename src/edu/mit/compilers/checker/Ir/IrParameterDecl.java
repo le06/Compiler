@@ -22,8 +22,8 @@ public class IrParameterDecl extends Ir {
 	
 	@Override
 	public void accept(IrNodeVisitor v) {
+	    v.visit(this);
 		// TODO Auto-generated method stub
-		// do nothing! v never accepts this class.
 	}
 	
 	public String toString() {

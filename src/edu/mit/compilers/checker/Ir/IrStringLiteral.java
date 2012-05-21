@@ -14,8 +14,8 @@ public class IrStringLiteral extends Ir {
 
 	@Override
 	public void accept(IrNodeVisitor v) {
+	    v.visit(this);
 		// TODO Auto-generated method stub
-		// no need to visit; correctness enforced by scanner.
 	}
 	
 	public String toString() {

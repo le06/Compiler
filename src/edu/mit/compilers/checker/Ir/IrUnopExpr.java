@@ -8,6 +8,10 @@ import edu.mit.compilers.codegen.ll.LLUnaryNeg;
 import edu.mit.compilers.codegen.ll.LLUnaryNot;
 
 public class IrUnopExpr extends Ir implements IrExpression {
+    private IrUnaryOperator operator;
+    private IrExpression expr;
+    private IrType type;
+    
     public IrUnopExpr(IrUnaryOperator op, IrExpression expression) {
         operator = op;
         expr = expression;
@@ -21,9 +25,6 @@ public class IrUnopExpr extends Ir implements IrExpression {
     		return false;
     	}
     }
-    
-    private IrUnaryOperator operator;
-    private IrExpression expr;
 
 	public IrUnaryOperator getOperator() {
 		return operator;
@@ -32,19 +33,24 @@ public class IrUnopExpr extends Ir implements IrExpression {
 		return expr;
 	}
 	
+	public IrType getType() {
+	    return type;
+	}
+	
 	@Override
 	public IrType getExprType(SemanticChecker c) {
 		IrType exprType = expr.getExprType(c);
 		
 		if (operator == IrUnaryOperator.NOT &&
 			exprType.myType == IrType.Type.BOOLEAN) {
-			return new IrType(IrType.Type.BOOLEAN);
+			type = new IrType(IrType.Type.BOOLEAN);
 		} else if (operator == IrUnaryOperator.MINUS &&
 				exprType.myType == IrType.Type.INT) {
-			return new IrType(IrType.Type.INT);
+			type = new IrType(IrType.Type.INT);
 		} else {
-			return new IrType(IrType.Type.MIXED);
+			type = new IrType(IrType.Type.MIXED);
 		}
+		return type;
 	}
 	@Override
 	public void accept(IrNodeVisitor v) {
