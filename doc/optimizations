@@ -1,0 +1,100 @@
+These are the major optimizations that we implemented after the codegen phase:
+
+
+-To begin with, Patrick rewrote most of the code generation scheme. The previous
+scheme required an excess of stack space, as every time a value was generated, it
+was given a new place on the stack. I remedied this through a transformation of the low
+level IR. We were generating code from a LLIR that was in a tree format, so I wrote code
+to flatten the tree into a linear IR, and at the same time transformed expressions so that 
+they were of this format:
+
+ loc = expr
+ methodcall -> method_name((var_location|literal)*)
+ loc -> var_location | array_location
+ expr -> binexpr | literal | methodcall | array_location | var_location
+ binexpr -> (var_location|literal) op (var_location|literal)
+
+This involved generating new temp variables as well to hold all of the new values.
+This made the code generation phase much simpler, as much of the logic was now encapsulated
+in a different file.
+
+Another part of this transformation, done in CfgGen, involved making code generation revolve
+around basic blocks. As I walk the LL IR tree to output a linear format, I place all of the 
+instructions into basic blocks that know their relations to the other blocks. This was
+done in order to make data flow optimizations easier, as many optimizations are done at the
+basic block level.
+
+In the end, our code generation phase looked like this: 
+  Ir -> LL tree -> CFG of basic blocks -> Array of in order ll instructions -> asm
+
+
+-After the transformation to a new code generation system, Patrick was able to add some 
+smaller optimizations to the code generation phase. By switching to movq, addq, subq, etc, 
+instead of mov, add, sub, I was able to do in one instruction what our previous code did
+in two.
+
+I also implemented some basic algebraic simplifications. To start, I simplified expressions
+with constants already in them:
+  e.g. a = 100 - 50 -> a = 50
+
+Beyond this, these simplifications were implemented:
+  a + 0 -> a
+  0 + a -> a
+  a - 0 -> a
+  a % 0 -> 0
+  a * 1 -> a
+  a / 1 -> a
+  a % 1 -> 1
+  1 % a -> 0
+
+
+-Patrick also implemented a simple register allocation system. This generated a modest speedup,
+but was held back by a number of issues: 
+  
+1) Method calls. Because method calls use registers to pass parameters, I ran into trouble in
+   situations like this: Suppose A is in %rsi, and we need to pass it as the second parameter.
+   We then get code like this:
+
+      mov %r13, %rsi
+      mov %rsi, %rdi
+   
+   which means whatever was in %r13 is in the place of A. I solved this by, in this example,
+   pushing A onto the stack, then reading from the stack into %rdi, which is clearly not
+   the most efficient way to do things.
+
+2) The problem in (1) also exists when pulling parameters from a method. Without a smart
+   way of allocating the registers of a method parameter, you have to store the value
+   on the stack. 
+
+3) Divs. I was allocating %rdx as a register, but realized that during a divide, it would be
+   wiped. This means that either rdx must be stored somewhere before every idiv, or it cannot
+   be allocated. For the sake of time and simplicity, I just removed %rdx, which eliminated
+   my problem but was not necessarily the best solution.
+
+
+During allocation, I also perform some dead code elimination out of necessity. If a variable
+x is defined in an instruction (e.g. x = a + b), but is dead after that instruction,
+it is eliminated.
+
+
+On the other hand, on the code generation side, I was able to save some instructions by being
+smart about how I used the fact that things were in registers. For example, if I had an 
+expression of the form:
+
+  a = a + b
+
+where a is in %r10 and b is in %r11, I can simplify to:
+
+  addq %r11, %r10
+
+
+
+
+
+
+
+
+
+
+
+
