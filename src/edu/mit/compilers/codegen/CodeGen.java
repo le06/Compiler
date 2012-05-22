@@ -155,10 +155,25 @@ public class CodeGen implements LLNodeVisitor {
 		for (int i = 0; i < args.size(); i++) {
 			loadArgument(i, args.get(i));
 		}
+		
+		for (int i = 0; i < args.size(); i++) {
+            fixInRegLoad(args.get(i));
+        }
+    }
+    
+    private void fixInRegLoad(LLVarLocation var) {
+        if (var.inRegister()) {
+            println("\tmovq " + var.getLocation() + ", " + var.addressOfResult());
+        }
     }
     
     private void loadArgument(int n, LLVarLocation var) {
-    	String addr = var.addressOfResult();
+        String addr;
+        if (var.inRegister()) {
+            addr = var.getLocation();
+        } else {
+            addr = var.addressOfResult();
+        }
     	LLMov mov;
     	// regs in order: rdi, rsi, rdx, rcx, r8, r9.
     	switch (n) {
@@ -576,6 +591,16 @@ public class CodeGen implements LLNodeVisitor {
         }
         
         for (int i = params.size()-1; i >= 0; i--) {
+            LLExpression e =  params.get(i); 
+            if (e instanceof LLVarLocation) {
+                LLVarLocation v = (LLVarLocation)e;
+                if (v.inRegister()) {
+                    println("\tmovq " + v.addressOfResult() + ", " + v.getLocation());
+                }
+            }
+        }
+        
+        for (int i = params.size()-1; i >= 0; i--) {
             pushArgument(i, params.get(i)); // push from RIGHT-TO-LEFT.
         }
         
@@ -632,6 +657,16 @@ public class CodeGen implements LLNodeVisitor {
         }
         
         for (int i = params.size()-1; i >= 0; i--) {
+            LLExpression e =  params.get(i); 
+            if (e instanceof LLVarLocation) {
+                LLVarLocation v = (LLVarLocation)e;
+                if (v.inRegister()) {
+                    println("\tmovq " + v.addressOfResult() + ", " + v.getLocation());
+                }
+            }
+        }
+        
+        for (int i = params.size()-1; i >= 0; i--) {
             pushArgument(i, params.get(i)); // push from RIGHT-TO-LEFT.
         }
         
@@ -668,6 +703,12 @@ public class CodeGen implements LLNodeVisitor {
         // polymorphic, so we don't have to check if arg is
         // a StringLiteral or not.
         String addr = arg.addressOfResult();
+        if (arg instanceof LLVarLocation) {
+            if (((LLVarLocation) arg).inRegister()) {
+                addr = ((LLVarLocation) arg).getLocation();
+            }
+        }
+        
         
         LLMov mov;
         // regs in order: rdi, rsi, rdx, rcx, r8, r9.

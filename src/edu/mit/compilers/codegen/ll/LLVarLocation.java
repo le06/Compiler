@@ -80,6 +80,7 @@ public class LLVarLocation implements LLExpression, LLLocation {
 	}
 	
 	public void putInRegister(String reg) {
+	    location = temp_location;
 		setAddress(reg);
 		inRegister = true;
 	}

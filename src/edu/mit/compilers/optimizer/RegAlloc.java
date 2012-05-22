@@ -44,7 +44,7 @@ public class RegAlloc implements LLNodeVisitor {
 		ANALYZE,
 		REG_ALLOC;
 	}
-	final boolean DEBUG = true;
+	final boolean DEBUG = false;
 	
 	MODE currentMode;
 	int currentInstruction;
