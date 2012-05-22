@@ -34,6 +34,8 @@ public class RegAlloc implements LLNodeVisitor {
 	
 	ArrayList<HashSet<Integer>> succ;
 	
+	HashSet<String> globals;
+	
 	HashMap<String, String> assignments;
 	
 	HashSet<String> currentSet;
@@ -60,7 +62,7 @@ public class RegAlloc implements LLNodeVisitor {
 		succ = new ArrayList<HashSet<Integer>>(instructions.size());
 		assignments = new HashMap<String, String>();
 		
-		HashSet<String> globals = new HashSet<String>(glbls);
+		globals = new HashSet<String>(glbls);
 		
 		// Find successors of each instruction
 		labelMap = new HashMap<String, Integer>();
@@ -310,7 +312,8 @@ public class RegAlloc implements LLNodeVisitor {
 				}
 			} else if (currentMode == MODE.DEADCODE) {
 			    // If the variable is not live after assigning it here, this is dead code
-			    if (!(outMap.get(currentInstruction).contains(dest))) {
+			    if (!(outMap.get(currentInstruction).contains(dest))
+			         && !globals.contains(dest)) { // Can't do this for globals though
 			        node.kill();
 			    }
 			}
