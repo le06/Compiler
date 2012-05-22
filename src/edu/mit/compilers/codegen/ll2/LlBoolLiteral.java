@@ -23,4 +23,9 @@ public class LlBoolLiteral implements LlConstant {
         
     }
 
+    @Override
+    public String print() {
+        return "$" + String.valueOf(val);
+    }
+
 }

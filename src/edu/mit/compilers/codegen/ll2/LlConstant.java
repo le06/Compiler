@@ -5,4 +5,5 @@ public interface LlConstant extends LlNode {
         BOOLEAN, INT, STRING
     }
     public Type getType();
+    public String print();
 }

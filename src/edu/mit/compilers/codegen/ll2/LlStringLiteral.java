@@ -34,4 +34,11 @@ public class LlStringLiteral implements LlConstant {
         
     }
 
+    @Override
+    public String print() {
+        // string literals are only used as callout args.
+        // this method should never be called.
+        return null;
+    }
+
 }
