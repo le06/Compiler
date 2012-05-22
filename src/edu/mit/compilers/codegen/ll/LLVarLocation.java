@@ -79,7 +79,8 @@ public class LLVarLocation implements LLExpression, LLLocation {
 		location = address;
 	}
 	
-	public void putInRegister() {
+	public void putInRegister(String reg) {
+		setAddress(reg);
 		inRegister = true;
 	}
 	

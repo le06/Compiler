@@ -139,16 +139,16 @@ public class CodeGen implements LLNodeVisitor {
         
         // Callee save registers
         if (node.usesRegister(R12)) {
-        	println("push " + R12);
+        	println("\tpush " + R12);
         }
         if (node.usesRegister(R13)) {
-        	println("push " + R13);
+        	println("\tpush " + R13);
         }
         if (node.usesRegister(R14)) {
-        	println("push " + R14);
+        	println("\tpush " + R14);
         }
         if (node.usesRegister(R15)) {
-        	println("push " + R15);
+        	println("\tpush " + R15);
         }
         
         ArrayList<LLVarLocation> args = node.getArgs();
@@ -461,6 +461,13 @@ public class CodeGen implements LLNodeVisitor {
 	            	println("\tcmove " + R11 + ", " + RAX);
 	        		println("\tmovq " + RAX + ", " + loc_addr);
         		}
+            } else if (node.getExpr() instanceof LLMethodCall) {
+            	writeMethodCall((LLMethodCall)node.getExpr());
+            	println("\tmovq " + RAX + ", " + loc.addressOfResult());
+            } else if (node.getExpr() instanceof LLCallout) {
+            	LLCallout c = (LLCallout)node.getExpr();
+            	writeCalloutCall(c);
+            	println("\tmovq " + RAX + ", " + loc.addressOfResult());
             } else if (node.getExpr() instanceof LLBinaryOp) {
             	emitBinOp(loc, (LLBinaryOp)node.getExpr());
             } else {
@@ -881,17 +888,17 @@ public class CodeGen implements LLNodeVisitor {
     @Override
     public void visit(LLCmp node) {
     	String left, right;
-/*    	if (node.getL() instanceof LLVarLocation) {
+    	if (node.getL() instanceof LLVarLocation) {
     		LLVarLocation l = (LLVarLocation)node.getL();
     		if (l.inRegister()) {
     			left = l.addressOfResult();
     		} else {
-    			left = l.addressOfResult();
-    			println("\tmov " + left + ", " + RAX);
+    			left = RAX;
+    			println("\tmov " + l.addressOfResult() + ", " + RAX);
     		}
     	} else {
-    		left = node.getL().addressOfResult();
-    		println("\tmov " + left + ", " + RAX);
+    		left = RAX;
+    		println("\tmov " + node.getL().addressOfResult() + ", " + RAX);
     	}
     	
     	if (node.getR() instanceof LLVarLocation) {
@@ -899,16 +906,16 @@ public class CodeGen implements LLNodeVisitor {
     		if (r.inRegister()) {
     			right = r.addressOfResult();
     		} else {
-    			right = r.addressOfResult();
-    			println("\tmov " + right + ", " + R11);
+    			right = R11;
+    			println("\tmov " + r.addressOfResult() + ", " + R11);
     		}
     	} else {
-    		right = node.getR().addressOfResult();
-    		println("\tmov " + right + ", " + R11);
-    	}*/
-    	println("\tmovq " + node.getL().addressOfResult() + ", " + RAX);
-    	println("\tmovq " + node.getR().addressOfResult() + ", " + R11);
-        println("\tcmp " + RAX + ", " + R11);
+    		right = R11;
+    		println("\tmov " + node.getR().addressOfResult() + ", " + R11);
+    	}
+/*    	println("\tmovq " + node.getL().addressOfResult() + ", " + RAX);
+    	println("\tmovq " + node.getR().addressOfResult() + ", " + R11);*/
+        println("\tcmp " + left + ", " + right);
     }
 
     @Override
