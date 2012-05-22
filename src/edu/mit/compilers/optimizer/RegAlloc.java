@@ -13,7 +13,7 @@ public class RegAlloc implements LLNodeVisitor {
     //private final String RBP = "(%rbp)";    
     private final String RDI = "%rdi";
     private final String RSI = "%rsi";
-    private final String RDX = "%rdx";
+    //private final String RDX = "%rdx";
     private final String RCX = "%rcx";
     private final String R8  = "%r8";
     private final String R9  = "%r9";
@@ -24,8 +24,8 @@ public class RegAlloc implements LLNodeVisitor {
     private final String R14 = "%r14";
     private final String R15 = "%r15";
     
-    private final String[] registers = {RDI, RSI, RDX, RCX, R8, R9, R12, R13, R14, R15};
-    private final int NUM_REGS = 10;
+    private final String[] registers = {RDI, RSI, RCX, R8, R9, R12, R13, R14, R15};
+    private final int NUM_REGS = 9;
 	
 	ArrayList<HashSet<String>> inMap;
 	ArrayList<HashSet<String>> outMap;
