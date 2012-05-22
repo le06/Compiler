@@ -187,4 +187,8 @@ public class AddressAssign {
     private String getAddr(int currentOffset) {
         return currentOffset + "(%rbp)";
     }
+    
+    public ArrayList<String> getGlobals() {
+        return globals;
+    }
 }

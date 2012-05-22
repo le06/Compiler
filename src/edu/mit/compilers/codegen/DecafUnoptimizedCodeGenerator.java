@@ -85,11 +85,11 @@ public class DecafUnoptimizedCodeGenerator {
         AddressAssign a = new AddressAssign();
         HashMap<String, Integer> methodMap = a.assign(instrs);
         
-/*        RegAlloc r;
+        RegAlloc r;
         for (ArrayList<LLNode> method : methods) {
         	r = new RegAlloc();
-        	r.allocMethod(method);
-        }*/
+        	r.allocMethod(method, a.getGlobals());
+        }
         
 /*        DecafOptimizer o = new DecafOptimizer();
         o.optimize(blocks.get(0));*/

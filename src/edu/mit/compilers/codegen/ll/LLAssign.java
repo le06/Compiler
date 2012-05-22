@@ -11,6 +11,7 @@ public class LLAssign implements LLNode {
 								  // Can implement later for debugging.
     private LLLocation loc;
 	private LLExpression expr;
+	boolean dead = false;
     
     public LLLocation getLoc() {
 		return loc;
@@ -40,5 +41,13 @@ public class LLAssign implements LLNode {
     
     public String toString() {
         return loc.toString() + " = " + expr.toString();
+    }
+    
+    public void kill() {
+        dead = true;
+    }
+    
+    public boolean isDead() {
+        return dead;
     }
 }

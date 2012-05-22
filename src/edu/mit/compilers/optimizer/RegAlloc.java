@@ -42,6 +42,7 @@ public class RegAlloc implements LLNodeVisitor {
 	
 	private enum MODE {
 		ANALYZE,
+		DEADCODE,
 		REG_ALLOC;
 	}
 	final boolean DEBUG = false;
@@ -51,13 +52,15 @@ public class RegAlloc implements LLNodeVisitor {
 	
 	HashMap<String, Integer> labelMap;
 	
-	public void allocMethod(ArrayList<LLNode> instructions) {
+	public void allocMethod(ArrayList<LLNode> instructions, ArrayList<String> glbls) {
 		inMap = new ArrayList<HashSet<String>>(instructions.size());
 		outMap = new ArrayList<HashSet<String>>(instructions.size());
 		defMap = new ArrayList<HashSet<String>>(instructions.size());
 		useMap = new ArrayList<HashSet<String>>(instructions.size());
 		succ = new ArrayList<HashSet<Integer>>(instructions.size());
 		assignments = new HashMap<String, String>();
+		
+		HashSet<String> globals = new HashSet<String>(glbls);
 		
 		// Find successors of each instruction
 		labelMap = new HashMap<String, Integer>();
@@ -136,6 +139,13 @@ public class RegAlloc implements LLNodeVisitor {
 			}
 		} while (repeat);
 		
+		
+		// Eliminate dead code.
+		currentMode = MODE.DEADCODE;
+        for (currentInstruction = 0; currentInstruction < instructions.size(); currentInstruction++) {
+            instructions.get(currentInstruction).accept(this);
+        }
+		
 		HashMap<String, HashSet<String>> graph = new HashMap<String, HashSet<String>>();
 		HashMap<String, HashSet<String>> graphCopy = new HashMap<String, HashSet<String>>();
 		
@@ -143,18 +153,20 @@ public class RegAlloc implements LLNodeVisitor {
 		//for (HashSet<String> in : inMap.values()) {
 		for (int i = 0; i < inMap.size(); i++) {
 			for (String s1 : inMap.get(i)) {
-				for (String s2 : inMap.get(i)) {
-					if (!(s1.equals(s2))) {
-						// Builds graph such that every node points to the 
-						// set of its neighbors
-						if (!graph.containsKey(s1)) {
-							graph.put(s1, new HashSet<String>());
-							graphCopy.put(s1, new HashSet<String>());
-						}
-						graph.get(s1).add(s2);
-						graphCopy.get(s1).add(s2);
-					}
-				}
+			    if (!globals.contains(s1)) {
+    				for (String s2 : inMap.get(i)) {
+    					if (!(s1.equals(s2)) && !globals.contains(s2)) {
+    						// Builds graph such that every node points to the 
+    						// set of its neighbors
+    						if (!graph.containsKey(s1)) {
+    							graph.put(s1, new HashSet<String>());
+    							graphCopy.put(s1, new HashSet<String>());
+    						}
+    						graph.get(s1).add(s2);
+    						graphCopy.get(s1).add(s2);
+    					}
+    				}
+			    }
 			}
 		}
 		
@@ -296,6 +308,11 @@ public class RegAlloc implements LLNodeVisitor {
 				if (assignments.containsKey(dest)) {
 					loc.putInRegister(assignments.get(dest));
 				}
+			} else if (currentMode == MODE.DEADCODE) {
+			    // If the variable is not live after assigning it here, this is dead code
+			    if (!(outMap.get(currentInstruction).contains(dest))) {
+			        node.kill();
+			    }
 			}
 		} else {
 			node.getLoc().accept(this);

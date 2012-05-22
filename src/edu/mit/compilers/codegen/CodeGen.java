@@ -406,6 +406,10 @@ public class CodeGen implements LLNodeVisitor {
 
     @Override
     public void visit(LLAssign node) {
+        if (node.isDead()) {
+            return;
+        }
+        
     	String source, loc_addr;
     	
         if (node.getLoc() instanceof LLVarLocation) {
@@ -996,16 +1000,16 @@ public class CodeGen implements LLNodeVisitor {
         
         // Callee save registers
         if (currentMethod.usesRegister(R12)) {
-        	println("pop " + R12);
+        	println("\tpop " + R12);
         }
         if (currentMethod.usesRegister(R13)) {
-        	println("pop " + R13);
+        	println("\tpop " + R13);
         }
         if (currentMethod.usesRegister(R14)) {
-        	println("pop " + R14);
+        	println("\tpop " + R14);
         }
         if (currentMethod.usesRegister(R15)) {
-        	println("pop " + R15);
+        	println("\tpop " + R15);
         }
         
         println("\tleave");
