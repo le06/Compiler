@@ -20,10 +20,13 @@ public class LlLabel implements LlNode {
         return ".".concat(label).concat(":");
     }
 
+    public String toString() {
+        return getASMLabel();
+    }
+    
     @Override
     public void accept(LlNodeVisitor v) {
-        // TODO Auto-generated method stub
-        
+        v.visit(this);
     }
     
 }

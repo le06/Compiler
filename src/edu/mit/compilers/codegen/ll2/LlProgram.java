@@ -62,10 +62,13 @@ public class LlProgram implements LlNode {
         return strings;
     }
 
+    public String toString() {
+        return "PROGRAM";
+    }
+    
     @Override
     public void accept(LlNodeVisitor v) {
-        // TODO Auto-generated method stub
-        
+        v.visit(this);
     }
     
 }

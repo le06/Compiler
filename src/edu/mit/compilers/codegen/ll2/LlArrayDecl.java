@@ -18,9 +18,12 @@ public class LlArrayDecl implements LlNode {
         return size;
     }
 
+    public String toString() {
+        return "ARRAYDECL: " + label.getName() + "[" + size + "]";
+    }
+    
     @Override
     public void accept(LlNodeVisitor v) {
-        // TODO Auto-generated method stub
-        
+        v.visit(this);
     }
 }

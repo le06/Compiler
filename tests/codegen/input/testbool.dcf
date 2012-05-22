@@ -1,0 +1,26 @@
+class Program
+{
+
+    boolean d()
+    {
+        callout("printf", "shouldn\'t be here\n");
+        return false;
+    }
+
+    void main()
+    {
+
+        boolean a,b,c;
+        a = false;
+        b = true;
+        b = a && d();
+        //c = a && b;
+        
+        if (b || a)
+        {
+            //c = false;
+        }    
+    
+    }
+
+}

@@ -411,6 +411,7 @@ public class SemanticChecker implements IrNodeVisitor {
                 // params are treated as locals.
                 // thus, these need to be allocated during codegen phase.
                 String symbol = "v" + String.valueOf(local_counter);
+                p.getId().setSymbol(symbol);
                 method_env.getSymbolTable().put(name, symbol);
     			local_counter++;
     		}

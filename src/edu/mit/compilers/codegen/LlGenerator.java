@@ -85,9 +85,38 @@ public class LlGenerator implements IrNodeVisitor {
         this.ir = ir;
     }
     
+    private LlEnv generateSequence(LlProgram p) {
+        LlEnv sequence = new LlEnv();
+        
+        for (LlGlobalDecl n : program.getGlobalDecls()) {
+            sequence.addNode(n);
+        }
+        for (LlArrayDecl n : program.getArrayDecls()) {
+            sequence.addNode(n);
+        }
+        for (LlMethodDecl n : program.getMethods()) {
+            sequence.addNode(n);
+            for (LlNode sn : n.getEnv().getSubnodes()) {
+                sequence.addNode(sn);
+            }
+        }
+        LlMethodDecl m = program.getMain();
+        sequence.addNode(m);
+        for (LlNode sn : m.getEnv().getSubnodes()) {
+            sequence.addNode(sn);
+        }
+        for (LlStringLiteral n : program.getStringLiterals()) {
+            sequence.addNode(n);
+        }
+        
+        return sequence;
+    }
+    
     public LlNode generateLL() {
         ir.accept(this);
-        return ll;
+
+        // TODO: tweak the return when basic blocks are implemented
+        return generateSequence(program);
     }
     
     @Override
@@ -173,7 +202,7 @@ public class LlGenerator implements IrNodeVisitor {
             */
         }
         
-        if (name == "main") {
+        if (name.equals("main")) {
             program.setMain(m);
         } else {
             program.addMethod(m);
@@ -411,9 +440,9 @@ public class LlGenerator implements IrNodeVisitor {
         IrBinOperator op = node.getOperator();
         if (op == IrBinOperator.AND) {
             LlAnnotation start = new LlAnnotation(AnnotationType.COND_OP_ASSIGNMENT,
-                    "ss" + String.valueOf(ssCounter), false, null);
+                    "ss_" + String.valueOf(ssCounter), false, null);
             LlAnnotation end = new LlAnnotation(AnnotationType.COND_OP_ASSIGNMENT,
-                    "ss" + String.valueOf(ssCounter), true, null);
+                    "ss_" + String.valueOf(ssCounter), true, null);
             LlLabel ss = new LlLabel("ss_" + String.valueOf(ssCounter));
             LlLabel ssEnd = new LlLabel("ssend_" + String.valueOf(ssCounter));
             
@@ -469,9 +498,9 @@ public class LlGenerator implements IrNodeVisitor {
             
         } else if (op == IrBinOperator.OR) {
             LlAnnotation start = new LlAnnotation(AnnotationType.COND_OP_ASSIGNMENT,
-                    "ss" + String.valueOf(ssCounter), false, null);
+                    "ss_" + String.valueOf(ssCounter), false, null);
             LlAnnotation end = new LlAnnotation(AnnotationType.COND_OP_ASSIGNMENT,
-                    "ss" + String.valueOf(ssCounter), true, null);
+                    "ss_" + String.valueOf(ssCounter), true, null);
             LlLabel ss = new LlLabel("ss_" + String.valueOf(ssCounter));
             LlLabel ssEnd = new LlLabel("ssend_" + String.valueOf(ssCounter));
             

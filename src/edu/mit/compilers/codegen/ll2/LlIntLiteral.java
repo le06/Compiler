@@ -17,10 +17,13 @@ public class LlIntLiteral implements LlConstant {
         return Type.INT;
     }
 
+    public String toString() {
+        return String.valueOf(value);
+    }
+    
     @Override
     public void accept(LlNodeVisitor v) {
-        // TODO Auto-generated method stub
-
+        v.visit(this);
     }
 
     @Override

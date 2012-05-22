@@ -1,6 +1,7 @@
 package edu.mit.compilers.codegen.ll2;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 public class LlMethodDecl implements LlNode {
     
@@ -48,10 +49,23 @@ public class LlMethodDecl implements LlNode {
         return method_code;
     }
 
+    public String toString() {
+        String signature = "(";
+        Iterator<LlTempLoc> i = args.iterator();
+        while (i.hasNext()) {
+            signature = signature + i.next().toString();
+            if (i.hasNext()) {
+                signature = signature + ", ";
+            }
+        }
+        signature = signature + ")";
+        
+        return "METHODDECL: " + method_name + signature;
+    }
+    
     @Override
     public void accept(LlNodeVisitor v) {
-        // TODO Auto-generated method stub
-        
+        v.visit(this);
     }
     
 }

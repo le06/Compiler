@@ -23,7 +23,6 @@ public class IrParameterDecl extends Ir {
 	@Override
 	public void accept(IrNodeVisitor v) {
 	    v.visit(this);
-		// TODO Auto-generated method stub
 	}
 	
 	public String toString() {

@@ -49,10 +49,17 @@ public class LlAnnotation implements LlNode {
         this.annotation = annotation;
     }
     
+    public String toString() {
+        if (!isEnd) {
+            return "START_ANTN: " + id;
+        } else {
+            return "END_ANTN: " + id;
+        }
+    }
+    
     @Override
     public void accept(LlNodeVisitor v) {
-        // TODO Auto-generated method stub
-
+        v.visit(this);
     }
 
 }

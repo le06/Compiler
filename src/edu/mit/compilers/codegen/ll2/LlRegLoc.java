@@ -25,10 +25,13 @@ public class LlRegLoc implements LlLocation {
         register = loc;
     }
 
+    public String toString() {
+        return register;
+    }
+    
     @Override
     public void accept(LlNodeVisitor v) {
-        // TODO Auto-generated method stub
-
+        v.visit(this);
     }
 
 }

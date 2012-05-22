@@ -1,6 +1,7 @@
 package edu.mit.compilers.codegen.ll2;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import edu.mit.compilers.codegen.ll2.LlMethodDecl.MethodType;
 
@@ -44,10 +45,23 @@ public class LlMethodCall implements LlNode {
         return params.size();
     }
     
+    public String toString() {
+        String args = "(";
+        Iterator<LlNode> i = params.iterator();
+        while (i.hasNext()) {
+            args = args + i.next().toString();
+            if (i.hasNext()) {
+                args = args + ", ";
+            }
+        }
+        args = args + ")";
+        
+        return "METHODCALL: " + return_location.toString() + " = " + name + args;
+    }
+    
     @Override
     public void accept(LlNodeVisitor v) {
-        // TODO Auto-generated method stub
-        
+        v.visit(this);
     }
 
 }

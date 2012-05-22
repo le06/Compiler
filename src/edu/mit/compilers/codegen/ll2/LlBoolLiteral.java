@@ -17,12 +17,15 @@ public class LlBoolLiteral implements LlConstant {
         return Type.BOOLEAN;
     }
 
+    public String toString() {
+        return String.valueOf(val);
+    }
+    
     @Override
     public void accept(LlNodeVisitor v) {
-        // TODO Auto-generated method stub
-        
+        v.visit(this);
     }
-
+    
     @Override
     public String print() {
         return "$" + String.valueOf(val);

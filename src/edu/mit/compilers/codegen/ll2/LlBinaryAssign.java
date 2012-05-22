@@ -78,11 +78,63 @@ public class LlBinaryAssign implements LlNode {
         rightIsConstant = true;
     }
     
+    public String getOperatorAsString() {
+        switch(op) {
+        case PLUS:
+            return "+";
+        case MINUS:
+            return "-";
+        case MUL:
+            return "*";
+        case DIV:
+            return "/";
+        case MOD:
+            return "%";
+        case EQ:
+            return "==";
+        case NEQ:
+            return "!=";
+        case LT:
+            return "<";
+        case LEQ:
+            return "<=";
+        case GEQ:
+            return ">=";
+        case GT:
+            return ">";
+        case AND: // should never reach this case!
+            return "&&";
+        case OR: // ditto.
+            return "||";
+        default:
+            return "UNDEFINED_BINOP";
+        }
+    }
+    
+    public String toString() {
+        String rhs;
+        if (leftIsConstant) {
+            rhs = leftLit.toString();
+        } else {
+            rhs = leftLoc.toString();
+        }
+        
+        String operator = getOperatorAsString();
+
+        rhs = rhs+" "+operator+" ";
+        
+        if (rightIsConstant) {
+            rhs = rhs + rightLit.toString();
+        } else {
+            rhs = rhs + rightLoc.toString();
+        }
+
+        return resultLoc.toString() + " = " + rhs;
+    }
     
     @Override
     public void accept(LlNodeVisitor v) {
-        // TODO Auto-generated method stub
-
+        v.visit(this);
     }
 
 }

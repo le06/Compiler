@@ -14,6 +14,10 @@ public class LlStringLiteral implements LlConstant {
         return text;
     }
     
+    public String getTextWithoutQuotes() {
+        return text.substring(1,text.length()-1);
+    }
+    
     public String getLabelName() {
         return label.getName();
     }
@@ -24,14 +28,16 @@ public class LlStringLiteral implements LlConstant {
     
     @Override
     public Type getType() {
-        // TODO Auto-generated method stub
         return Type.STRING;
     }
 
+    public String toString() {
+        return text;
+    }
+    
     @Override
     public void accept(LlNodeVisitor v) {
-        // TODO Auto-generated method stub
-        
+        v.visit(this);
     }
 
     @Override

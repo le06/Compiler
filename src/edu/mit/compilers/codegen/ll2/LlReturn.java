@@ -33,10 +33,23 @@ public class LlReturn implements LlNode {
         return lit;
     }
     
+    public String toString() {
+        String returnExpr;
+        if (voidReturnType) {
+            returnExpr = "";
+        }
+        else if (hasConstant) {
+            returnExpr = lit.toString();
+        } else {
+            returnExpr = loc.toString();
+        }
+        
+        return "RETURN " + returnExpr;
+    }
+    
     @Override
     public void accept(LlNodeVisitor v) {
-        // TODO Auto-generated method stub
-
+        v.visit(this);
     }
 
 }

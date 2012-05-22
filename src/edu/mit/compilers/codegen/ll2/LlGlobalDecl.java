@@ -17,10 +17,13 @@ public class LlGlobalDecl implements LlNode {
         return size;
     }
 
+    public String toString() {
+        return "GLOBALDECL: " + label.getName();
+    }
+    
     @Override
     public void accept(LlNodeVisitor v) {
-        // TODO Auto-generated method stub
-        
+        v.visit(this);
     }
     
 }

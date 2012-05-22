@@ -32,10 +32,17 @@ public class LlAssign implements LlNode {
         hasConstant = true;
     }
     
+    public String toString() {
+        if (hasConstant) {
+            return lhsLoc.toString() + " = " + rhsLit.toString();
+        } else {
+            return lhsLoc.toString() + " = " + rhsLoc.toString();
+        }
+    }
+    
     @Override
     public void accept(LlNodeVisitor v) {
-        // TODO Auto-generated method stub
-
+        v.visit(this);
     }
 
 }

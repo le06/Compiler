@@ -13,18 +13,24 @@ public class LlTempLoc implements LlLocation {
     public String getSymbol() {
         return symbol;
     }
+    
     @Override
     public String getLocation() {
         return location;
     }
+    
     @Override
     public void setLocation(String loc) {
         location = loc;
     }
+    
+    public String toString() {
+        return symbol;
+    }
+    
     @Override
     public void accept(LlNodeVisitor v) {
-        // TODO Auto-generated method stub
-
+        v.visit(this);
     }
 
 }

@@ -45,10 +45,14 @@ public class LlJmp implements LlNode {
         return label;
     }
     
+    public String toString() {
+        String op = getOpcode().toUpperCase();
+        return op + ": " + label.getName();
+    }
+    
     @Override
     public void accept(LlNodeVisitor v) {
-        // TODO Auto-generated method stub
-
+        v.visit(this);
     }
 
 }

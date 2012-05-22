@@ -1,6 +1,7 @@
 package edu.mit.compilers.codegen.ll2;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import edu.mit.compilers.codegen.ll2.LlMethodDecl.MethodType;
 
@@ -27,6 +28,10 @@ public class LlCallout implements LlNode {
         return name;
     }
     
+    public String getNameWithoutQuotes() {
+        return name.substring(1,name.length()-1);
+    }
+    
     public LlLocation getReturnLocation() {
         return return_location;
     }
@@ -43,10 +48,30 @@ public class LlCallout implements LlNode {
         return params.size();
     }
     
+    public String toString() {
+        String args = "(";
+        Iterator<LlNode> i = params.iterator();
+        while (i.hasNext()) {
+            LlNode next = i.next();
+            if (next instanceof LlStringLiteral) {
+                args = args + ((LlStringLiteral)next).getLabelName();
+            } else {
+                args = args + next.toString();
+            }
+            
+            if (i.hasNext()) {
+                args = args + ", ";
+            }
+        }
+        args = args + ")";
+        
+        String funcName = getNameWithoutQuotes();
+        return "CALLOUT: " + return_location.toString() + " = " + funcName + args;
+    }
+    
     @Override
     public void accept(LlNodeVisitor v) {
-        // TODO Auto-generated method stub
-
+        v.visit(this);
     }
 
 }

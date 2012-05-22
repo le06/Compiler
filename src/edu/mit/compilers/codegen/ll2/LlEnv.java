@@ -17,9 +17,12 @@ public class LlEnv implements LlNode {
         return subnodes;
     }
 
+    public String toString() {
+        return "ENVIRONMENT";
+    }
+    
     @Override
     public void accept(LlNodeVisitor v) {
-        // TODO Auto-generated method stub
-        
+        v.visit(this);
     }
 }

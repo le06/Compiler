@@ -24,10 +24,13 @@ public class LlGlobalLoc implements LlLocation {
         location = loc;
     }
     
+    public String toString() {
+        return symbol;
+    }
+    
     @Override
     public void accept(LlNodeVisitor v) {
-        // TODO Auto-generated method stub
-
+        v.visit(this);
     }
 
 }

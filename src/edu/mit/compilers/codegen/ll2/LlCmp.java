@@ -73,10 +73,27 @@ public class LlCmp implements LlNode {
         rightIsConstant = true;
     }
     
+    public String toString() {
+        String left, right;
+        if (leftIsConstant) {
+            left = leftLit.toString();
+        } else {
+            left = leftLoc.toString();
+        }
+        
+        
+        if (rightIsConstant) {
+            right = rightLit.toString();
+        } else {
+            right = rightLoc.toString();
+        }
+
+        return "CMP: " + left + ", " + right;
+    }
+    
     @Override
     public void accept(LlNodeVisitor v) {
-        // TODO Auto-generated method stub
-
+        v.visit(this);
     }
 
 }
