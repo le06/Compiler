@@ -15,14 +15,14 @@ public class LlMethodDecl implements LlNode {
     private String method_name;
     private ArrayList<LlTempLoc> args;
     private int num_args;
-    private LlEnv method_code;
+    private ArrayList<LlBlock> blocksInOrder;
+    private LlBlock returnBlock; // control flow goes into this 'sink' for every return statement in the method.
     
-    public LlMethodDecl(MethodType t, String name, int num_args, LlEnv code) {
+    public LlMethodDecl(MethodType t, String name, int num_args) {
         type = t;
         method_name = name;
         args = new ArrayList<LlTempLoc>();
         this.num_args = num_args;
-        method_code = code;
     }
     
     public MethodType getType() {
@@ -44,11 +44,27 @@ public class LlMethodDecl implements LlNode {
     public int getNumArgs() {
         return num_args;
     }
-    
-    public LlEnv getEnv() {
-        return method_code;
-    }
 
+    public void addBlock(LlBlock b) {
+        blocksInOrder.add(b);
+    }
+    
+    public void setBlocksInOrder(ArrayList<LlBlock> blocks) {
+        blocksInOrder = blocks;
+    }
+    
+    public ArrayList<LlBlock> getBlocksInOrder() {
+        return blocksInOrder;
+    }
+    
+    public void setReturnBlock(LlBlock b) {
+        returnBlock = b;
+    }
+    
+    public LlBlock getReturnBlock() {
+        return returnBlock;
+    }
+    
     public String toString() {
         String signature = "(";
         Iterator<LlTempLoc> i = args.iterator();

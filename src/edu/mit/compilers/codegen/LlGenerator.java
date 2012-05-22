@@ -55,17 +55,20 @@ import edu.mit.compilers.codegen.ll2.LlJmp.JumpType;
 public class LlGenerator implements IrNodeVisitor {
 
     private Ir ir;
-    private LlNode ll;
-        
+    //private LlNode ll;
+
     /*
      * The state of the LL generator as it walks the IR tree.
      */
     private LlProgram program;
-    private LlEnv currentEnv; // the current environment where instructions should be added.
+    private LlBlock currentBlock; // the current block/environment where instructions should be added.
+    private LlBlock returnBlock;  // the control flow 'sink' of each method.
+    private ArrayList<LlBlock> currentBlocksInOrder;
+    private int blockCounter = 1;
+
     private LlLocation currentLoc; // a location in memory. for example: the LHS in some assign statement.
     private LlConstant currentLit; // an integer literal or a boolean literal.
     private int currentlyEvaluatingExpr = 0; // "true" if non-zero. like a semaphore.
-
     private int currentTemp = 1;
     
     private int stringLitCounter = 1;
@@ -77,46 +80,62 @@ public class LlGenerator implements IrNodeVisitor {
     private int whileCounter = 1;
     private int ssCounter = 1;
     
-    private LlLabel breakPoint;
-    private LlLabel continuePoint;
+    private LlLabel breakLabel;
+    private LlBlock breakBlock;
+    private LlLabel continueLabel;
+    private LlBlock continueBlock;
     
     // expects the root node as input.
     public LlGenerator(Ir ir) {
         this.ir = ir;
     }
     
-    private LlEnv generateSequence(LlProgram p) {
-        LlEnv sequence = new LlEnv();
+
+    public ArrayList<LlNode> generateSequence(LlProgram p) {
+        ArrayList<LlNode> sequence = new ArrayList<LlNode>();
         
-        for (LlGlobalDecl n : program.getGlobalDecls()) {
-            sequence.addNode(n);
+        for (LlGlobalDecl n : p.getGlobalDecls()) {
+            sequence.add(n);
         }
-        for (LlArrayDecl n : program.getArrayDecls()) {
-            sequence.addNode(n);
+        for (LlArrayDecl n : p.getArrayDecls()) {
+            sequence.add(n);
         }
-        for (LlMethodDecl n : program.getMethods()) {
-            sequence.addNode(n);
-            for (LlNode sn : n.getEnv().getSubnodes()) {
-                sequence.addNode(sn);
+        for (LlMethodDecl n : p.getMethods()) {
+            sequence.add(n);
+            sequence.add(n.getReturnBlock());
+            for (LlBlock bb : n.getBlocksInOrder()) {
+                sequence.add(bb);
+                for (LlNode inst : bb.getInstructions()) {
+                    sequence.add(inst);
+                }
             }
         }
-        LlMethodDecl m = program.getMain();
-        sequence.addNode(m);
-        for (LlNode sn : m.getEnv().getSubnodes()) {
-            sequence.addNode(sn);
+        LlMethodDecl m = p.getMain();
+        sequence.add(m);
+        sequence.add(m.getReturnBlock());
+        for (LlBlock bb : m.getBlocksInOrder()) {
+            sequence.add(bb);
+            for (LlNode inst : bb.getInstructions()) {
+                sequence.add(inst);
+            }
         }
-        for (LlStringLiteral n : program.getStringLiterals()) {
-            sequence.addNode(n);
+        for (LlStringLiteral n : p.getStringLiterals()) {
+            sequence.add(n);
         }
         
         return sequence;
     }
     
-    public LlNode generateLL() {
+    public LlProgram generateLL() {
         ir.accept(this);
 
-        // TODO: tweak the return when basic blocks are implemented
-        return generateSequence(program);
+        // TODO: debug as necessary.
+        for (LlNode n : generateSequence(program)) {
+            System.out.println(n);
+        }
+        
+        // TODO: should the return type be tweaked?
+        return program;
     }
     
     @Override
@@ -130,8 +149,6 @@ public class LlGenerator implements IrNodeVisitor {
         for (LlStringLiteral s : stringLiterals) {
             program.addString(s);
         }
-        
-        ll = (LlNode)program;
     }
 
     @Override
@@ -157,33 +174,51 @@ public class LlGenerator implements IrNodeVisitor {
         LlArrayDecl d = new LlArrayDecl(g, node.getArraySize().getIntRep());
         program.addArrayDecl(d);
     }
-
+    
+    private LlBlock createBlock(String method) {
+        LlBlock newBlock = new LlBlock(method, blockCounter);
+        blockCounter++;
+        return newBlock;
+    }
+    
     @Override
     public void visit(IrMethodDecl node) {
-        currentEnv = new LlEnv();
-        
-        // walk the method contents.
-        node.getBlock().accept(this);
+        returnBlock = null;
+        currentBlock = null;
+        currentBlocksInOrder = new ArrayList<LlBlock>();
         
         String name = node.getId().getId();
         int num_args = node.getParams().size();
         LlMethodDecl m;
         
+        // walk the method contents.
+        returnBlock = createBlock(name);
+        currentBlock = createBlock(name);
+        currentBlocksInOrder.add(currentBlock);
+        node.getBlock().accept(this);
+        
+        // always return at the end of a method.
+        LlBlock.pairUp(currentBlock, returnBlock);
+        
         // set the method's return type.
         switch (node.getReturnType().myType) {
         case BOOLEAN:
-            m = new LlMethodDecl(MethodType.BOOLEAN, name, num_args, currentEnv);
+            m = new LlMethodDecl(MethodType.BOOLEAN, name, num_args);
             break;
         case INT:
-            m = new LlMethodDecl(MethodType.INT, name, num_args, currentEnv);
+            m = new LlMethodDecl(MethodType.INT, name, num_args);
             break;
         case VOID:
-            m = new LlMethodDecl(MethodType.VOID, name, num_args, currentEnv);
-            currentEnv.addNode(new LlReturn(new LlIntLiteral(0)));
+            m = new LlMethodDecl(MethodType.VOID, name, num_args);
+            currentBlock.addInstruction(new LlReturn(new LlIntLiteral(0)));
             break;
         default:
             throw new RuntimeException("Cannot have a method with mixed type");
         }
+        
+        // add the basic blocks to the method declaration.
+        m.setBlocksInOrder(currentBlocksInOrder);
+        m.setReturnBlock(returnBlock);
         
         // add the method params.
         for (IrParameterDecl p : node.getParams()) {
@@ -249,7 +284,7 @@ public class LlGenerator implements IrNodeVisitor {
         LlConstant expr = new LlIntLiteral(0);
         
         LlAssign a = new LlAssign(loc, expr, Type.INT, false);
-        currentEnv.addNode(a);
+        currentBlock.addInstruction(a);
     }
 
     @Override
@@ -276,7 +311,13 @@ public class LlGenerator implements IrNodeVisitor {
             }
         }
         
-        currentEnv.addNode(r);
+        // direct CFG to sink.
+        currentBlock.addInstruction(r);
+        LlBlock.pairUp(currentBlock, returnBlock);
+        // create a new, unconnected block.
+        LlBlock nextBlock = createBlock(currentBlock.getMethod());
+        currentBlock = nextBlock;
+        currentBlocksInOrder.add(nextBlock);
     }
 
     // The basic building blocks of an expression.
@@ -352,8 +393,6 @@ public class LlGenerator implements IrNodeVisitor {
 
     }
     
-    // TODO: control flow transfers to new method scope -> new basic block.
-    
     @Override
     public void visit(IrMethodCallStmt node) {
         LlMethodCall mc;
@@ -383,7 +422,19 @@ public class LlGenerator implements IrNodeVisitor {
             }
         }
         
-        currentEnv.addNode(mc);
+        // add method call to block.
+        currentBlock.addInstruction(mc);
+        currentBlock.setCalls(node.getMethodName().getId());
+        
+        // create a new block.
+        LlBlock nextBlock = createBlock(currentBlock.getMethod());
+        nextBlock.setReturnsFrom(node.getMethodName().getId());
+        
+        // pair up pre-method-call and post-method-call blocks.
+        LlBlock.pairUp(currentBlock, nextBlock);
+        currentBlock = nextBlock;
+        currentBlocksInOrder.add(nextBlock);
+        
         if (currentlyEvaluatingExpr > 0) {
             currentLoc = mc.getReturnLocation();
         }
@@ -405,7 +456,7 @@ public class LlGenerator implements IrNodeVisitor {
             }
         }
         
-        currentEnv.addNode(co);
+        currentBlock.addInstruction(co);
         if (currentlyEvaluatingExpr > 0) {
             currentLoc = co.getReturnLocation();
         }
@@ -447,7 +498,7 @@ public class LlGenerator implements IrNodeVisitor {
             LlLabel ssEnd = new LlLabel("ssend_" + String.valueOf(ssCounter));
             
             ssCounter++;
-            currentEnv.addNode(start);
+            currentBlock.addInstruction(start);
             
             LlAssign assign;
             LlCmp cmp;
@@ -466,8 +517,8 @@ public class LlGenerator implements IrNodeVisitor {
             }
             
             // short circuits if left == 0 == false.
-            currentEnv.addNode(cmp);
-            currentEnv.addNode(new LlJmp(JumpType.EQUAL,ss));
+            currentBlock.addInstruction(cmp);
+            currentBlock.addInstruction(new LlJmp(JumpType.EQUAL,ss));
             
             // if short circuit fails, eval right.
             acceptExpr(node.getRight());
@@ -482,14 +533,14 @@ public class LlGenerator implements IrNodeVisitor {
             }
             
             // result = right;
-            currentEnv.addNode(assign);
-            currentEnv.addNode(new LlJmp(JumpType.UNCONDITIONAL,ssEnd));
+            currentBlock.addInstruction(assign);
+            currentBlock.addInstruction(new LlJmp(JumpType.UNCONDITIONAL,ssEnd));
             
             // if short-circuit, result = 0;
-            currentEnv.addNode(ss);
-            currentEnv.addNode(new LlAssign(result, new LlIntLiteral(0), Type.BOOLEAN, false));
-            currentEnv.addNode(ssEnd);
-            currentEnv.addNode(end);
+            currentBlock.addInstruction(ss);
+            currentBlock.addInstruction(new LlAssign(result, new LlIntLiteral(0), Type.BOOLEAN, false));
+            currentBlock.addInstruction(ssEnd);
+            currentBlock.addInstruction(end);
             
             // annotate beginning and end of short-circuit code.
             String annotation = result.getSymbol() + "=" + leftSymbol + "&&" + rightSymbol;
@@ -505,7 +556,7 @@ public class LlGenerator implements IrNodeVisitor {
             LlLabel ssEnd = new LlLabel("ssend_" + String.valueOf(ssCounter));
             
             ssCounter++;
-            currentEnv.addNode(start);
+            currentBlock.addInstruction(start);
             
             LlAssign assign;
             LlCmp cmp;
@@ -524,8 +575,8 @@ public class LlGenerator implements IrNodeVisitor {
             }
             
             // short circuits if left == 1 == true.
-            currentEnv.addNode(cmp); // cmp 0, left
-            currentEnv.addNode(new LlJmp(JumpType.NOT_EQUAL,ss)); // 0 != 1
+            currentBlock.addInstruction(cmp); // cmp 0, left
+            currentBlock.addInstruction(new LlJmp(JumpType.NOT_EQUAL,ss)); // 0 != 1
             
             // if short circuit fails, eval right.
             acceptExpr(node.getRight());
@@ -540,14 +591,14 @@ public class LlGenerator implements IrNodeVisitor {
             }
             
             // result = right;
-            currentEnv.addNode(assign);
-            currentEnv.addNode(new LlJmp(JumpType.UNCONDITIONAL,ssEnd));
+            currentBlock.addInstruction(assign);
+            currentBlock.addInstruction(new LlJmp(JumpType.UNCONDITIONAL,ssEnd));
             
             // if short-circuit, result = 1;
-            currentEnv.addNode(ss);
-            currentEnv.addNode(new LlAssign(result, new LlIntLiteral(1), Type.BOOLEAN, false));
-            currentEnv.addNode(ssEnd);
-            currentEnv.addNode(end);
+            currentBlock.addInstruction(ss);
+            currentBlock.addInstruction(new LlAssign(result, new LlIntLiteral(1), Type.BOOLEAN, false));
+            currentBlock.addInstruction(ssEnd);
+            currentBlock.addInstruction(end);
             
             // annotate beginning and end of short-circuit code.
             String annotation = result.getSymbol() + "=" + leftSymbol + "||" + rightSymbol;
@@ -617,7 +668,7 @@ public class LlGenerator implements IrNodeVisitor {
                 throw new RuntimeException("Bad binary expr.");
             }
             
-            currentEnv.addNode(a);    
+            currentBlock.addInstruction(a);    
         }
         
         currentLoc = result;
@@ -651,7 +702,7 @@ public class LlGenerator implements IrNodeVisitor {
             throw new RuntimeException("Unary expr badly formed");
         }
 
-        currentEnv.addNode(a);
+        currentBlock.addInstruction(a);
         currentLoc = result;
         currentLit = null;
     }
@@ -673,7 +724,7 @@ public class LlGenerator implements IrNodeVisitor {
             throw new RuntimeException("Unary expr badly formed");
         }
 
-        currentEnv.addNode(a);
+        currentBlock.addInstruction(a);
     }
 
     @Override
@@ -691,7 +742,7 @@ public class LlGenerator implements IrNodeVisitor {
             throw new RuntimeException("Unary expr badly formed");
         }
 
-        currentEnv.addNode(a);
+        currentBlock.addInstruction(a);
     }
 
     @Override
@@ -709,12 +760,10 @@ public class LlGenerator implements IrNodeVisitor {
             throw new RuntimeException("Unary expr badly formed");
         }
 
-        currentEnv.addNode(a);
+        currentBlock.addInstruction(a);
     }
     
     // Control flow.
-
-    // TODO: control flow changes -> new basic blocks.
     
     @Override
     public void visit(IrIfStmt node) {
@@ -726,7 +775,7 @@ public class LlGenerator implements IrNodeVisitor {
         LlLabel ifEnd = new LlLabel("ifend_" + String.valueOf(ifCounter));
         
         ifCounter++;
-        currentEnv.addNode(start);
+        currentBlock.addInstruction(start);
         
         LlCmp cmp;
         
@@ -740,19 +789,55 @@ public class LlGenerator implements IrNodeVisitor {
             throw new RuntimeException("if loop condition badly formed");
         }
 
-        currentEnv.addNode(cmp); // jmp to else block if 0 == cond.
-        currentEnv.addNode(new LlJmp(JumpType.EQUAL, ifElse));
+        currentBlock.addInstruction(cmp); // jmp to else block if 0 == cond.
+        currentBlock.addInstruction(new LlJmp(JumpType.EQUAL, ifElse));
         
-        // add true branch.
+        // define blocks.
+        LlBlock preBlock = currentBlock;
+        LlBlock postBlock = createBlock(currentBlock.getMethod());
+        
+        // walk true branch.
+        LlBlock trueBlock = createBlock(currentBlock.getMethod());
+        currentBlock = trueBlock;
+        currentBlocksInOrder.add(trueBlock);
+        
         node.getTrueBlock().accept(this);
-        currentEnv.addNode(new LlJmp(JumpType.UNCONDITIONAL, ifEnd));
-        // add false branch.
-        currentEnv.addNode(ifElse);
+        currentBlock.addInstruction(new LlJmp(JumpType.UNCONDITIONAL, ifEnd));
+        
+        // connect true branch.
+        LlBlock.pairUp(preBlock, trueBlock);
+        LlBlock.pairUp(currentBlock, postBlock);
+        
+        // walk false branch, if necessary.
         if (node.getFalseBlock() != null) {
+            LlBlock falseBlock = createBlock(currentBlock.getMethod());
+            currentBlock = falseBlock;
+            currentBlocksInOrder.add(falseBlock);
+            
+            currentBlock.addInstruction(ifElse);
             node.getFalseBlock().accept(this);
+            
+            // connect false branch.
+            LlBlock.pairUp(preBlock, falseBlock);
+            LlBlock.pairUp(currentBlock, postBlock);
+            
+            currentBlock = postBlock;
+            currentBlocksInOrder.add(postBlock);
+            
+            currentBlock.addInstruction(ifEnd);
+            currentBlock.addInstruction(end);
+        } else {
+            // connect false branch.
+            LlBlock.pairUp(preBlock, postBlock);
+            
+            currentBlock = postBlock;
+            currentBlocksInOrder.add(postBlock);
+            
+            currentBlock.addInstruction(ifElse);
+            currentBlock.addInstruction(ifEnd);
+            currentBlock.addInstruction(end);
         }
-        currentEnv.addNode(ifEnd);
-        currentEnv.addNode(end);
+        
     }
     
     @Override
@@ -762,10 +847,11 @@ public class LlGenerator implements IrNodeVisitor {
         LlAnnotation end = new LlAnnotation(AnnotationType.FOR,
                 "for_" + String.valueOf(forCounter), true, null);
         LlLabel forLoop = new LlLabel("forloop_" + String.valueOf(forCounter));
+        LlLabel forIncr = new LlLabel("forincr_" + String.valueOf(forCounter));
         LlLabel forDone = new LlLabel("fordone_" + String.valueOf(forCounter));
         
         forCounter++;
-        currentEnv.addNode(start);
+        currentBlock.addInstruction(start);
         
         // init the loop counter.
         LlTempLoc counterLoc = new LlTempLoc(node.getCounterSymbol());
@@ -779,16 +865,32 @@ public class LlGenerator implements IrNodeVisitor {
         } else {
             throw new RuntimeException("for loop counter badly formed");
         }
-        currentEnv.addNode(a);
+        currentBlock.addInstruction(a);
         
-        // update this visitor's current breakpoint and continuepoint.
-        LlLabel oldBreak = breakPoint;
-        LlLabel oldContinue = continuePoint;
-        breakPoint = forDone;
-        continuePoint = forLoop;
+        // init blocks.
+        LlBlock preBlock = currentBlock;
+        LlBlock forCondition = createBlock(currentBlock.getMethod());
+        LlBlock forBody = createBlock(currentBlock.getMethod());
+        LlBlock forEndOfBody = createBlock(currentBlock.getMethod());
+        LlBlock postBlock = createBlock(currentBlock.getMethod());
         
-        // inside the loop body. loop condition checking.
-        currentEnv.addNode(forLoop);
+        // update this visitor's current break and continue points.
+        LlLabel oldBreakLabel = breakLabel;
+        LlBlock oldBreakBlock = breakBlock;
+        LlLabel oldContinueLabel = continueLabel;
+        LlBlock oldContinueBlock = continueBlock;
+        
+        breakLabel = forDone;
+        breakBlock = postBlock;
+        continueLabel = forIncr;
+        continueBlock = forEndOfBody;
+        
+        // loop condition checking is its own basic block.
+        LlBlock.pairUp(preBlock, forCondition);
+        currentBlock = forCondition;
+        currentBlocksInOrder.add(forCondition);
+        
+        currentBlock.addInstruction(forLoop);
         IrExpression stopExpr = node.getStopValue();
         LlCmp cmp;
         acceptExpr(stopExpr); // eval end condition.
@@ -801,26 +903,41 @@ public class LlGenerator implements IrNodeVisitor {
         }
         
         // the loop exits iff loc == stopExpr.
-        currentEnv.addNode(cmp);
-        currentEnv.addNode(new LlJmp(JumpType.EQUAL, forDone));
+        currentBlock.addInstruction(cmp);
+        currentBlock.addInstruction(new LlJmp(JumpType.EQUAL, forDone));
+        LlBlock.pairUp(currentBlock, postBlock);
+        LlBlock.pairUp(currentBlock, forBody);
         
         // walk the for loop's body.
+        currentBlock = forBody;
+        currentBlocksInOrder.add(forBody);        
         node.getBlock().accept(this);
 
         // increment the counter; repeat the loop.
+        LlBlock.pairUp(currentBlock, forEndOfBody);        
+        currentBlock = forEndOfBody;
+        currentBlocksInOrder.add(forEndOfBody);
         LlBinaryAssign increment = new LlBinaryAssign(counterLoc, counterLoc, new LlIntLiteral(1),
                 Type.INT, IrBinOperator.PLUS);
-        currentEnv.addNode(increment);
-        currentEnv.addNode(new LlJmp(JumpType.UNCONDITIONAL, forLoop));
+        currentBlock.addInstruction(forIncr);
+        currentBlock.addInstruction(increment);
+        currentBlock.addInstruction(new LlJmp(JumpType.UNCONDITIONAL, forLoop));
+        LlBlock.pairUp(currentBlock, forCondition);
         
         // out of the loop.
-        currentEnv.addNode(forDone);
-        currentEnv.addNode(end);
+        currentBlock = postBlock;
+        currentBlocksInOrder.add(postBlock);
         
-        breakPoint = oldBreak;
-        continuePoint = oldContinue;
+        currentBlock.addInstruction(forDone);
+        currentBlock.addInstruction(end);
+        
+        // revert break and continue points.
+        breakLabel = oldBreakLabel;
+        breakBlock = oldBreakBlock;
+        continueLabel = oldContinueLabel;
+        continueBlock = oldContinueBlock;
     }
-
+    
     @Override
     public void visit(IrWhileStmt node) {
         LlAnnotation start = new LlAnnotation(AnnotationType.WHILE,
@@ -831,16 +948,30 @@ public class LlGenerator implements IrNodeVisitor {
         LlLabel whileDone = new LlLabel("fordone_" + String.valueOf(whileCounter));
         
         whileCounter++;
-        currentEnv.addNode(start);
+        currentBlock.addInstruction(start);
         
-        // update this visitor's current breakpoint and continuepoint.
-        LlLabel oldBreak = breakPoint;
-        LlLabel oldContinue = continuePoint;
-        breakPoint = whileDone;
-        continuePoint = whileLoop;
+        // init blocks.
+        LlBlock preBlock = currentBlock;
+        LlBlock whileCondition = createBlock(currentBlock.getMethod());
+        LlBlock whileBody = createBlock(currentBlock.getMethod());
+        LlBlock postBlock = createBlock(currentBlock.getMethod());
+        
+        // update this visitor's current break and continue points.
+        LlLabel oldBreakLabel = breakLabel;
+        LlBlock oldBreakBlock = breakBlock;
+        LlLabel oldContinueLabel = continueLabel;
+        LlBlock oldContinueBlock = continueBlock;
+        
+        breakLabel = whileDone;
+        breakBlock = postBlock;
+        continueLabel = whileLoop;
+        continueBlock = whileCondition;
         
         // inside the loop.
-        currentEnv.addNode(whileLoop);
+        LlBlock.pairUp(preBlock, whileCondition);
+        currentBlock = whileCondition;
+        currentBlocksInOrder.add(whileCondition);
+        currentBlock.addInstruction(whileLoop);
         
         // check the while condition.
         IrExpression whileExpr = node.getCondition();
@@ -854,29 +985,50 @@ public class LlGenerator implements IrNodeVisitor {
             throw new RuntimeException("for loop condition badly formed");
         }
         
-        currentEnv.addNode(cmp); // jmp outside the loop if 0 == cond.
-        currentEnv.addNode(new LlJmp(JumpType.EQUAL, whileDone));
+        currentBlock.addInstruction(cmp); // jmp outside the loop if 0 == cond.
+        currentBlock.addInstruction(new LlJmp(JumpType.EQUAL, whileDone));
+        LlBlock.pairUp(currentBlock, whileBody);
+        LlBlock.pairUp(currentBlock, postBlock);
         
         // walk the while loop's body.
+        currentBlock = whileBody;
+        currentBlocksInOrder.add(whileBody);
+        
         node.getBlock().accept(this);
-        currentEnv.addNode(new LlJmp(JumpType.UNCONDITIONAL, whileLoop));
+        currentBlock.addInstruction(new LlJmp(JumpType.UNCONDITIONAL, whileLoop));
+        LlBlock.pairUp(currentBlock, whileCondition);
         
         // outside the loop.
-        currentEnv.addNode(whileDone);
-        currentEnv.addNode(end);
+        currentBlock = postBlock;
+        currentBlocksInOrder.add(postBlock);
+        currentBlock.addInstruction(whileDone);
+        currentBlock.addInstruction(end);
         
-        breakPoint = oldBreak;
-        continuePoint = oldContinue;
+        // revert break and continue points.
+        breakLabel = oldBreakLabel;
+        breakBlock = oldBreakBlock;
+        continueLabel = oldContinueLabel;
+        continueBlock = oldContinueBlock;
     }
-
+    
     @Override
     public void visit(IrBreakStmt node) {
-        currentEnv.addNode(new LlJmp(JumpType.UNCONDITIONAL, breakPoint));
-    }    
+        currentBlock.addInstruction(new LlJmp(JumpType.UNCONDITIONAL, breakLabel));
+        LlBlock.pairUp(currentBlock, breakBlock);
+
+        LlBlock nextBlock = createBlock(currentBlock.getMethod());
+        currentBlock = nextBlock;
+        currentBlocksInOrder.add(nextBlock);
+    }
     
     @Override
     public void visit(IrContinueStmt node) {
-        currentEnv.addNode(new LlJmp(JumpType.UNCONDITIONAL, continuePoint));
+        currentBlock.addInstruction(new LlJmp(JumpType.UNCONDITIONAL, continueLabel));
+        LlBlock.pairUp(currentBlock, continueBlock);
+
+        LlBlock nextBlock = createBlock(currentBlock.getMethod());
+        currentBlock = nextBlock;
+        currentBlocksInOrder.add(nextBlock);
     }
     
     // Unused visitor methods.

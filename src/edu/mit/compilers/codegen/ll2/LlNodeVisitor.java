@@ -7,10 +7,10 @@ public interface LlNodeVisitor {
     public void visit(LlArrayLoc node);
     public void visit(LlAssign node);
     public void visit(LlBinaryAssign node);
+    public void visit(LlBlock node);
     public void visit(LlBoolLiteral node);
     public void visit(LlCallout node);
     public void visit(LlCmp node);
-    public void visit(LlEnv node);
     public void visit(LlGlobalDecl node);
     public void visit(LlGlobalLoc node);
     public void visit(LlIntLiteral node);
