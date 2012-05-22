@@ -47,6 +47,7 @@ import edu.mit.compilers.checker.Ir.IrVarDecl;
 import edu.mit.compilers.checker.Ir.IrVarLocation;
 import edu.mit.compilers.checker.Ir.IrWhileStmt;
 import edu.mit.compilers.codegen.ll2.*;
+import edu.mit.compilers.codegen.ll2.LlAnnotation.AnnotationType;
 import edu.mit.compilers.codegen.ll2.LlConstant.Type;
 import edu.mit.compilers.codegen.ll2.LlMethodDecl.MethodType;
 import edu.mit.compilers.codegen.ll2.LlJmp.JumpType;
@@ -66,9 +67,15 @@ public class LlGenerator implements IrNodeVisitor {
     private int currentlyEvaluatingExpr = 0; // "true" if non-zero. like a semaphore.
 
     private int currentTemp = 1;
+    
     private int stringLitCounter = 1;
     private String stringLitPrefix = "strlit_";
     private ArrayList<LlStringLiteral> stringLiterals = new ArrayList<LlStringLiteral>();
+
+    private int ifCounter = 1;
+    private int forCounter = 1;
+    private int whileCounter = 1;
+    private int ssCounter = 1;
     
     private LlLabel breakPoint;
     private LlLabel continuePoint;
@@ -89,6 +96,10 @@ public class LlGenerator implements IrNodeVisitor {
         
         for (IrMemberDecl m : node.getMembers()) {
             m.accept(this);
+        }
+        
+        for (LlStringLiteral s : stringLiterals) {
+            program.addString(s);
         }
         
         ll = (LlNode)program;
@@ -123,7 +134,6 @@ public class LlGenerator implements IrNodeVisitor {
         currentEnv = new LlEnv();
         
         // walk the method contents.
-        currentTemp = 1;
         node.getBlock().accept(this);
         
         String name = node.getId().getId();
@@ -216,16 +226,6 @@ public class LlGenerator implements IrNodeVisitor {
     @Override
     public void visit(IrBlockStmt node) {
         node.getBlock().accept(this);
-    }
-
-    @Override
-    public void visit(IrBreakStmt node) {
-        currentEnv.addNode(new LlJmp(JumpType.UNCONDITIONAL, breakPoint));
-    }    
-    
-    @Override
-    public void visit(IrContinueStmt node) {
-        currentEnv.addNode(new LlJmp(JumpType.UNCONDITIONAL, continuePoint));
     }
 
     @Override
@@ -323,6 +323,8 @@ public class LlGenerator implements IrNodeVisitor {
 
     }
     
+    // TODO: control flow transfers to new method scope -> new basic block.
+    
     @Override
     public void visit(IrMethodCallStmt node) {
         LlMethodCall mc;
@@ -398,76 +400,197 @@ public class LlGenerator implements IrNodeVisitor {
     }
     
     // These exprs guarantee the generation of temp vars, except in certain optimized cases.
-    // Optimizations are done in a separate pass.
+    // Conditional operators are converted to short circuits. See LlAnnotation.
     
     @Override
     public void visit(IrBinopExpr node) {
         LlTempLoc result = new LlTempLoc("t" + String.valueOf(currentTemp));
         currentTemp++;
         
-        LlLocation lhsLoc, rhsLoc;
-        LlConstant lhsLit, rhsLit;
-        
-        // walk the left expr subtree.
-        acceptExpr(node.getLeft());
-        if (currentLoc != null) {
-            lhsLoc = currentLoc;
-            lhsLit = null;
-        } else if (currentLit != null) {
-            lhsLit = currentLit;
-            lhsLoc = null;
-        } else {
-            throw new RuntimeException("LHS of expression badly formed");
-        }
-        // walk the right expr subtree.
-        acceptExpr(node.getRight());
-        if (currentLoc != null) {
-            rhsLoc = currentLoc;
-            rhsLit = null;
-        } else if (currentLit != null) {
-            rhsLit = currentLit;
-            rhsLoc = null;
-        } else {
-            throw new RuntimeException("LHS of expression badly formed");
-        }
-        
-        Type type;
-        switch (node.getType().myType) {
-        case BOOLEAN:
-            type = Type.BOOLEAN;
-            break;
-        case INT:
-            type = Type.INT;
-            break;
-        default:
-            throw new RuntimeException("Unrecognized local var type");
-        }
+        // if the op is && or ||, convert into a short circuit representation.
         IrBinOperator op = node.getOperator();
-        
-        LlBinaryAssign a;
-        if (lhsLoc != null) {
-            if (rhsLoc != null) {
-                a = new LlBinaryAssign(result, lhsLoc, rhsLoc, type, op);
-            } else if (rhsLit != null) {
-                a = new LlBinaryAssign(result, lhsLoc, rhsLit, type, op);
+        if (op == IrBinOperator.AND) {
+            LlAnnotation start = new LlAnnotation(AnnotationType.COND_OP_ASSIGNMENT,
+                    "ss" + String.valueOf(ssCounter), false, null);
+            LlAnnotation end = new LlAnnotation(AnnotationType.COND_OP_ASSIGNMENT,
+                    "ss" + String.valueOf(ssCounter), true, null);
+            LlLabel ss = new LlLabel("ss_" + String.valueOf(ssCounter));
+            LlLabel ssEnd = new LlLabel("ssend_" + String.valueOf(ssCounter));
+            
+            ssCounter++;
+            currentEnv.addNode(start);
+            
+            LlAssign assign;
+            LlCmp cmp;
+            String leftSymbol, rightSymbol;
+            
+            // eval left first.
+            acceptExpr(node.getLeft());
+            if (currentLoc != null) {
+                cmp = new LlCmp(currentLoc);
+                leftSymbol = currentLoc.getSymbol();
+            } else if (currentLit != null) {
+                cmp = new LlCmp(currentLit);
+                leftSymbol = currentLit.print();
             } else {
-                throw new RuntimeException("Bad binary expr.");
+                throw new RuntimeException("LHS of binop badly formed");
             }
             
-        } else if (lhsLit != null ){
-            if (rhsLoc != null) {
-                a = new LlBinaryAssign(result, lhsLit, rhsLoc, type, op);
-            } else if (rhsLit != null) {
-                a = new LlBinaryAssign(result, lhsLit, rhsLit, type, op);
+            // short circuits if left == 0 == false.
+            currentEnv.addNode(cmp);
+            currentEnv.addNode(new LlJmp(JumpType.EQUAL,ss));
+            
+            // if short circuit fails, eval right.
+            acceptExpr(node.getRight());
+            if (currentLoc != null) {
+                assign = new LlAssign(result, currentLoc, Type.BOOLEAN, false);
+                rightSymbol = currentLoc.getSymbol();
+            } else if (currentLit != null) {
+                assign = new LlAssign(result, currentLit, Type.BOOLEAN, false);
+                rightSymbol = currentLit.print();
             } else {
-                throw new RuntimeException("Bad binary expr.");
+                throw new RuntimeException("RHS of binop badly formed");
             }
+            
+            // result = right;
+            currentEnv.addNode(assign);
+            currentEnv.addNode(new LlJmp(JumpType.UNCONDITIONAL,ssEnd));
+            
+            // if short-circuit, result = 0;
+            currentEnv.addNode(ss);
+            currentEnv.addNode(new LlAssign(result, new LlIntLiteral(0), Type.BOOLEAN, false));
+            currentEnv.addNode(ssEnd);
+            currentEnv.addNode(end);
+            
+            // annotate beginning and end of short-circuit code.
+            String annotation = result.getSymbol() + "=" + leftSymbol + "&&" + rightSymbol;
+            start.setAnnotation(annotation);
+            end.setAnnotation(annotation);
+            
+        } else if (op == IrBinOperator.OR) {
+            LlAnnotation start = new LlAnnotation(AnnotationType.COND_OP_ASSIGNMENT,
+                    "ss" + String.valueOf(ssCounter), false, null);
+            LlAnnotation end = new LlAnnotation(AnnotationType.COND_OP_ASSIGNMENT,
+                    "ss" + String.valueOf(ssCounter), true, null);
+            LlLabel ss = new LlLabel("ss_" + String.valueOf(ssCounter));
+            LlLabel ssEnd = new LlLabel("ssend_" + String.valueOf(ssCounter));
+            
+            ssCounter++;
+            currentEnv.addNode(start);
+            
+            LlAssign assign;
+            LlCmp cmp;
+            String leftSymbol, rightSymbol;
+            
+            // eval left first.
+            acceptExpr(node.getLeft());
+            if (currentLoc != null) {
+                cmp = new LlCmp(currentLoc);
+                leftSymbol = currentLoc.getSymbol();
+            } else if (currentLit != null) {
+                cmp = new LlCmp(currentLit);
+                leftSymbol = currentLit.print();
+            } else {
+                throw new RuntimeException("LHS of binop badly formed");
+            }
+            
+            // short circuits if left == 1 == true.
+            currentEnv.addNode(cmp); // cmp 0, left
+            currentEnv.addNode(new LlJmp(JumpType.NOT_EQUAL,ss)); // 0 != 1
+            
+            // if short circuit fails, eval right.
+            acceptExpr(node.getRight());
+            if (currentLoc != null) {
+                assign = new LlAssign(result, currentLoc, Type.BOOLEAN, false);
+                rightSymbol = currentLoc.getSymbol();
+            } else if (currentLit != null) {
+                assign = new LlAssign(result, currentLit, Type.BOOLEAN, false);
+                rightSymbol = currentLit.print();
+            } else {
+                throw new RuntimeException("RHS of binop badly formed");
+            }
+            
+            // result = right;
+            currentEnv.addNode(assign);
+            currentEnv.addNode(new LlJmp(JumpType.UNCONDITIONAL,ssEnd));
+            
+            // if short-circuit, result = 1;
+            currentEnv.addNode(ss);
+            currentEnv.addNode(new LlAssign(result, new LlIntLiteral(1), Type.BOOLEAN, false));
+            currentEnv.addNode(ssEnd);
+            currentEnv.addNode(end);
+            
+            // annotate beginning and end of short-circuit code.
+            String annotation = result.getSymbol() + "=" + leftSymbol + "||" + rightSymbol;
+            start.setAnnotation(annotation);
+            end.setAnnotation(annotation);
             
         } else {
-            throw new RuntimeException("Bad binary expr.");
+            // normal binop, otherwise.
+            LlLocation lhsLoc, rhsLoc;
+            LlConstant lhsLit, rhsLit;
+            
+            // walk the left expr subtree.
+            acceptExpr(node.getLeft());
+            if (currentLoc != null) {
+                lhsLoc = currentLoc;
+                lhsLit = null;
+            } else if (currentLit != null) {
+                lhsLit = currentLit;
+                lhsLoc = null;
+            } else {
+                throw new RuntimeException("LHS of expression badly formed");
+            }
+            // walk the right expr subtree.
+            acceptExpr(node.getRight());
+            if (currentLoc != null) {
+                rhsLoc = currentLoc;
+                rhsLit = null;
+            } else if (currentLit != null) {
+                rhsLit = currentLit;
+                rhsLoc = null;
+            } else {
+                throw new RuntimeException("RHS of expression badly formed");
+            }
+            
+            Type type;
+            switch (node.getType().myType) {
+            case BOOLEAN:
+                type = Type.BOOLEAN;
+                break;
+            case INT:
+                type = Type.INT;
+                break;
+            default:
+                throw new RuntimeException("Unrecognized local var type");
+            }
+            
+            LlBinaryAssign a;
+            if (lhsLoc != null) {
+                if (rhsLoc != null) {
+                    a = new LlBinaryAssign(result, lhsLoc, rhsLoc, type, op);
+                } else if (rhsLit != null) {
+                    a = new LlBinaryAssign(result, lhsLoc, rhsLit, type, op);
+                } else {
+                    throw new RuntimeException("Bad binary expr.");
+                }
+                
+            } else if (lhsLit != null ){
+                if (rhsLoc != null) {
+                    a = new LlBinaryAssign(result, lhsLit, rhsLoc, type, op);
+                } else if (rhsLit != null) {
+                    a = new LlBinaryAssign(result, lhsLit, rhsLit, type, op);
+                } else {
+                    throw new RuntimeException("Bad binary expr.");
+                }
+                
+            } else {
+                throw new RuntimeException("Bad binary expr.");
+            }
+            
+            currentEnv.addNode(a);    
         }
         
-        currentEnv.addNode(a);
         currentLoc = result;
         currentLit = null;
     }
@@ -562,41 +685,185 @@ public class LlGenerator implements IrNodeVisitor {
     
     // Control flow.
 
+    // TODO: control flow changes -> new basic blocks.
+    
     @Override
     public void visit(IrIfStmt node) {
-        // TODO Auto-generated method stub
+        LlAnnotation start = new LlAnnotation(AnnotationType.IF,
+                "if_" + String.valueOf(ifCounter), false, null);
+        LlAnnotation end = new LlAnnotation(AnnotationType.IF,
+                "if_" + String.valueOf(ifCounter), true, null);
+        LlLabel ifElse = new LlLabel("ifelse_" + String.valueOf(ifCounter));
+        LlLabel ifEnd = new LlLabel("ifend_" + String.valueOf(ifCounter));
+        
+        ifCounter++;
+        currentEnv.addNode(start);
+        
+        LlCmp cmp;
+        
+        IrExpression cond = node.getCondition();
+        acceptExpr(cond);
+        if (currentLoc != null) {
+            cmp = new LlCmp(currentLoc);
+        } else if (currentLit != null) {
+            cmp = new LlCmp(currentLit);
+        } else {
+            throw new RuntimeException("if loop condition badly formed");
+        }
 
+        currentEnv.addNode(cmp); // jmp to else block if 0 == cond.
+        currentEnv.addNode(new LlJmp(JumpType.EQUAL, ifElse));
+        
+        // add true branch.
+        node.getTrueBlock().accept(this);
+        currentEnv.addNode(new LlJmp(JumpType.UNCONDITIONAL, ifEnd));
+        // add false branch.
+        currentEnv.addNode(ifElse);
+        if (node.getFalseBlock() != null) {
+            node.getFalseBlock().accept(this);
+        }
+        currentEnv.addNode(ifEnd);
+        currentEnv.addNode(end);
     }
     
     @Override
     public void visit(IrForStmt node) {
-        // TODO Auto-generated method stub
+        LlAnnotation start = new LlAnnotation(AnnotationType.FOR,
+                "for_" + String.valueOf(forCounter), false, null);
+        LlAnnotation end = new LlAnnotation(AnnotationType.FOR,
+                "for_" + String.valueOf(forCounter), true, null);
+        LlLabel forLoop = new LlLabel("forloop_" + String.valueOf(forCounter));
+        LlLabel forDone = new LlLabel("fordone_" + String.valueOf(forCounter));
+        
+        forCounter++;
+        currentEnv.addNode(start);
+        
+        // init the loop counter.
+        LlTempLoc counterLoc = new LlTempLoc(node.getCounterSymbol());
+        LlAssign a;
+        IrExpression startExpr = node.getStartValue();
+        acceptExpr(startExpr);
+        if (currentLoc != null) {
+            a = new LlAssign(counterLoc, currentLoc, null, true);
+        } else if (currentLit != null) {
+            a = new LlAssign(counterLoc, currentLit, null, true);
+        } else {
+            throw new RuntimeException("for loop counter badly formed");
+        }
+        currentEnv.addNode(a);
+        
+        // update this visitor's current breakpoint and continuepoint.
+        LlLabel oldBreak = breakPoint;
+        LlLabel oldContinue = continuePoint;
+        breakPoint = forDone;
+        continuePoint = forLoop;
+        
+        // inside the loop body. loop condition checking.
+        currentEnv.addNode(forLoop);
+        IrExpression stopExpr = node.getStopValue();
+        LlCmp cmp;
+        acceptExpr(stopExpr); // eval end condition.
+        if (currentLoc != null) {
+            cmp = new LlCmp(counterLoc, currentLoc);
+        } else if (currentLit != null) {
+            cmp = new LlCmp(counterLoc, currentLit);
+        } else {
+            throw new RuntimeException("for loop condition badly formed");
+        }
+        
+        // the loop exits iff loc == stopExpr.
+        currentEnv.addNode(cmp);
+        currentEnv.addNode(new LlJmp(JumpType.EQUAL, forDone));
+        
+        // walk the for loop's body.
+        node.getBlock().accept(this);
 
+        // increment the counter; repeat the loop.
+        LlBinaryAssign increment = new LlBinaryAssign(counterLoc, counterLoc, new LlIntLiteral(1),
+                Type.INT, IrBinOperator.PLUS);
+        currentEnv.addNode(increment);
+        currentEnv.addNode(new LlJmp(JumpType.UNCONDITIONAL, forLoop));
+        
+        // out of the loop.
+        currentEnv.addNode(forDone);
+        currentEnv.addNode(end);
+        
+        breakPoint = oldBreak;
+        continuePoint = oldContinue;
     }
 
     @Override
     public void visit(IrWhileStmt node) {
-        // TODO Auto-generated method stub
-
+        LlAnnotation start = new LlAnnotation(AnnotationType.WHILE,
+                "while_" + String.valueOf(whileCounter), false, null);
+        LlAnnotation end = new LlAnnotation(AnnotationType.WHILE,
+                "while_" + String.valueOf(whileCounter), true, null);
+        LlLabel whileLoop = new LlLabel("forloop_" + String.valueOf(whileCounter));
+        LlLabel whileDone = new LlLabel("fordone_" + String.valueOf(whileCounter));
+        
+        whileCounter++;
+        currentEnv.addNode(start);
+        
+        // update this visitor's current breakpoint and continuepoint.
+        LlLabel oldBreak = breakPoint;
+        LlLabel oldContinue = continuePoint;
+        breakPoint = whileDone;
+        continuePoint = whileLoop;
+        
+        // inside the loop.
+        currentEnv.addNode(whileLoop);
+        
+        // check the while condition.
+        IrExpression whileExpr = node.getCondition();
+        LlCmp cmp;
+        acceptExpr(whileExpr);
+        if (currentLoc != null) {
+            cmp = new LlCmp(currentLoc);
+        } else if (currentLit != null) {
+            cmp = new LlCmp(currentLit);
+        } else {
+            throw new RuntimeException("for loop condition badly formed");
+        }
+        
+        currentEnv.addNode(cmp); // jmp outside the loop if 0 == cond.
+        currentEnv.addNode(new LlJmp(JumpType.EQUAL, whileDone));
+        
+        // walk the while loop's body.
+        node.getBlock().accept(this);
+        currentEnv.addNode(new LlJmp(JumpType.UNCONDITIONAL, whileLoop));
+        
+        // outside the loop.
+        currentEnv.addNode(whileDone);
+        currentEnv.addNode(end);
+        
+        breakPoint = oldBreak;
+        continuePoint = oldContinue;
     }
 
+    @Override
+    public void visit(IrBreakStmt node) {
+        currentEnv.addNode(new LlJmp(JumpType.UNCONDITIONAL, breakPoint));
+    }    
+    
+    @Override
+    public void visit(IrContinueStmt node) {
+        currentEnv.addNode(new LlJmp(JumpType.UNCONDITIONAL, continuePoint));
+    }
+    
     // Unused visitor methods.
     
     @Override
     public void visit(IrParameterDecl irParameterDecl) {
-        // TODO Auto-generated method stub
         // no need to visit.
     }
 
     @Override
     public void visit(IrStringLiteral irStringLiteral) {
-        // TODO Auto-generated method stub
         // no need to visit.
     }
 
     @Override
     public void visit(IrType irType) {
-        // TODO Auto-generated method stub
         // no need to visit.
     }
 
